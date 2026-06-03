@@ -67,7 +67,7 @@ El diagrama de Gantt detallado está disponible en [`/docs/Planificacion_GANTT_S
 | # | Artefacto | Estado |
 |---|---|---|
 | A1 | Especificación de Requisitos del Usuario y del Sistema | ✅ Completado |
-| A2 | Diagrama de Flujo de Datos del Usuario y del Sistema | ⏳ Pendiente |
+| A2 | Diagrama de Flujo de Datos del Usuario y del Sistema | ✅ Completado |
 | A3 | Diagrama de Arquitectura en Capas | ⏳ Pendiente |
 | A4 | Diagrama de Casos de Uso | ⏳ Pendiente |
 | A5 | Diagrama de Clases | ⏳ Pendiente |
