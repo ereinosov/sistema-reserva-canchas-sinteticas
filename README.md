@@ -58,7 +58,7 @@ El proyecto se desarrolla en **67 días hábiles** distribuidos en 4 fases:
 | Construcción y Pruebas | 25 | 10 jul 2026 | 14 ago 2026 |
 | Implementación | 10 | 15 ago 2026 | 28 ago 2026 |
 
-El diagrama de Gantt detallado está disponible en [`/docs/Planificacion_GANTT_SistemaReservaCanchas.xlsx`](./docs/Planificacion_GANTT_SistemaReservaCanchas.xlsx).
+El diagrama de Gantt detallado está disponible en [`/docs/GANTT_corregido.xlsx`](./docs/GANTT_corregido.xlsx).
 
 ---
 
