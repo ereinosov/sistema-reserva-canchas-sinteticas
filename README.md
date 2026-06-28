@@ -17,10 +17,10 @@ Aplicación de escritorio desarrollada en **Windows Forms (C#)** con **SQL Serve
 |---|---|
 | Universidad | Universidad Técnica Estatal de Quevedo (UTEQ) |
 | Facultad | Facultad de Ciencias de la Computación (FCC) |
-| Carrera | Software |
-| Materia | Proceso de Software |
+| Carrera | Ingeniería en Software |
+| Materia | Proceso de Software "A" |
 | Grupo | CHRS |
-| Integrantes | Calderón Joseph · Herrera Humberto · Reinoso Eduardo · Silva John |
+| Integrantes | Calderón Saltos Joseph · Herrera Barco Humberto · Reinoso Vélez Eduardo · Silva Triviño John |
 | Período | Mayo – Agosto 2026 |
 
 ---
@@ -58,33 +58,33 @@ El proyecto se desarrolla en **67 días hábiles** distribuidos en 4 fases:
 | Construcción y Pruebas | 25 | 10 jul 2026 | 14 ago 2026 |
 | Implementación | 10 | 15 ago 2026 | 28 ago 2026 |
 
-El diagrama de Gantt detallado está disponible en [`/docs/GANTT_corregido.xlsx`](./docs/GANTT_corregido.xlsx).
+El diagrama de Gantt detallado está disponible en [`/docs/GANTT_actualizado.xlsx`](./docs/GANTT_actualizado.xlsx).
 
 ---
 
 ## 📄 Artefactos
 
-| # | Artefacto | Estado |
-|---|---|---|
-| A1 | Especificación de Requisitos del Usuario y del Sistema | ✅ Completado |
-| A2 | Diagrama de Flujo de Datos del Usuario y del Sistema | ✅ Completado |
-| A3 | Diagrama de Arquitectura en Capas | ✅ Completado |
-| A4 | Diagrama de Casos de Uso | ⏳ Pendiente |
-| A5 | Diagrama de Clases | ⏳ Pendiente |
-| A6 | Diagrama de Secuencias | ⏳ Pendiente |
-| A7 | Diagrama de Flujo de Datos del Sistema | ⏳ Pendiente |
-| A8 | Modelo Conceptual | ⏳ Pendiente |
-| A9 | Modelo Lógico | ⏳ Pendiente |
-| A10 | Modelo Físico | ⏳ Pendiente |
-| A11 | Script DDL de creación de tablas (SQL Server) | ⏳ Pendiente |
-| A12 | Documento de Estándares de Codificación C# (.NET) | ⏳ Pendiente |
-| A13 | Código Fuente del Sistema (WinForms C#) | ⏳ Pendiente |
-| A14 | Plan de Pruebas Unitarias | ⏳ Pendiente |
-| A15 | Pruebas de Regresión | ⏳ Pendiente |
-| A16 | Revisiones Técnicas Formales | ⏳ Pendiente |
-| A17 | Pruebas de Despliegue | ⏳ Pendiente |
-| A18 | Desarrollo de Instaladores | ⏳ Pendiente |
-| A19 | Manual de Usuario | ⏳ Pendiente |
+| # | Artefacto | Estado | Archivo |
+|---|---|---|---|
+| A1 | Especificación de Requisitos del Usuario y del Sistema | ✅ Completado | [PDF](./docs/A1_Especificacion_Requisitos.pdf) |
+| A2 | Diagrama de Flujo de Datos del Usuario y del Sistema | ✅ Completado | [SVG – Nivel 0](./docs/A2_DFD_Usuario_Nivel0.svg) · [SVG – Nivel 1](./docs/A2_DFD_Sistema_Nivel1.svg) |
+| A3 | Diagrama de Arquitectura en Capas | ✅ Completado | [SVG](./docs/A3_Arquitectura_Capas.svg) |
+| A4 | Diagrama de Casos de Uso | ⏳ Pendiente | — |
+| A5 | Modelo Conceptual | ✅ Completado | [SVG](./docs/A5_Modelo_Conceptual.svg) |
+| A6 | Modelo Lógico | ✅ Completado | [SVG](./docs/A6_Modelo_Logico.svg) |
+| A7 | Modelo Físico | ✅ Completado | [SVG](./docs/A7_Modelo_Fisico.svg) |
+| A8 | Diagrama de Clases | ⏳ Pendiente | — |
+| A9 | Diagrama de Secuencias | ⏳ Pendiente | — |
+| A10 | Diagrama de Flujo de Datos del Sistema | ⏳ Pendiente | — |
+| A11 | Script DDL de creación de tablas (SQL Server) | ⏳ Pendiente | — |
+| A12 | Documento de Estándares de Codificación C# (.NET) | ⏳ Pendiente | — |
+| A13 | Código Fuente del Sistema (WinForms C#) | ⏳ Pendiente | — |
+| A14 | Pruebas Unitarias | ⏳ Pendiente | — |
+| A15 | Pruebas de Regresión | ⏳ Pendiente | — |
+| A16 | Revisiones Técnicas Formales | ⏳ Pendiente | — |
+| A17 | Pruebas de Despliegue | ⏳ Pendiente | — |
+| A18 | Desarrollo de Instaladores | ⏳ Pendiente | — |
+| A19 | Manual de Usuario | ⏳ Pendiente | — |
 
 ---
 
@@ -99,5 +99,5 @@ El diagrama de Gantt detallado está disponible en [`/docs/GANTT_corregido.xlsx`
 
 ## 📚 Referencias
 
-- Pressman, R. S. (2010). *Ingeniería del software: Un enfoque práctico* (7.ª ed.). McGraw-Hill. ISBN 978-0-07-337597-7
+- Pressman, R. S., & Maxim, B. R. (2014). *Software Engineering: A Practitioner's Approach* (8.ª ed.). McGraw-Hill. ISBN 978-0-07-802212-8
 - Sommerville, I. (2016). *Software Engineering* (10.ª ed.). Pearson. ISBN 978-0-13-394303-0
