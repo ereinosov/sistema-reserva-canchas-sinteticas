@@ -66,7 +66,7 @@ El diagrama de Gantt detallado está disponible en [`/docs/GANTT_actualizado.xls
 
 | # | Artefacto | Estado | Archivo |
 |---|---|---|---|
-| A1 | Especificación de Requisitos del Usuario y del Sistema | ✅ Completado | [PDF](./docs/A1_Especificacion_Requisitos.pdf) |
+| A1 | Especificación de Requisitos del Usuario y del Sistema | ✅ Completado (actualizado) | [PDF](./docs/A1_Especificacion_Requisitos.pdf) |
 | A2 | Diagrama de Flujo de Datos del Usuario y del Sistema | ✅ Completado | [SVG – Nivel 0](./docs/A2_DFD_Usuario_Nivel0.svg) · [SVG – Nivel 1](./docs/A2_DFD_Sistema_Nivel1.svg) |
 | A3 | Diagrama de Arquitectura en Capas | ✅ Completado | [SVG](./docs/A3_Arquitectura_Capas.svg) |
 | A4 | Diagrama de Casos de Uso | ⏳ Pendiente | — |
