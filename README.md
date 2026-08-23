@@ -73,7 +73,7 @@ El diagrama de Gantt detallado está disponible en [`/docs/GANTT_Corte2.xlsx`](.
 | A1 | Especificación de Requisitos del Usuario y del Sistema | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PDF](./docs/A1_Especificacion_Requisitos_corregido.pdf) |
 | A2 | Diagrama de Flujo de Datos del Usuario y del Sistema| ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A2_de_Flujo_de_Datos.png) |
 | A3 | Diagrama de Arquitectura en Capas | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A3_Arquitectura_Capas.png) |
-| A4 | Diagrama de Casos de Uso | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A4_Diagramas_Casos_De_Uso/.png) |
+| A4 | Diagrama de Casos de Uso | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A4_Diagramas_Casos_De_Uso.png) |
 | A5 | Modelo Conceptual | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A5_Modelo_Conceptual.png) |
 | A6 | Modelo Lógico | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A6_Modelo_Logico.png) |
 | A7 | Modelo Físico | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A7_Modelo_Fisico.png) |
