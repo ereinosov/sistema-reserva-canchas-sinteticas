@@ -56,8 +56,8 @@ El proyecto se desarrolla en **67 días hábiles** distribuidos en 4 fases:
 | Fase | Días hábiles | Inicio | Fin |
 |---|---|---|---|
 | Investigación | 7 | 27 may 2026 | 04 jun 2026 |
-| Análisis y diseño | 25 | 05 jun 2026 | 09 jul 2026 |
-| Construcción y pruebas | 25 | 10 jul 2026 | 14 ago 2026 |
+| Análisis y diseño | 25 | 05 jun 2026 | 29 jun 2026 |
+| Construcción y pruebas | 25 | 30 jun 2026 | 14 ago 2026 |
 | Implementación | 10 | 15 ago 2026 | 28 ago 2026 |
 
 El diagrama de Gantt detallado está disponible en [`/docs/GANTT_Corte2.xlsx`](./docs/GANTT_Corte2.xlsx).
@@ -71,17 +71,17 @@ El diagrama de Gantt detallado está disponible en [`/docs/GANTT_Corte2.xlsx`](.
 | # | Artefacto | Estado | Archivo |
 |---|---|---|---|
 | A1 | Especificación de Requisitos del Usuario y del Sistema | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PDF](./docs/A1_Especificacion_Requisitos_corregido.pdf) |
-| A2 | Diagrama de Flujo de Datos del Usuario y del Sistema | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [SVG – Nivel 0](./docs/A2_DFD_Usuario_Nivel0.svg) · [SVG – Nivel 1](./docs/A2_DFD_Sistema_Nivel1.svg) |
-| A3 | Diagrama de Arquitectura en Capas | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [SVG](./docs/A3_Arquitectura_Capas.svg) |
+| A2 | Diagrama de Flujo de Datos del Usuario y del Sistema| ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
+| A3 | Diagrama de Arquitectura en Capas | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A3_Arquitectura_Capas.png) |
 | A4 | Diagrama de Casos de Uso | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
-| A5 | Modelo Conceptual | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [SVG](./docs/A5_Modelo_Conceptual.svg) |
-| A6 | Modelo Lógico | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [SVG](./docs/A6_Modelo_Logico.svg) |
-| A7 | Modelo Físico | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [SVG](./docs/A7_Modelo_Fisico.svg) |
-| A8 | Diagrama de Clases | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
+| A5 | Modelo Conceptual | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A5_Modelo_Conceptual.png) |
+| A6 | Modelo Lógico | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A6_Modelo_Logico.png) |
+| A7 | Modelo Físico | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A7_Modelo_Fisico.png) |
+| A8 | Diagrama de Clases  | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A8_Diagrama_Clases.png) |
 | A9 | Diagrama de Secuencias | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
 | A10 | Diagrama de Flujo de Datos del Sistema | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
-| A11 | Script DDL de creación de tablas (SQL Server) | ![En desarrollo](https://img.shields.io/badge/-En%20desarrollo-dfb317?style=flat-square) | — |
-| A12 | Documento de Estándares de Codificación C# (.NET) | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
+| A11 | Script DDL de creación de tablas (SQL Server)  | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [SQL](./docs/A11_Script_DDL.sql) |
+| A12 | Documento de Estándares de Codificación C# (.NET) | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PDF](./docs/A12_Estandares_Codificacion.pdf) |
 | A13 | Código Fuente del Sistema (WinForms C#) | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
 | A14 | Pruebas Unitarias | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
 | A15 | Pruebas de Regresión | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
