@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>SistemaCanchas.Entidades</RootNamespace>
+    <AssemblyName>SistemaCanchas.Entidades</AssemblyName>
+    <Description>POCOs del dominio. Capa transversal del artefacto A3.</Description>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+</Project>

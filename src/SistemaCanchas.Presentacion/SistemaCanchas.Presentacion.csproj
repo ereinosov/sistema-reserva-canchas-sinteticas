@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>SistemaCanchas.Presentacion</RootNamespace>
+    <AssemblyName>SistemaCanchas.Presentacion</AssemblyName>
+    <Description>Interfaz Windows Forms. Solo habla con la capa de Negocio.</Description>
+    <Version>0.1.0</Version>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <StartupObject>SistemaCanchas.Presentacion.Program</StartupObject>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SistemaCanchas.Negocio\SistemaCanchas.Negocio.csproj" />
+    <ProjectReference Include="..\SistemaCanchas.Entidades\SistemaCanchas.Entidades.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+</Project>

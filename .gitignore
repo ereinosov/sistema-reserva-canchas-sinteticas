@@ -1,0 +1,36 @@
+## Visual Studio
+.vs/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.sln.docstates
+
+## Compilación
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+
+## NuGet
+*.nupkg
+**/packages/*
+!**/packages/build/
+
+## Pruebas
+[Tt]est[Rr]esult*/
+*.trx
+
+## Secretos locales (RNF12 / A12 §10.3)
+**/aes.key
+**/App.config.local
+
+## Sistema
+Thumbs.db
+Desktop.ini
+*.tmp

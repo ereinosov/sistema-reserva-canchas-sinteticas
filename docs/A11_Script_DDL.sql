@@ -49,6 +49,13 @@ GO
 USE ReservaCanchasDB;
 GO
 
+-- Necesario para que sp_RegistrarUsuario (EXECUTE AS OWNER) pueda ejecutar
+-- CREATE LOGIN y ALTER SERVER ROLE en LocalDB / instancias de desarrollo.
+-- El propietario de la base debe ser sysadmin (cuenta de Windows que ejecutó A11).
+IF EXISTS (SELECT 1 FROM sys.databases WHERE name = N'ReservaCanchasDB' AND is_trustworthy_on = 0)
+    ALTER DATABASE ReservaCanchasDB SET TRUSTWORTHY ON;
+GO
+
 ------------------------------------------------------------------------------
 -- 1. TABLAS, CLAVES Y RESTRICCIONES
 --    (nombres, tipos y constraints tomados literalmente del Artefacto A7)
@@ -655,6 +662,26 @@ BEGIN
 END
 GO
 
+-- 5.10b sp_ConsultarUsuarios — RF14 / RF15 (listado de cuentas; sin hashes ni claves)
+IF OBJECT_ID(N'dbo.sp_ConsultarUsuarios', N'P') IS NOT NULL DROP PROCEDURE dbo.sp_ConsultarUsuarios;
+GO
+CREATE PROCEDURE dbo.sp_ConsultarUsuarios
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        u.id_usuario,
+        u.nombre_usuario,
+        u.usuario_login,
+        r.nombre_rol,
+        u.estado_usuario
+    FROM dbo.USUARIOS u
+    INNER JOIN dbo.ROLES r ON r.id_rol = u.id_rol
+    ORDER BY u.nombre_usuario;
+END
+GO
+
 -- 5.11 sp_ObtenerCredencialesLogin — RF16
 -- Único procedimiento accesible con el login de arranque (login_bootstrap).
 -- Devuelve lo necesario para que la capa de negocio verifique la clave de
@@ -952,6 +979,7 @@ GRANT EXECUTE ON dbo.sp_CancelarReserva         TO db_rol_empleado, db_rol_admin
 GRANT EXECUTE ON dbo.sp_RegistrarPago           TO db_rol_empleado, db_rol_administrador;
 GRANT EXECUTE ON dbo.sp_ConsultarEstadoPago     TO db_rol_empleado, db_rol_administrador;
 GRANT EXECUTE ON dbo.sp_ConsultarDisponibilidad TO db_rol_empleado, db_rol_administrador;
+GRANT EXECUTE ON dbo.sp_GenerarHorariosDia      TO db_rol_empleado, db_rol_administrador;
 GRANT EXECUTE ON dbo.sp_ConsultarCanchas        TO db_rol_empleado, db_rol_administrador;
 
 GRANT EXECUTE ON dbo.sp_EliminarCliente         TO db_rol_administrador;
@@ -960,6 +988,7 @@ GRANT EXECUTE ON dbo.sp_ModificarCancha         TO db_rol_administrador;
 GRANT EXECUTE ON dbo.sp_DesactivarCancha        TO db_rol_administrador;
 GRANT EXECUTE ON dbo.sp_RegistrarUsuario        TO db_rol_administrador;
 GRANT EXECUTE ON dbo.sp_DesactivarUsuario       TO db_rol_administrador;
+GRANT EXECUTE ON dbo.sp_ConsultarUsuarios       TO db_rol_administrador;
 GRANT EXECUTE ON dbo.sp_ConsultarIngresos       TO db_rol_administrador;
 GO
 

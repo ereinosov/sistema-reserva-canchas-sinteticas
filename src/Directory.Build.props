@@ -1,0 +1,14 @@
+<Project>
+  <PropertyGroup>
+    <LangVersion>7.3</LangVersion>
+    <Deterministic>true</Deterministic>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <Company>UTEQ - FCC - Grupo CHRS</Company>
+    <Product>Sistema de Reserva de Canchas Sintéticas</Product>
+    <Authors>Calderón Saltos Joseph; Herrera Barco Humberto; Reinoso Vélez Eduardo; Silva Triviño John</Authors>
+    <Copyright>Copyright © 2026 Grupo CHRS</Copyright>
+    <NeutralLanguage>es-EC</NeutralLanguage>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>SistemaCanchas.Negocio</RootNamespace>
+    <AssemblyName>SistemaCanchas.Negocio</AssemblyName>
+    <Description>Reglas de negocio RN01-RN13. La presentación no salta esta capa.</Description>
+    <Version>0.1.0</Version>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SistemaCanchas.Datos\SistemaCanchas.Datos.csproj" />
+    <ProjectReference Include="..\SistemaCanchas.Entidades\SistemaCanchas.Entidades.csproj" />
+  </ItemGroup>
+</Project>
