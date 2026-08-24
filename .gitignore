@@ -30,6 +30,10 @@
 **/aes.key
 **/App.config.local
 
+## Instalador A18 (salida de publicación y Setup.exe; los scripts sí se versionan)
+setup/payload/
+setup/output/
+
 ## Sistema
 Thumbs.db
 Desktop.ini

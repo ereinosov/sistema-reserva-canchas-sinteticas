@@ -1,0 +1,40 @@
+SISTEMA DE RESERVA DE CANCHAS SINTÉTICAS
+Universidad Técnica Estatal de Quevedo — FCC — Grupo CHRS
+Instalador A18 — versión 1.0.0
+------------------------------------------------------------------------------
+
+Este paquete INSTALA LA APLICACIÓN DE ESCRITORIO. No crea ni borra la base
+de datos.
+
+ANTES DE USAR EL PROGRAMA
+1. .NET Framework 4.8 (Windows 10 21H2 o posterior suele traerlo).
+2. SQL Server LocalDB o Express. En el laboratorio el servidor es
+   (localdb)\MSSQLLocalDB  —  no use "localhost".
+3. Base ReservaCanchasDB:
+   - Si la instancia está vacía: ejecute UNA VEZ, en SSMS, el archivo
+     sql\A11_Script_DDL.sql de esta carpeta de instalación.
+   - Si la base YA EXISTE: NO vuelva a ejecutar A11 (hace DROP TABLE).
+     Use solo los complementos de sql\ según el síntoma (TRUSTWORTHY,
+     ConsultarUsuarios, GRANT de horarios). Ver artefacto A17.
+
+CONFIGURACIÓN (exe.config)
+- Data Source debe coincidir con su instancia.
+- Encrypt=False  (LocalDB no admite cifrado de canal).
+- La clave de login_bootstrap debe ser la misma que en A11. En producción
+  cámbiela en SQL Server Y en el .config, y después ejecute
+  ProtegerCadenaConexion.ps1  (cifra connectionStrings con DPAPI / RNF12).
+  Ese cifrado se hace EN LA ESTACIÓN INSTALADA, nunca en el código fuente.
+
+LO QUE ESTE INSTALADOR NO TOCA
+- No ejecuta scripts SQL.
+- No borra %ProgramData%\SistemaCanchas\aes.key al desinstalar. Esa clave
+  AES permite descifrar clave_bd_enc de los usuarios ya creados. Si la
+  elimina, nadie podrá iniciar sesión hasta recrear las cuentas.
+
+PRIMER ARRANQUE
+Si USUARIOS está vacío, use en el login el enlace de primera configuración
+(cuenta de Windows sysadmin). Si ya hay usuarios, inicie sesión con su
+clave de aplicación.
+
+Desinstalación: Panel de control o Desinstalar-SistemaCanchas.ps1.
+El manual de operación del usuario es el artefacto A19.
