@@ -78,8 +78,8 @@ El diagrama de Gantt detallado está disponible en [`/docs/GANTT_Corte2.xlsx`](.
 | A6 | Modelo Lógico | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A6_Modelo_Logico.png) |
 | A7 | Modelo Físico | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A7_Modelo_Fisico.png) |
 | A8 | Diagrama de Clases  | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A8_Diagrama_Clases.png) |
-| A9 | Diagrama de Secuencias | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
-| A10 | Diagrama de Flujo de Datos del Sistema | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
+| A9 | Diagrama de Secuencias | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A9_Diagrama_De_Secuencia.png) |
+| A10 | Diagrama de Flujo de Datos del Sistema | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A10_DFD_Sistema_Nivel1.png) |
 | A11 | Script DDL de creación de tablas (SQL Server)  | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [SQL](./docs/A11_Script_DDL.sql) |
 | A12 | Documento de Estándares de Codificación C# (.NET) | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PDF](./docs/A12_Estandares_Codificacion.pdf) |
 | A13 | Código Fuente del Sistema (WinForms C#) | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
