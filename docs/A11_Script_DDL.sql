@@ -49,6 +49,13 @@ GO
 USE ReservaCanchasDB;
 GO
 
+-- El índice filtrado UQ_RESERVAS_horario_activa exige QUOTED_IDENTIFIER ON en
+-- el lote que crea los procedimientos que hacen INSERT/UPDATE sobre RESERVAS.
+-- sqlcmd deja esa opción en OFF salvo que se invoque con -I.
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+GO
+
 -- Necesario para que sp_RegistrarUsuario (EXECUTE AS OWNER) pueda ejecutar
 -- CREATE LOGIN y ALTER SERVER ROLE en LocalDB / instancias de desarrollo.
 -- El propietario de la base debe ser sysadmin (cuenta de Windows que ejecutó A11).
