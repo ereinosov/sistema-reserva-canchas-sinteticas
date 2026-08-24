@@ -62,7 +62,7 @@ El proyecto se desarrolla en **67 días hábiles** distribuidos en 4 fases:
 
 El diagrama de Gantt detallado está disponible en [`/docs/GANTT_Corte2.xlsx`](./docs/GANTT_Corte2.xlsx).
 
-> **Plan de recuperación vigente:** no se amplía el alcance funcional. A1–A15 están cerrados; faltan revisiones formales, despliegue, instalador y manual (A16–A19).
+> **Plan de recuperación vigente:** no se amplía el alcance funcional. A1–A16 están cerrados; faltan despliegue, instalador y manual (A17–A19).
 
 ---
 
@@ -85,7 +85,7 @@ El diagrama de Gantt detallado está disponible en [`/docs/GANTT_Corte2.xlsx`](.
 | A13 | Código Fuente del Sistema (WinForms C#) | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [SLN](./src/SistemaCanchasSinteticas.sln) |
 | A14 | Pruebas Unitarias | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [Tests](./src/SistemaCanchas.Tests/) |
 | A15 | Pruebas de Regresión | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [MD](./docs/A15_Pruebas_Regresion.md) |
-| A16 | Revisiones Técnicas Formales | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
+| A16 | Revisiones Técnicas Formales | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [MD](./docs/A16_Revisiones_Tecnicas_Formales.md) |
 | A17 | Pruebas de Despliegue | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
 | A18 | Desarrollo de Instaladores | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
 | A19 | Manual de Usuario | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
