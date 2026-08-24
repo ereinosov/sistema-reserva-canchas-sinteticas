@@ -62,7 +62,7 @@ El proyecto se desarrolla en **67 días hábiles** distribuidos en 4 fases:
 
 El diagrama de Gantt detallado está disponible en [`/docs/GANTT_Corte2.xlsx`](./docs/GANTT_Corte2.xlsx).
 
-> **Plan de recuperación vigente:** no se amplía el alcance funcional. A1–A18 están cerrados; falta el manual de usuario (A19).
+> **Plan de recuperación vigente:** no se amplía el alcance funcional. **A1–A19 están cerrados.**
 
 ---
 
@@ -88,7 +88,7 @@ El diagrama de Gantt detallado está disponible en [`/docs/GANTT_Corte2.xlsx`](.
 | A16 | Revisiones Técnicas Formales | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [MD](./docs/A16_Revisiones_Tecnicas_Formales.md) |
 | A17 | Pruebas de Despliegue | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [MD](./docs/A17_Pruebas_Despliegue.md) |
 | A18 | Desarrollo de Instaladores | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [MD](./docs/A18_Desarrollo_Instaladores.md) · [setup](./setup/) |
-| A19 | Manual de Usuario | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
+| A19 | Manual de Usuario | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [MD](./docs/A19_Manual_Usuario.md) |
 
 ---
 
