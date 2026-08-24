@@ -28,9 +28,9 @@ Aplicación de escritorio desarrollada en **Windows Forms (C#)** con **SQL Serve
 ### Estructura del repositorio
 
 ```
-/docs       Artefactos y documentación del ciclo de desarrollo
-/src        Código fuente de la aplicación WinForms C#
-/tests      Casos y registros de pruebas
+/docs                           Artefactos y documentación del ciclo de desarrollo
+/src                            Solución WinForms C# en cuatro capas
+/src/SistemaCanchas.Tests       Pruebas unitarias (MSTest)
 README.md
 ```
 
@@ -62,7 +62,7 @@ El proyecto se desarrolla en **67 días hábiles** distribuidos en 4 fases:
 
 El diagrama de Gantt detallado está disponible en [`/docs/GANTT_Corte2.xlsx`](./docs/GANTT_Corte2.xlsx).
 
-> **Plan de recuperación vigente:** no se amplía el alcance funcional; se corrigen los artefactos A1–A10, A11 (script DDL) está en desarrollo, y las pruebas unitarias inician junto con A13 en lugar de dejarse para el final.
+> **Plan de recuperación vigente:** no se amplía el alcance funcional. A1–A14 están cerrados; faltan pruebas de regresión, revisiones formales, despliegue, instalador y manual (A15–A19).
 
 ---
 
@@ -82,8 +82,8 @@ El diagrama de Gantt detallado está disponible en [`/docs/GANTT_Corte2.xlsx`](.
 | A10 | Diagrama de Flujo de Datos del Sistema | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PNG](./docs/A10_DFD_Sistema_Nivel1.png) |
 | A11 | Script DDL de creación de tablas (SQL Server)  | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [SQL](./docs/A11_Script_DDL.sql) |
 | A12 | Documento de Estándares de Codificación C# (.NET) | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [PDF](./docs/A12_Estandares_Codificacion.pdf) |
-| A13 | Código Fuente del Sistema (WinForms C#) | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
-| A14 | Pruebas Unitarias | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
+| A13 | Código Fuente del Sistema (WinForms C#) | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [SLN](./src/SistemaCanchasSinteticas.sln) |
+| A14 | Pruebas Unitarias | ![Completado](https://img.shields.io/badge/-Completado-2ea44f?style=flat-square) | [Tests](./src/SistemaCanchas.Tests/) |
 | A15 | Pruebas de Regresión | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
 | A16 | Revisiones Técnicas Formales | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
 | A17 | Pruebas de Despliegue | ![Pendiente](https://img.shields.io/badge/-Pendiente-9e9e9e?style=flat-square) | — |
