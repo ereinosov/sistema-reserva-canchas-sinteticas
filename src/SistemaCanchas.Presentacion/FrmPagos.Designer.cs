@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace SistemaCanchas.Presentacion
@@ -204,6 +204,8 @@ namespace SistemaCanchas.Presentacion
             StartPosition = FormStartPosition.CenterParent;
             Text = "Pagos";
             Load += FrmPagos_Load;
+            // Aplicar icono de la aplicación (usa el icono del ejecutable)
+            this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
             ((System.ComponentModel.ISupportInitialize)dgvPagos).EndInit();
             grpFiltros.ResumeLayout(false);
             grpFiltros.PerformLayout();

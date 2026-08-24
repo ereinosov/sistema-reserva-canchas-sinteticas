@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 using SistemaCanchas.Entidades;
@@ -143,6 +143,8 @@ namespace SistemaCanchas.Presentacion
             Name = "FrmConfiguracionInicial";
             StartPosition = FormStartPosition.CenterParent;
             Text = TextosUi.TituloAplicacion;
+            // Aplicar icono de la aplicación (usa el icono del ejecutable)
+            this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
             pnlEncabezado.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();

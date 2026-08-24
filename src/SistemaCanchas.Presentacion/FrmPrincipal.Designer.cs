@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace SistemaCanchas.Presentacion
@@ -140,6 +140,8 @@ namespace SistemaCanchas.Presentacion
             StartPosition = FormStartPosition.CenterScreen;
             Text = TextosUi.TituloAplicacion;
             Load += FrmPrincipal_Load;
+            // Aplicar icono de la aplicación (usa el icono del ejecutable)
+            this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
             mnuPrincipal.ResumeLayout(false);
             mnuPrincipal.PerformLayout();
             staEstado.ResumeLayout(false);

@@ -1,4 +1,4 @@
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 using SistemaCanchas.Entidades;
@@ -249,6 +249,8 @@ namespace SistemaCanchas.Presentacion
             StartPosition = FormStartPosition.CenterParent;
             Text = "Clientes";
             Load += FrmClientes_Load;
+            // Aplicar icono de la aplicación (usa el icono del ejecutable)
+            this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
             ((System.ComponentModel.ISupportInitialize)dgvClientes).EndInit();
             grpFiltros.ResumeLayout(false);
             grpFiltros.PerformLayout();
