@@ -24,7 +24,7 @@ namespace SistemaCanchas.Tests
 
             try
             {
-                servicio.CrearReserva(1, 2);
+                servicio.CrearReserva(1, new int[] { 2 });
                 Assert.Fail("Debió lanzar SesionNoIniciadaException.");
             }
             catch (SesionNoIniciadaException)
@@ -38,7 +38,7 @@ namespace SistemaCanchas.Tests
             ReservaRepositoryFake repositorio = new ReservaRepositoryFake();
             ReservaService servicio = CrearServicioEmpleado(repositorio, new HorarioRepositoryFake());
 
-            int id = servicio.CrearReserva(4, 12);
+            int id = servicio.CrearReserva(4, new int[] { 12 });
 
             Assert.AreEqual(1, id);
             Assert.AreEqual(4, repositorio.UltimaInsertada.IdCliente);
@@ -54,7 +54,22 @@ namespace SistemaCanchas.Tests
 
             try
             {
-                servicio.CrearReserva(0, 12);
+                servicio.CrearReserva(0, new int[] { 12 });
+                Assert.Fail("Debió lanzar ValidacionNegocioException.");
+            }
+            catch (ValidacionNegocioException)
+            {
+            }
+        }
+
+        [TestMethod]
+        public void CrearReserva_SinFranjas_LanzaValidacion()
+        {
+            ReservaService servicio = CrearServicioEmpleado(new ReservaRepositoryFake(), new HorarioRepositoryFake());
+
+            try
+            {
+                servicio.CrearReserva(1, new int[0]);
                 Assert.Fail("Debió lanzar ValidacionNegocioException.");
             }
             catch (ValidacionNegocioException)
@@ -73,7 +88,7 @@ namespace SistemaCanchas.Tests
 
             try
             {
-                servicio.CrearReserva(1, 8);
+                servicio.CrearReserva(1, new int[] { 8 });
                 Assert.Fail("Debió lanzar ValidacionNegocioException.");
             }
             catch (ValidacionNegocioException)
@@ -92,7 +107,7 @@ namespace SistemaCanchas.Tests
 
             try
             {
-                servicio.CrearReserva(1, 8);
+                servicio.CrearReserva(1, new int[] { 8 });
                 Assert.Fail("Debió lanzar ValidacionNegocioException.");
             }
             catch (ValidacionNegocioException)

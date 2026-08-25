@@ -424,6 +424,8 @@ namespace SistemaCanchas.Tests
 
         public Reserva UltimaInsertada { get; private set; }
 
+        public IList<int> UltimosIdsHorario { get; private set; }
+
         public int IdHorarioActualizado { get; private set; }
 
         public int IdReservaActualizada { get; private set; }
@@ -446,7 +448,7 @@ namespace SistemaCanchas.Tests
             SiguienteId = 1;
         }
 
-        public int Insertar(Reserva reserva)
+        public int Insertar(Reserva reserva, IList<int> idsHorario)
         {
             if (ExcepcionALanzar != null)
             {
@@ -454,6 +456,12 @@ namespace SistemaCanchas.Tests
             }
 
             UltimaInsertada = reserva;
+            UltimosIdsHorario = idsHorario;
+            if (reserva != null && idsHorario != null && idsHorario.Count > 0)
+            {
+                reserva.IdHorario = idsHorario[0];
+            }
+
             int id = SiguienteId;
             SiguienteId++;
             return id;

@@ -97,13 +97,16 @@ IF OBJECT_ID(N'dbo.CANCHAS', N'U') IS NOT NULL DROP TABLE dbo.CANCHAS;
 GO
 CREATE TABLE dbo.CANCHAS
 (
-    id_cancha       INT IDENTITY(1,1) NOT NULL,
-    nombre_cancha    NVARCHAR(60)      NOT NULL,
-    estado_cancha    CHAR(10)          NOT NULL CONSTRAINT DF_CANCHAS_estado DEFAULT ('activa'),
+    id_cancha              INT IDENTITY(1,1) NOT NULL,
+    nombre_cancha           NVARCHAR(60)      NOT NULL,
+    estado_cancha           CHAR(10)          NOT NULL CONSTRAINT DF_CANCHAS_estado DEFAULT ('activa'),
+    hora_inicio_operacion   TIME(0)           NOT NULL CONSTRAINT DF_CANCHAS_hora_inicio DEFAULT ('06:00:00'),
+    hora_fin_operacion      TIME(0)           NOT NULL CONSTRAINT DF_CANCHAS_hora_fin DEFAULT ('22:00:00'),
 
     CONSTRAINT PK_CANCHAS PRIMARY KEY (id_cancha),
     CONSTRAINT UQ_CANCHAS_nombre UNIQUE (nombre_cancha),
-    CONSTRAINT CK_CANCHAS_estado CHECK (estado_cancha IN ('activa','inactiva'))
+    CONSTRAINT CK_CANCHAS_estado CHECK (estado_cancha IN ('activa','inactiva')),
+    CONSTRAINT CK_CANCHAS_horario CHECK (hora_inicio_operacion < hora_fin_operacion)
 );
 GO
 
@@ -120,8 +123,6 @@ CREATE TABLE dbo.HORARIOS
     CONSTRAINT PK_HORARIOS PRIMARY KEY (id_horario),
     CONSTRAINT FK_HORARIOS_CANCHAS FOREIGN KEY (id_cancha) REFERENCES dbo.CANCHAS (id_cancha) ON DELETE NO ACTION,
     CONSTRAINT UQ_HORARIOS_franja UNIQUE (id_cancha, fecha_horario, hora_inicio_horario),
-    -- Franjas fijas de una hora entre 06:00 y 21:00 (última franja termina a las 22:00).
-    CONSTRAINT CK_HORARIOS_rango CHECK (hora_inicio_horario BETWEEN '06:00:00' AND '21:00:00'),
     CONSTRAINT CK_HORARIOS_minuto CHECK (DATEPART(MINUTE, hora_inicio_horario) = 0)
 );
 GO
@@ -247,7 +248,7 @@ GO
 -- 5. PROCEDIMIENTOS ALMACENADOS
 ------------------------------------------------------------------------------
 
--- sp_GenerarHorariosDia: genera las 16 franjas fijas de una fecha (06:00-21:00) para una cancha.
+-- sp_GenerarHorariosDia: franjas de 1 hora entre hora_inicio_operacion y hora_fin_operacion de la cancha.
 IF OBJECT_ID(N'dbo.sp_GenerarHorariosDia', N'P') IS NOT NULL DROP PROCEDURE dbo.sp_GenerarHorariosDia;
 GO
 CREATE PROCEDURE dbo.sp_GenerarHorariosDia
@@ -256,10 +257,21 @@ CREATE PROCEDURE dbo.sp_GenerarHorariosDia
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    DECLARE @hora_inicio TIME(0), @hora_fin TIME(0);
+    SELECT @hora_inicio = hora_inicio_operacion, @hora_fin = hora_fin_operacion
+    FROM dbo.CANCHAS
+    WHERE id_cancha = @id_cancha;
+
+    IF @hora_inicio IS NULL
+        RETURN;
+
     ;WITH Horas AS (
-        SELECT CAST('06:00:00' AS TIME(0)) AS hora_inicio
+        SELECT @hora_inicio AS hora_inicio
         UNION ALL
-        SELECT DATEADD(HOUR, 1, hora_inicio) FROM Horas WHERE hora_inicio < '21:00:00'
+        SELECT DATEADD(HOUR, 1, hora_inicio)
+        FROM Horas
+        WHERE DATEADD(HOUR, 1, hora_inicio) < @hora_fin
     )
     INSERT INTO dbo.HORARIOS (id_cancha, fecha_horario, hora_inicio_horario)
     SELECT @id_cancha, @fecha, h.hora_inicio
@@ -268,7 +280,7 @@ BEGIN
         SELECT 1 FROM dbo.HORARIOS x
         WHERE x.id_cancha = @id_cancha AND x.fecha_horario = @fecha AND x.hora_inicio_horario = h.hora_inicio
     )
-    OPTION (MAXRECURSION 16);
+    OPTION (MAXRECURSION 24);
 END
 GO
 
@@ -401,8 +413,10 @@ GO
 IF OBJECT_ID(N'dbo.sp_RegistrarCancha', N'P') IS NOT NULL DROP PROCEDURE dbo.sp_RegistrarCancha;
 GO
 CREATE PROCEDURE dbo.sp_RegistrarCancha
-    @nombre_cancha   NVARCHAR(60),
-    @id_cancha_nueva INT OUTPUT
+    @nombre_cancha          NVARCHAR(60),
+    @hora_inicio_operacion  TIME(0) = '06:00:00',
+    @hora_fin_operacion     TIME(0) = '22:00:00',
+    @id_cancha_nueva        INT OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -410,7 +424,8 @@ BEGIN
         IF EXISTS (SELECT 1 FROM dbo.CANCHAS WHERE nombre_cancha = @nombre_cancha)
             THROW 50020, 'Ya existe una cancha registrada con ese nombre.', 1;
 
-        INSERT INTO dbo.CANCHAS (nombre_cancha) VALUES (@nombre_cancha);
+        INSERT INTO dbo.CANCHAS (nombre_cancha, hora_inicio_operacion, hora_fin_operacion)
+        VALUES (@nombre_cancha, @hora_inicio_operacion, @hora_fin_operacion);
         SET @id_cancha_nueva = SCOPE_IDENTITY();
     END TRY
     BEGIN CATCH
@@ -427,7 +442,7 @@ CREATE PROCEDURE dbo.sp_ConsultarCanchas
 AS
 BEGIN
     SET NOCOUNT ON;
-    SELECT id_cancha, nombre_cancha, estado_cancha
+    SELECT id_cancha, nombre_cancha, estado_cancha, hora_inicio_operacion, hora_fin_operacion
     FROM dbo.CANCHAS
     WHERE (@estado_cancha IS NULL OR estado_cancha = @estado_cancha)
     ORDER BY nombre_cancha;
@@ -438,8 +453,10 @@ GO
 IF OBJECT_ID(N'dbo.sp_ModificarCancha', N'P') IS NOT NULL DROP PROCEDURE dbo.sp_ModificarCancha;
 GO
 CREATE PROCEDURE dbo.sp_ModificarCancha
-    @id_cancha     INT,
-    @nombre_cancha NVARCHAR(60)
+    @id_cancha              INT,
+    @nombre_cancha          NVARCHAR(60),
+    @hora_inicio_operacion  TIME(0) = '06:00:00',
+    @hora_fin_operacion     TIME(0) = '22:00:00'
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -450,7 +467,11 @@ BEGIN
         IF EXISTS (SELECT 1 FROM dbo.CANCHAS WHERE nombre_cancha = @nombre_cancha AND id_cancha <> @id_cancha)
             THROW 50020, 'Ya existe otra cancha registrada con ese nombre.', 1;
 
-        UPDATE dbo.CANCHAS SET nombre_cancha = @nombre_cancha WHERE id_cancha = @id_cancha;
+        UPDATE dbo.CANCHAS
+        SET nombre_cancha = @nombre_cancha,
+            hora_inicio_operacion = @hora_inicio_operacion,
+            hora_fin_operacion = @hora_fin_operacion
+        WHERE id_cancha = @id_cancha;
     END TRY
     BEGIN CATCH
         THROW;
@@ -693,39 +714,64 @@ GO
 -- sp_CrearReserva
 IF OBJECT_ID(N'dbo.sp_CrearReserva', N'P') IS NOT NULL DROP PROCEDURE dbo.sp_CrearReserva;
 GO
+IF TYPE_ID(N'dbo.ListaIdsHorario') IS NOT NULL DROP TYPE dbo.ListaIdsHorario;
+GO
+CREATE TYPE dbo.ListaIdsHorario AS TABLE
+(
+    id_horario INT NOT NULL PRIMARY KEY
+);
+GO
 CREATE PROCEDURE dbo.sp_CrearReserva
     @id_cliente       INT,
-    @id_horario       INT,
+    @horarios         dbo.ListaIdsHorario READONLY,
     @id_usuario       INT,
     @id_reserva_nueva INT OUTPUT
 AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
+        IF NOT EXISTS (SELECT 1 FROM @horarios)
+            THROW 50015, 'Debe seleccionar al menos una franja horaria.', 1;
+
         IF NOT EXISTS (SELECT 1 FROM dbo.CLIENTES WHERE id_cliente = @id_cliente)
             THROW 50002, 'El cliente indicado no existe.', 1;
 
         IF NOT EXISTS (SELECT 1 FROM dbo.USUARIOS WHERE id_usuario = @id_usuario AND estado_usuario = 'activo')
             THROW 50033, 'El usuario que registra la reserva no existe o está inactivo.', 1;
 
-        DECLARE @fecha_horario DATE, @id_cancha INT;
-        SELECT @fecha_horario = fecha_horario, @id_cancha = id_cancha FROM dbo.HORARIOS WHERE id_horario = @id_horario;
-
-        IF @fecha_horario IS NULL
+        IF EXISTS (
+            SELECT 1 FROM @horarios t
+            WHERE NOT EXISTS (SELECT 1 FROM dbo.HORARIOS h WHERE h.id_horario = t.id_horario)
+        )
             THROW 50005, 'La franja horaria indicada no existe.', 1;
 
-        IF NOT EXISTS (SELECT 1 FROM dbo.CANCHAS WHERE id_cancha = @id_cancha AND estado_cancha = 'activa')
+        IF EXISTS (
+            SELECT 1
+            FROM @horarios t
+            INNER JOIN dbo.HORARIOS h ON h.id_horario = t.id_horario
+            INNER JOIN dbo.CANCHAS c ON c.id_cancha = h.id_cancha
+            WHERE c.estado_cancha <> 'activa'
+        )
             THROW 50022, 'La cancha de la franja seleccionada no está activa.', 1;
 
-        IF @fecha_horario < CAST(GETDATE() AS DATE)
+        IF EXISTS (
+            SELECT 1
+            FROM @horarios t
+            INNER JOIN dbo.HORARIOS h ON h.id_horario = t.id_horario
+            WHERE h.fecha_horario < CAST(GETDATE() AS DATE)
+        )
             THROW 50006, 'No se pueden registrar reservas con fecha anterior a la actual.', 1;
 
-        IF dbo.fn_FranjaOcupada(@id_horario) = 1
+        IF EXISTS (
+            SELECT 1 FROM @horarios t
+            WHERE dbo.fn_FranjaOcupada(t.id_horario) = 1
+        )
             THROW 50007, 'La franja horaria seleccionada ya se encuentra ocupada.', 1;
 
         BEGIN TRANSACTION;
             INSERT INTO dbo.RESERVAS (id_cliente, id_horario, id_usuario, estado_reserva)
-            VALUES (@id_cliente, @id_horario, @id_usuario, 'activa');
+            SELECT @id_cliente, t.id_horario, @id_usuario, 'activa'
+            FROM @horarios t;
 
             SET @id_reserva_nueva = SCOPE_IDENTITY();
         COMMIT TRANSACTION;
@@ -939,6 +985,7 @@ GRANT EXECUTE ON dbo.sp_RegistrarCliente        TO db_rol_empleado, db_rol_admin
 GRANT EXECUTE ON dbo.sp_ConsultarClientes       TO db_rol_empleado, db_rol_administrador;
 GRANT EXECUTE ON dbo.sp_ModificarCliente        TO db_rol_empleado, db_rol_administrador;
 GRANT EXECUTE ON dbo.sp_CrearReserva            TO db_rol_empleado, db_rol_administrador;
+GRANT EXECUTE ON TYPE::dbo.ListaIdsHorario      TO db_rol_empleado, db_rol_administrador;
 GRANT EXECUTE ON dbo.sp_ConsultarReservas       TO db_rol_empleado, db_rol_administrador;
 GRANT EXECUTE ON dbo.sp_ModificarReservaHorario TO db_rol_empleado, db_rol_administrador;
 GRANT EXECUTE ON dbo.sp_CancelarReserva         TO db_rol_empleado, db_rol_administrador;

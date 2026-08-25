@@ -45,14 +45,17 @@ namespace SistemaCanchas.Negocio
             _usuarioService = usuarioService;
         }
 
-        public int RegistrarCancha(string nombreCancha)
+        public int RegistrarCancha(string nombreCancha, TimeSpan horaInicioOperacion, TimeSpan horaFinOperacion)
         {
             ExigirAdministrador();
             string nombre = NormalizarNombre(nombreCancha);
+            ValidarHorarioOperacion(horaInicioOperacion, horaFinOperacion);
             Cancha cancha = new Cancha
             {
                 NombreCancha = nombre,
-                EstadoCancha = ValoresDominio.EstadoCancha.Activa
+                EstadoCancha = ValoresDominio.EstadoCancha.Activa,
+                HoraInicioOperacion = horaInicioOperacion,
+                HoraFinOperacion = horaFinOperacion
             };
 
             return EjecutarDatos(
@@ -76,7 +79,7 @@ namespace SistemaCanchas.Negocio
                 "No se pudo consultar las canchas activas.");
         }
 
-        public void ModificarCancha(int idCancha, string nombreCancha)
+        public void ModificarCancha(int idCancha, string nombreCancha, TimeSpan horaInicioOperacion, TimeSpan horaFinOperacion)
         {
             ExigirAdministrador();
             if (idCancha <= 0)
@@ -85,10 +88,13 @@ namespace SistemaCanchas.Negocio
             }
 
             string nombre = NormalizarNombre(nombreCancha);
+            ValidarHorarioOperacion(horaInicioOperacion, horaFinOperacion);
             Cancha cancha = new Cancha
             {
                 IdCancha = idCancha,
-                NombreCancha = nombre
+                NombreCancha = nombre,
+                HoraInicioOperacion = horaInicioOperacion,
+                HoraFinOperacion = horaFinOperacion
             };
 
             EjecutarDatos(
@@ -193,6 +199,20 @@ namespace SistemaCanchas.Negocio
             }
 
             return nombre;
+        }
+
+        private static void ValidarHorarioOperacion(TimeSpan horaInicio, TimeSpan horaFin)
+        {
+            if (horaInicio.Minutes != 0 || horaInicio.Seconds != 0 ||
+                horaFin.Minutes != 0 || horaFin.Seconds != 0)
+            {
+                throw new ValidacionNegocioException("Las horas de operación deben ser en punto (minutos en 00).");
+            }
+
+            if (horaInicio >= horaFin)
+            {
+                throw new ValidacionNegocioException("La hora de inicio de operación debe ser anterior a la hora de fin.");
+            }
         }
 
         private static T EjecutarDatos<T>(Func<T> operacion, string mensajeInfraestructura)

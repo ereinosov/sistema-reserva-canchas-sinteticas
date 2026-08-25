@@ -26,6 +26,7 @@ namespace SistemaCanchas.Presentacion
 
         private void FrmCanchas_Load(object sender, EventArgs e)
         {
+            AsignarHorarioPorDefecto();
             CargarCanchas();
         }
 
@@ -38,6 +39,18 @@ namespace SistemaCanchas.Presentacion
 
             _idSeleccionado = Convert.ToInt32(dgvCanchas.CurrentRow.Cells["colId"].Value);
             txtNombreCancha.Text = Convert.ToString(dgvCanchas.CurrentRow.Cells["colNombre"].Value);
+            object inicio = dgvCanchas.CurrentRow.Cells["colInicio"].Value;
+            object fin = dgvCanchas.CurrentRow.Cells["colFin"].Value;
+            if (inicio is TimeSpan)
+            {
+                dtpHoraInicio.Value = DateTime.Today.Add((TimeSpan)inicio);
+            }
+
+            if (fin is TimeSpan)
+            {
+                dtpHoraFin.Value = DateTime.Today.Add((TimeSpan)fin);
+            }
+
             ActualizarBotonesEstado();
         }
 
@@ -50,13 +63,17 @@ namespace SistemaCanchas.Presentacion
 
             try
             {
-                _canchaService.RegistrarCancha(txtNombreCancha.Text);
+                _canchaService.RegistrarCancha(
+                    txtNombreCancha.Text,
+                    dtpHoraInicio.Value.TimeOfDay,
+                    dtpHoraFin.Value.TimeOfDay);
                 MessageBox.Show(
                     "Cancha registrada.",
                     TextosUi.TituloAplicacion,
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
                 txtNombreCancha.Clear();
+                AsignarHorarioPorDefecto();
                 _idSeleccionado = 0;
                 CargarCanchas();
             }
@@ -85,7 +102,11 @@ namespace SistemaCanchas.Presentacion
 
             try
             {
-                _canchaService.ModificarCancha(_idSeleccionado, txtNombreCancha.Text);
+                _canchaService.ModificarCancha(
+                    _idSeleccionado,
+                    txtNombreCancha.Text,
+                    dtpHoraInicio.Value.TimeOfDay,
+                    dtpHoraFin.Value.TimeOfDay);
                 MessageBox.Show(
                     "Cancha actualizada.",
                     TextosUi.TituloAplicacion,
@@ -174,7 +195,12 @@ namespace SistemaCanchas.Presentacion
                 for (int i = 0; i < canchas.Count; i++)
                 {
                     Cancha cancha = canchas[i];
-                    dgvCanchas.Rows.Add(cancha.IdCancha, cancha.NombreCancha, cancha.EstadoCancha);
+                    dgvCanchas.Rows.Add(
+                        cancha.IdCancha,
+                        cancha.NombreCancha,
+                        cancha.EstadoCancha,
+                        cancha.HoraInicioOperacion,
+                        cancha.HoraFinOperacion);
                 }
 
                 if (dgvCanchas.Rows.Count == 0)
@@ -211,6 +237,12 @@ namespace SistemaCanchas.Presentacion
             }
 
             return true;
+        }
+
+        private void AsignarHorarioPorDefecto()
+        {
+            dtpHoraInicio.Value = DateTime.Today.AddHours(ValoresDominio.HoraInicioFranja);
+            dtpHoraFin.Value = DateTime.Today.AddHours(ValoresDominio.HoraFinOperacion);
         }
 
         private static void MostrarError(Exception ex)

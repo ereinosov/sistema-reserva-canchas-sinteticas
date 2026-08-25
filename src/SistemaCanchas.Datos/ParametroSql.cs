@@ -74,6 +74,14 @@ namespace SistemaCanchas.Datos
             return parametro;
         }
 
+        internal static SqlParameter Tabla(string nombre, string tipo, DataTable tabla)
+        {
+            SqlParameter parametro = new SqlParameter(nombre, SqlDbType.Structured);
+            parametro.TypeName = tipo;
+            parametro.Value = tabla;
+            return parametro;
+        }
+
         private static object ValorONulo(string valor)
         {
             if (valor == null)

@@ -48,13 +48,10 @@ namespace SistemaCanchas.Negocio
                 throw new ValidacionNegocioException("El número de documento no puede superar 20 caracteres.");
             }
 
-            // RN07: si el tipo es cédula, exactamente diez dígitos numéricos.
+            // RN07: cédula ecuatoriana (provincia, persona natural y dígito verificador).
             if (string.Equals(tipoDocumento, ValoresDominio.TipoDocumento.Cedula, System.StringComparison.Ordinal))
             {
-                if (numero.Length != ValoresDominio.LongitudCedula || !SoloDigitos.IsMatch(numero))
-                {
-                    throw new ValidacionNegocioException("La cédula debe contener exactamente 10 dígitos numéricos.");
-                }
+                ValidarCedulaEcuatoriana(numero);
             }
 
             if (string.IsNullOrWhiteSpace(telefono) || !Telefono.IsMatch(telefono.Trim()))
@@ -75,6 +72,45 @@ namespace SistemaCanchas.Negocio
                 TelefonoCliente = telefono.Trim(),
                 CorreoCliente = correo.Trim()
             };
+        }
+
+        private static void ValidarCedulaEcuatoriana(string numero)
+        {
+            if (numero.Length != ValoresDominio.LongitudCedula || !SoloDigitos.IsMatch(numero))
+            {
+                throw new ValidacionNegocioException("La cédula debe contener exactamente 10 dígitos numéricos.");
+            }
+
+            int provincia = (numero[0] - '0') * 10 + (numero[1] - '0');
+            if (provincia < 1 || provincia > 24)
+            {
+                throw new ValidacionNegocioException("El código de provincia de la cédula debe estar entre 01 y 24.");
+            }
+
+            int tercerDigito = numero[2] - '0';
+            if (tercerDigito < 0 || tercerDigito > 5)
+            {
+                throw new ValidacionNegocioException("El tercer dígito de la cédula debe estar entre 0 y 5 (persona natural).");
+            }
+
+            int[] coeficientes = { 2, 1, 2, 1, 2, 1, 2, 1, 2 };
+            int suma = 0;
+            for (int i = 0; i < 9; i++)
+            {
+                int producto = (numero[i] - '0') * coeficientes[i];
+                if (producto > 9)
+                {
+                    producto -= 9;
+                }
+
+                suma += producto;
+            }
+
+            int verificador = (10 - (suma % 10)) % 10;
+            if (numero[9] - '0' != verificador)
+            {
+                throw new ValidacionNegocioException("El dígito verificador de la cédula no es válido.");
+            }
         }
 
         private static bool EsTipoDocumento(string tipo)

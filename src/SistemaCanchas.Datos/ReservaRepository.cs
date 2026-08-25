@@ -29,11 +29,16 @@ namespace SistemaCanchas.Datos
             _gestorConexion = gestorConexion;
         }
 
-        public int Insertar(Reserva reserva)
+        public int Insertar(Reserva reserva, IList<int> idsHorario)
         {
             if (reserva == null)
             {
                 throw new ArgumentNullException(nameof(reserva));
+            }
+
+            if (idsHorario == null || idsHorario.Count == 0)
+            {
+                throw new ArgumentException("Debe indicar al menos una franja horaria.", nameof(idsHorario));
             }
 
             try
@@ -43,7 +48,7 @@ namespace SistemaCanchas.Datos
                 {
                     comando.CommandType = CommandType.StoredProcedure;
                     comando.Parameters.Add(ParametroSql.Entero("@id_cliente", reserva.IdCliente));
-                    comando.Parameters.Add(ParametroSql.Entero("@id_horario", reserva.IdHorario));
+                    comando.Parameters.Add(ParametroSql.Tabla("@horarios", "dbo.ListaIdsHorario", CrearTablaHorarios(idsHorario)));
                     comando.Parameters.Add(ParametroSql.Entero("@id_usuario", reserva.IdUsuario));
                     SqlParameter idSalida = ParametroSql.EnteroSalida("@id_reserva_nueva");
                     comando.Parameters.Add(idSalida);
@@ -130,6 +135,18 @@ namespace SistemaCanchas.Datos
             {
                 throw new ErrorAccesoDatosException("No se pudo cancelar la reserva.", ex);
             }
+        }
+
+        private static DataTable CrearTablaHorarios(IList<int> idsHorario)
+        {
+            DataTable tabla = new DataTable();
+            tabla.Columns.Add("id_horario", typeof(int));
+            for (int i = 0; i < idsHorario.Count; i++)
+            {
+                tabla.Rows.Add(idsHorario[i]);
+            }
+
+            return tabla;
         }
 
         private static Reserva MapearConsulta(SqlDataReader lector)

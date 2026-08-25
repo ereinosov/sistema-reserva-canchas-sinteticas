@@ -14,6 +14,7 @@ namespace SistemaCanchas.Tests
     [TestClass]
     public class ClienteServiceTests
     {
+        private const string CedulaValida = "0912345675";
         [TestMethod]
         public void RegistrarCliente_SinSesion_LanzaSesionNoIniciada()
         {
@@ -21,7 +22,7 @@ namespace SistemaCanchas.Tests
 
             try
             {
-                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "0102030405", "0987654321", "ana@uteq.edu.ec");
+                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, CedulaValida, "0987654321", "ana@uteq.edu.ec");
                 Assert.Fail("Debió lanzar SesionNoIniciadaException.");
             }
             catch (SesionNoIniciadaException)
@@ -45,6 +46,54 @@ namespace SistemaCanchas.Tests
         }
 
         [TestMethod]
+        public void RegistrarCliente_CedulaProvinciaInvalida_LanzaValidacion()
+        {
+            ClienteService servicio = CrearServicioEmpleado(new ClienteRepositoryFake());
+
+            try
+            {
+                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "2501234567", "0987654321", "ana@uteq.edu.ec");
+                Assert.Fail("Debió lanzar ValidacionNegocioException.");
+            }
+            catch (ValidacionNegocioException ex)
+            {
+                StringAssert.Contains(ex.Message, "provincia");
+            }
+        }
+
+        [TestMethod]
+        public void RegistrarCliente_CedulaTercerDigitoInvalido_LanzaValidacion()
+        {
+            ClienteService servicio = CrearServicioEmpleado(new ClienteRepositoryFake());
+
+            try
+            {
+                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "0960000000", "0987654321", "ana@uteq.edu.ec");
+                Assert.Fail("Debió lanzar ValidacionNegocioException.");
+            }
+            catch (ValidacionNegocioException ex)
+            {
+                StringAssert.Contains(ex.Message, "tercer dígito");
+            }
+        }
+
+        [TestMethod]
+        public void RegistrarCliente_CedulaVerificadorInvalido_LanzaValidacion()
+        {
+            ClienteService servicio = CrearServicioEmpleado(new ClienteRepositoryFake());
+
+            try
+            {
+                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "0912345670", "0987654321", "ana@uteq.edu.ec");
+                Assert.Fail("Debió lanzar ValidacionNegocioException.");
+            }
+            catch (ValidacionNegocioException ex)
+            {
+                StringAssert.Contains(ex.Message, "verificador");
+            }
+        }
+
+        [TestMethod]
         public void RegistrarCliente_DatosValidos_PersisteRecortado()
         {
             ClienteRepositoryFake repositorio = new ClienteRepositoryFake();
@@ -53,13 +102,13 @@ namespace SistemaCanchas.Tests
             int id = servicio.RegistrarCliente(
                 "  Ana Pérez  ",
                 ValoresDominio.TipoDocumento.Cedula,
-                " 0102030405 ",
+                " " + CedulaValida + " ",
                 "0987654321",
                 "  ana@uteq.edu.ec ");
 
             Assert.AreEqual(1, id);
             Assert.AreEqual("Ana Pérez", repositorio.UltimoInsertado.NombreCliente);
-            Assert.AreEqual("0102030405", repositorio.UltimoInsertado.NumeroDocumentoCliente);
+            Assert.AreEqual(CedulaValida, repositorio.UltimoInsertado.NumeroDocumentoCliente);
             Assert.AreEqual("ana@uteq.edu.ec", repositorio.UltimoInsertado.CorreoCliente);
         }
 
@@ -74,7 +123,7 @@ namespace SistemaCanchas.Tests
 
             try
             {
-                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "0102030405", "0987654321", "ana@uteq.edu.ec");
+                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, CedulaValida, "0987654321", "ana@uteq.edu.ec");
                 Assert.Fail("Debió lanzar ValidacionNegocioException.");
             }
             catch (ValidacionNegocioException)
@@ -93,7 +142,7 @@ namespace SistemaCanchas.Tests
 
             try
             {
-                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "0102030405", "0987654321", "ana@uteq.edu.ec");
+                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, CedulaValida, "0987654321", "ana@uteq.edu.ec");
                 Assert.Fail("Debió lanzar ValidacionNegocioException.");
             }
             catch (ValidacionNegocioException ex)
@@ -113,7 +162,7 @@ namespace SistemaCanchas.Tests
 
             try
             {
-                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "0102030405", "0987654321", "ana@uteq.edu.ec");
+                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, CedulaValida, "0987654321", "ana@uteq.edu.ec");
                 Assert.Fail("Debió lanzar ValidacionNegocioException.");
             }
             catch (ValidacionNegocioException ex)

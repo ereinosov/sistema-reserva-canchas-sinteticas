@@ -9,13 +9,13 @@ namespace SistemaCanchas.Entidades
         /// <summary>Duración fija de cada franja, en minutos (RN05).</summary>
         public const int DuracionTurnoMinutos = 60;
 
-        /// <summary>Hora de inicio de la primera franja del día (RN05).</summary>
+        /// <summary>Hora de inicio sugerida al registrar una cancha nueva.</summary>
         public const int HoraInicioFranja = 6;
 
-        /// <summary>Hora de inicio de la última franja; esa franja termina a las 22:00 (RN05).</summary>
+        /// <summary>Hora de inicio de la última franja sugerida (termina en HoraFinOperacion).</summary>
         public const int HoraInicioUltimaFranja = 21;
 
-        /// <summary>Hora de cierre del establecimiento (RN05).</summary>
+        /// <summary>Hora de cierre sugerida al registrar una cancha nueva.</summary>
         public const int HoraFinOperacion = 22;
 
         /// <summary>Longitud máxima de usuario_login (A11: VARCHAR(30)).</summary>

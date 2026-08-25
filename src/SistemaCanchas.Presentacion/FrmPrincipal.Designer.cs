@@ -20,6 +20,10 @@ namespace SistemaCanchas.Presentacion
         private ToolStripMenuItem mnuAdministracion;
         private ToolStripMenuItem mnuCanchas;
         private ToolStripMenuItem mnuUsuarios;
+        private ToolStripMenuItem mnuVentana;
+        private ToolStripMenuItem mnuCascada;
+        private ToolStripMenuItem mnuMosaicoHorizontal;
+        private ToolStripMenuItem mnuOrganizarIconos;
         private StatusStrip staEstado;
         private ToolStripStatusLabel slblUsuario;
         private ToolStripStatusLabel slblRol;
@@ -52,6 +56,10 @@ namespace SistemaCanchas.Presentacion
             mnuAdministracion = new ToolStripMenuItem();
             mnuCanchas = new ToolStripMenuItem();
             mnuUsuarios = new ToolStripMenuItem();
+            mnuVentana = new ToolStripMenuItem();
+            mnuCascada = new ToolStripMenuItem();
+            mnuMosaicoHorizontal = new ToolStripMenuItem();
+            mnuOrganizarIconos = new ToolStripMenuItem();
             staEstado = new StatusStrip();
             slblUsuario = new ToolStripStatusLabel();
             slblRol = new ToolStripStatusLabel();
@@ -99,9 +107,21 @@ namespace SistemaCanchas.Presentacion
             mnuUsuarios.Text = "&Usuarios";
             mnuUsuarios.Click += mnuUsuarios_Click;
 
+            mnuVentana.Text = "&Ventana";
+            mnuVentana.DropDownItems.AddRange(new ToolStripItem[] { mnuCascada, mnuMosaicoHorizontal, mnuOrganizarIconos });
+
+            mnuCascada.Text = "&Cascada";
+            mnuCascada.Click += mnuCascada_Click;
+
+            mnuMosaicoHorizontal.Text = "&Mosaico horizontal";
+            mnuMosaicoHorizontal.Click += mnuMosaicoHorizontal_Click;
+
+            mnuOrganizarIconos.Text = "&Organizar iconos";
+            mnuOrganizarIconos.Click += mnuOrganizarIconos_Click;
+
             mnuPrincipal.Items.AddRange(new ToolStripItem[]
             {
-                mnuArchivo, mnuGestion, mnuConsultas, mnuAdministracion
+                mnuArchivo, mnuGestion, mnuConsultas, mnuAdministracion, mnuVentana
             });
             mnuPrincipal.Location = new Point(0, 0);
             mnuPrincipal.Name = "mnuPrincipal";
@@ -127,6 +147,11 @@ namespace SistemaCanchas.Presentacion
             lblBienvenida.TextAlign = ContentAlignment.MiddleCenter;
             lblBienvenida.Padding = new Padding(24);
 
+            lblBienvenida.Visible = false;
+            lblBienvenida.Dock = DockStyle.None;
+            lblBienvenida.Size = new Size(0, 0);
+
+            IsMdiContainer = true;
             MainMenuStrip = mnuPrincipal;
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;

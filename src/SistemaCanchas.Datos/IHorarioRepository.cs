@@ -10,7 +10,7 @@ namespace SistemaCanchas.Datos
     /// </summary>
     public interface IHorarioRepository
     {
-        /// <summary>Lista las 16 franjas de una cancha en una fecha, generando las que falten.</summary>
+        /// <summary>Lista las franjas de una cancha en una fecha, generando las que falten.</summary>
         /// <param name="idCancha">Cancha consultada.</param>
         /// <param name="fecha">Día a consultar.</param>
         /// <returns>Franjas con estado libre u ocupada.</returns>

@@ -59,22 +59,22 @@ namespace SistemaCanchas.Negocio
             _usuarioService = usuarioService;
         }
 
-        public int CrearReserva(int idCliente, int idHorario)
+        public int CrearReserva(int idCliente, IList<int> idsHorario)
         {
             Usuario sesion = _usuarioService.ObtenerSesionActual();
             ValidadorReserva.ExigirId(idCliente, "Seleccione un cliente.");
-            ValidadorReserva.ExigirId(idHorario, "Seleccione una franja horaria libre.");
+            IList<int> horarios = NormalizarIdsHorario(idsHorario);
 
             Reserva reserva = new Reserva
             {
                 IdCliente = idCliente,
-                IdHorario = idHorario,
+                IdHorario = horarios[0],
                 IdUsuario = sesion.IdUsuario,
                 EstadoReserva = ValoresDominio.EstadoReserva.Activa
             };
 
             return EjecutarDatos(
-                () => _reservaRepository.Insertar(reserva),
+                () => _reservaRepository.Insertar(reserva, horarios),
                 "No se pudo registrar la reserva.");
         }
 
@@ -139,6 +139,11 @@ namespace SistemaCanchas.Negocio
 
         private static Exception Traducir(ErrorAccesoDatosException ex, string mensajeInfraestructura)
         {
+            if (ex.NumeroSql == CodigosSql.ListaHorariosVacia)
+            {
+                return new ValidacionNegocioException("Debe seleccionar al menos una franja horaria.");
+            }
+
             if (ex.NumeroSql == CodigosSql.ClienteNoExiste)
             {
                 return new ValidacionNegocioException("El cliente indicado no existe.");
@@ -192,6 +197,26 @@ namespace SistemaCanchas.Negocio
             }
 
             return new ErrorInfraestructuraException(mensajeInfraestructura + DetalleMotor(ex), ex);
+        }
+
+        private static IList<int> NormalizarIdsHorario(IList<int> idsHorario)
+        {
+            if (idsHorario == null || idsHorario.Count == 0)
+            {
+                throw new ValidacionNegocioException("Seleccione al menos una franja horaria libre.");
+            }
+
+            List<int> unicos = new List<int>();
+            for (int i = 0; i < idsHorario.Count; i++)
+            {
+                ValidadorReserva.ExigirId(idsHorario[i], "Seleccione una franja horaria libre.");
+                if (!unicos.Contains(idsHorario[i]))
+                {
+                    unicos.Add(idsHorario[i]);
+                }
+            }
+
+            return unicos;
         }
 
         private static string DetalleMotor(Exception excepcion)

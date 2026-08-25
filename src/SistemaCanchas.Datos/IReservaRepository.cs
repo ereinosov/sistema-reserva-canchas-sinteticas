@@ -11,9 +11,10 @@ namespace SistemaCanchas.Datos
     public interface IReservaRepository
     {
         /// <summary>Crea una reserva activa (sp_CrearReserva, RF05).</summary>
-        /// <param name="reserva">Cliente, horario y usuario que registra.</param>
+        /// <param name="reserva">Cliente y usuario que registra.</param>
+        /// <param name="idsHorario">Franjas a reservar en la misma operación.</param>
         /// <returns>Id generado.</returns>
-        int Insertar(Reserva reserva);
+        int Insertar(Reserva reserva, IList<int> idsHorario);
 
         /// <summary>Lista reservas con filtros opcionales (sp_ConsultarReservas, RF06).</summary>
         /// <param name="fecha">Fecha de la franja o null.</param>

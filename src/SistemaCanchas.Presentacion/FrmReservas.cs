@@ -140,23 +140,23 @@ namespace SistemaCanchas.Presentacion
         private void btnRegistrar_Click(object sender, EventArgs e)
         {
             ItemId cliente = ResolverCliente();
-            ItemId horario = cboHorario.SelectedItem as ItemId;
+            IList<int> horarios = ObtenerHorariosMarcados();
             if (cliente == null || cliente.Id <= 0)
             {
                 errValidacion.SetError(cboCliente, "Seleccione un cliente.");
                 return;
             }
 
-            if (horario == null || horario.Id <= 0)
+            if (horarios.Count == 0)
             {
-                errValidacion.SetError(cboHorario, "Seleccione una franja libre.");
+                errValidacion.SetError(clbHorarios, "Seleccione al menos una franja libre.");
                 return;
             }
 
             errValidacion.Clear();
             try
             {
-                _reservaService.CrearReserva(cliente.Id, horario.Id);
+                _reservaService.CrearReserva(cliente.Id, horarios);
                 MessageBox.Show(
                     "Reserva registrada.",
                     TextosUi.TituloAplicacion,
@@ -184,17 +184,17 @@ namespace SistemaCanchas.Presentacion
                 return;
             }
 
-            ItemId horario = cboHorario.SelectedItem as ItemId;
-            if (horario == null || horario.Id <= 0)
+            IList<int> horarios = ObtenerHorariosMarcados();
+            if (horarios.Count != 1)
             {
-                errValidacion.SetError(cboHorario, "Seleccione una franja libre.");
+                errValidacion.SetError(clbHorarios, "Seleccione una sola franja libre para cambiar el horario.");
                 return;
             }
 
             errValidacion.Clear();
             try
             {
-                _reservaService.ModificarHorario(_idSeleccionado, horario.Id);
+                _reservaService.ModificarHorario(_idSeleccionado, horarios[0]);
                 MessageBox.Show(
                     "Horario de la reserva actualizado.",
                     TextosUi.TituloAplicacion,
@@ -343,7 +343,7 @@ namespace SistemaCanchas.Presentacion
 
         private void CargarFranjas()
         {
-            cboHorario.Items.Clear();
+            clbHorarios.Items.Clear();
             ItemId cancha = cboCancha.SelectedItem as ItemId;
             if (cancha == null || cancha.Id <= 0)
             {
@@ -361,12 +361,7 @@ namespace SistemaCanchas.Presentacion
                     }
 
                     string texto = FormatearHora(franjas[i].HoraInicioHorario) + " - " + FormatearHora(franjas[i].HoraFinHorario);
-                    cboHorario.Items.Add(new ItemId(franjas[i].IdHorario, texto));
-                }
-
-                if (cboHorario.Items.Count > 0)
-                {
-                    cboHorario.SelectedIndex = 0;
+                    clbHorarios.Items.Add(new ItemId(franjas[i].IdHorario, texto));
                 }
             }
             catch (Exception ex)
@@ -426,6 +421,21 @@ namespace SistemaCanchas.Presentacion
             }
 
             return null;
+        }
+
+        private IList<int> ObtenerHorariosMarcados()
+        {
+            List<int> ids = new List<int>();
+            for (int i = 0; i < clbHorarios.CheckedItems.Count; i++)
+            {
+                ItemId item = clbHorarios.CheckedItems[i] as ItemId;
+                if (item != null && item.Id > 0)
+                {
+                    ids.Add(item.Id);
+                }
+            }
+
+            return ids;
         }
 
         private void ActualizarBotonRegistrar()

@@ -68,6 +68,8 @@ namespace SistemaCanchas.Datos
         /// <summary>La reserva ya tiene un pago (RN04).</summary>
         public const int PagoYaRegistrado = 50012;
 
+        public const int ListaHorariosVacia = 50015;
+
         /// <summary>La cancha de la franja no está activa (RN10).</summary>
         public const int CanchaNoActiva = 50022;
 

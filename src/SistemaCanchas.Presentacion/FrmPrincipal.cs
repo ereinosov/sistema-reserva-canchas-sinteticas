@@ -57,18 +57,12 @@ namespace SistemaCanchas.Presentacion
 
         private void mnuUsuarios_Click(object sender, EventArgs e)
         {
-            using (FrmUsuarios formulario = new FrmUsuarios(_usuarioService))
-            {
-                formulario.ShowDialog(this);
-            }
+            AbrirModulo(typeof(FrmUsuarios), () => new FrmUsuarios(_usuarioService));
         }
 
         private void mnuCanchas_Click(object sender, EventArgs e)
         {
-            using (FrmCanchas formulario = new FrmCanchas(new CanchaService(_usuarioService)))
-            {
-                formulario.ShowDialog(this);
-            }
+            AbrirModulo(typeof(FrmCanchas), () => new FrmCanchas(new CanchaService(_usuarioService)));
         }
 
         private void mnuClientes_Click(object sender, EventArgs e)
@@ -78,55 +72,83 @@ namespace SistemaCanchas.Presentacion
                 ValoresDominio.Rol.Administrador,
                 StringComparison.Ordinal);
 
-            using (FrmClientes formulario = new FrmClientes(new ClienteService(_usuarioService), puedeEliminar))
-            {
-                formulario.ShowDialog(this);
-            }
+            AbrirModulo(typeof(FrmClientes), () => new FrmClientes(new ClienteService(_usuarioService), puedeEliminar));
         }
 
         private void mnuReservas_Click(object sender, EventArgs e)
         {
-            using (FrmReservas formulario = new FrmReservas(
-                new ReservaService(_usuarioService),
-                new ClienteService(_usuarioService),
-                new CanchaService(_usuarioService)))
-            {
-                formulario.ShowDialog(this);
-            }
+            AbrirModulo(
+                typeof(FrmReservas),
+                () => new FrmReservas(
+                    new ReservaService(_usuarioService),
+                    new ClienteService(_usuarioService),
+                    new CanchaService(_usuarioService)));
         }
 
         private void mnuDisponibilidad_Click(object sender, EventArgs e)
         {
-            using (FrmDisponibilidad formulario = new FrmDisponibilidad(
-                new ReservaService(_usuarioService),
-                new CanchaService(_usuarioService)))
-            {
-                formulario.ShowDialog(this);
-            }
+            AbrirModulo(
+                typeof(FrmDisponibilidad),
+                () => new FrmDisponibilidad(
+                    new ReservaService(_usuarioService),
+                    new CanchaService(_usuarioService)));
         }
 
         private void mnuPagos_Click(object sender, EventArgs e)
         {
-            using (FrmPagos formulario = new FrmPagos(
-                new PagoService(_usuarioService),
-                new ClienteService(_usuarioService),
-                new CanchaService(_usuarioService)))
-            {
-                formulario.ShowDialog(this);
-            }
+            AbrirModulo(
+                typeof(FrmPagos),
+                () => new FrmPagos(
+                    new PagoService(_usuarioService),
+                    new ClienteService(_usuarioService),
+                    new CanchaService(_usuarioService)));
         }
 
         private void mnuIngresos_Click(object sender, EventArgs e)
         {
-            using (FrmIngresos formulario = new FrmIngresos(new IngresoService(_usuarioService)))
-            {
-                formulario.ShowDialog(this);
-            }
+            AbrirModulo(typeof(FrmIngresos), () => new FrmIngresos(new IngresoService(_usuarioService)));
+        }
+
+        private void mnuCascada_Click(object sender, EventArgs e)
+        {
+            LayoutMdi(MdiLayout.Cascade);
+        }
+
+        private void mnuMosaicoHorizontal_Click(object sender, EventArgs e)
+        {
+            LayoutMdi(MdiLayout.TileHorizontal);
+        }
+
+        private void mnuOrganizarIconos_Click(object sender, EventArgs e)
+        {
+            LayoutMdi(MdiLayout.ArrangeIcons);
         }
 
         private void mnuSalir_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void AbrirModulo(Type tipoFormulario, Func<Form> crear)
+        {
+            for (int i = 0; i < MdiChildren.Length; i++)
+            {
+                Form abierto = MdiChildren[i];
+                if (abierto.GetType() == tipoFormulario)
+                {
+                    if (abierto.WindowState == FormWindowState.Minimized)
+                    {
+                        abierto.WindowState = FormWindowState.Normal;
+                    }
+
+                    abierto.Activate();
+                    return;
+                }
+            }
+
+            Form formulario = crear();
+            formulario.MdiParent = this;
+            formulario.Show();
         }
     }
 }

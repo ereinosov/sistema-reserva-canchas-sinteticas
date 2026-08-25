@@ -10,5 +10,9 @@ namespace SistemaCanchas.Entidades
         public string NombreCancha { get; set; }
 
         public string EstadoCancha { get; set; }
+
+        public System.TimeSpan HoraInicioOperacion { get; set; }
+
+        public System.TimeSpan HoraFinOperacion { get; set; }
     }
 }

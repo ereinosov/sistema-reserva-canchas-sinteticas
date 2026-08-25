@@ -26,7 +26,7 @@ namespace SistemaCanchas.Presentacion
         private ComboBox cboCliente;
         private ComboBox cboCancha;
         private DateTimePicker dtpFecha;
-        private ComboBox cboHorario;
+        private CheckedListBox clbHorarios;
         private Button btnRegistrar;
         private Button btnModificar;
         private Button btnCancelar;
@@ -81,7 +81,7 @@ namespace SistemaCanchas.Presentacion
             lblFecha = new Label();
             dtpFecha = new DateTimePicker();
             lblHorario = new Label();
-            cboHorario = new ComboBox();
+            clbHorarios = new CheckedListBox();
             btnRegistrar = new Button();
             btnModificar = new Button();
             btnCancelar = new Button();
@@ -200,12 +200,12 @@ namespace SistemaCanchas.Presentacion
             grpDatos.Controls.Add(lblFecha);
             grpDatos.Controls.Add(dtpFecha);
             grpDatos.Controls.Add(lblHorario);
-            grpDatos.Controls.Add(cboHorario);
+            grpDatos.Controls.Add(clbHorarios);
             grpDatos.Controls.Add(btnRegistrar);
             grpDatos.Controls.Add(btnModificar);
             grpDatos.Controls.Add(btnCancelar);
-            grpDatos.Location = new Point(16, 354);
-            grpDatos.Size = new Size(952, 150);
+            grpDatos.Location = new Point(16, 348);
+            grpDatos.Size = new Size(952, 186);
             grpDatos.Text = "Datos de la reserva";
 
             lblCliente.AutoSize = true;
@@ -241,14 +241,14 @@ namespace SistemaCanchas.Presentacion
 
             lblHorario.AutoSize = true;
             lblHorario.Location = new Point(596, 28);
-            lblHorario.Text = "Franja libre";
-            cboHorario.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboHorario.Location = new Point(599, 48);
-            cboHorario.Size = new Size(160, 23);
-            cboHorario.TabIndex = 9;
+            lblHorario.Text = "Franjas libres";
+            clbHorarios.CheckOnClick = true;
+            clbHorarios.Location = new Point(599, 48);
+            clbHorarios.Size = new Size(200, 94);
+            clbHorarios.TabIndex = 9;
 
             btnRegistrar.Enabled = false;
-            btnRegistrar.Location = new Point(19, 96);
+            btnRegistrar.Location = new Point(19, 148);
             btnRegistrar.Size = new Size(100, 28);
             btnRegistrar.TabIndex = 10;
             btnRegistrar.Text = "Registrar";
@@ -256,7 +256,7 @@ namespace SistemaCanchas.Presentacion
             btnRegistrar.Click += btnRegistrar_Click;
 
             btnModificar.Enabled = false;
-            btnModificar.Location = new Point(125, 96);
+            btnModificar.Location = new Point(125, 148);
             btnModificar.Size = new Size(140, 28);
             btnModificar.TabIndex = 11;
             btnModificar.Text = "Cambiar horario";
@@ -264,7 +264,7 @@ namespace SistemaCanchas.Presentacion
             btnModificar.Click += btnModificar_Click;
 
             btnCancelar.Enabled = false;
-            btnCancelar.Location = new Point(271, 96);
+            btnCancelar.Location = new Point(271, 148);
             btnCancelar.Size = new Size(130, 28);
             btnCancelar.TabIndex = 12;
             btnCancelar.Text = "Cancelar reserva";
@@ -276,7 +276,7 @@ namespace SistemaCanchas.Presentacion
 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(984, 522);
+            ClientSize = new Size(984, 556);
             Controls.Add(grpDatos);
             Controls.Add(dgvReservas);
             Controls.Add(grpFiltros);

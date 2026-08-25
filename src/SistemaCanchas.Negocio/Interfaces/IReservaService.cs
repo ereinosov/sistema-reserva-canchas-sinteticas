@@ -12,9 +12,9 @@ namespace SistemaCanchas.Negocio.Interfaces
     {
         /// <summary>Registra una reserva activa. Requiere sesión iniciada.</summary>
         /// <param name="idCliente">Cliente existente.</param>
-        /// <param name="idHorario">Franja libre.</param>
+        /// <param name="idsHorario">Franjas libres a reservar.</param>
         /// <returns>Id generado.</returns>
-        int CrearReserva(int idCliente, int idHorario);
+        int CrearReserva(int idCliente, IList<int> idsHorario);
 
         /// <summary>Lista reservas con filtros opcionales. Requiere sesión iniciada.</summary>
         /// <param name="fecha">Fecha de la franja; null para no filtrar.</param>
@@ -33,7 +33,7 @@ namespace SistemaCanchas.Negocio.Interfaces
         /// <param name="idReserva">Identificador.</param>
         void CancelarReserva(int idReserva);
 
-        /// <summary>Consulta las 16 franjas de una cancha en una fecha (RF11 / RN08). Requiere sesión iniciada.</summary>
+        /// <summary>Consulta las franjas de una cancha en una fecha (RF11 / RN08). Requiere sesión iniciada.</summary>
         /// <param name="idCancha">Cancha.</param>
         /// <param name="fecha">Día a consultar.</param>
         /// <returns>Franjas con estado libre u ocupada.</returns>

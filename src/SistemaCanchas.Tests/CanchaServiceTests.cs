@@ -13,6 +13,8 @@ namespace SistemaCanchas.Tests
     [TestClass]
     public class CanchaServiceTests
     {
+        private static readonly TimeSpan HoraInicio = TimeSpan.FromHours(ValoresDominio.HoraInicioFranja);
+        private static readonly TimeSpan HoraFin = TimeSpan.FromHours(ValoresDominio.HoraFinOperacion);
         [TestMethod]
         public void RegistrarCancha_SinSesion_LanzaSesionNoIniciada()
         {
@@ -20,7 +22,7 @@ namespace SistemaCanchas.Tests
 
             try
             {
-                servicio.RegistrarCancha("Cancha 1");
+                servicio.RegistrarCancha("Cancha 1", HoraInicio, HoraFin);
                 Assert.Fail("Debió lanzar SesionNoIniciadaException.");
             }
             catch (SesionNoIniciadaException)
@@ -35,7 +37,7 @@ namespace SistemaCanchas.Tests
 
             try
             {
-                servicio.RegistrarCancha("Cancha 1");
+                servicio.RegistrarCancha("Cancha 1", HoraInicio, HoraFin);
                 Assert.Fail("Debió lanzar OperacionNoPermitidaException.");
             }
             catch (OperacionNoPermitidaException)
@@ -50,7 +52,7 @@ namespace SistemaCanchas.Tests
 
             try
             {
-                servicio.RegistrarCancha("   ");
+                servicio.RegistrarCancha("   ", HoraInicio, HoraFin);
                 Assert.Fail("Debió lanzar ValidacionNegocioException.");
             }
             catch (ValidacionNegocioException)
@@ -64,11 +66,13 @@ namespace SistemaCanchas.Tests
             CanchaRepositoryFake repositorio = new CanchaRepositoryFake();
             CanchaService servicio = CrearServicioAdmin(repositorio);
 
-            int id = servicio.RegistrarCancha("  Cancha Norte  ");
+            int id = servicio.RegistrarCancha("  Cancha Norte  ", HoraInicio, HoraFin);
 
             Assert.AreEqual(1, id);
             Assert.AreEqual("Cancha Norte", repositorio.UltimaInsertada.NombreCancha);
             Assert.AreEqual(ValoresDominio.EstadoCancha.Activa, repositorio.UltimaInsertada.EstadoCancha);
+            Assert.AreEqual(HoraInicio, repositorio.UltimaInsertada.HoraInicioOperacion);
+            Assert.AreEqual(HoraFin, repositorio.UltimaInsertada.HoraFinOperacion);
         }
 
         [TestMethod]
@@ -82,7 +86,7 @@ namespace SistemaCanchas.Tests
 
             try
             {
-                servicio.RegistrarCancha("Cancha 1");
+                servicio.RegistrarCancha("Cancha 1", HoraInicio, HoraFin);
                 Assert.Fail("Debió lanzar ValidacionNegocioException.");
             }
             catch (ValidacionNegocioException)
@@ -197,10 +201,27 @@ namespace SistemaCanchas.Tests
             CanchaRepositoryFake repositorio = new CanchaRepositoryFake();
             CanchaService servicio = CrearServicioAdmin(repositorio);
 
-            servicio.ModificarCancha(4, "  Cancha Central  ");
+            servicio.ModificarCancha(4, "  Cancha Central  ", HoraInicio, HoraFin);
 
             Assert.AreEqual(4, repositorio.UltimaActualizada.IdCancha);
             Assert.AreEqual("Cancha Central", repositorio.UltimaActualizada.NombreCancha);
+            Assert.AreEqual(HoraInicio, repositorio.UltimaActualizada.HoraInicioOperacion);
+            Assert.AreEqual(HoraFin, repositorio.UltimaActualizada.HoraFinOperacion);
+        }
+
+        [TestMethod]
+        public void RegistrarCancha_HorarioInvertido_LanzaValidacion()
+        {
+            CanchaService servicio = CrearServicioAdmin(new CanchaRepositoryFake());
+
+            try
+            {
+                servicio.RegistrarCancha("Cancha 1", HoraFin, HoraInicio);
+                Assert.Fail("Debió lanzar ValidacionNegocioException.");
+            }
+            catch (ValidacionNegocioException)
+            {
+            }
         }
 
         [TestMethod]

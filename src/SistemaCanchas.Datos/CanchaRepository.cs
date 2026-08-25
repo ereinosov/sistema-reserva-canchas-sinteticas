@@ -43,6 +43,8 @@ namespace SistemaCanchas.Datos
                 {
                     comando.CommandType = CommandType.StoredProcedure;
                     comando.Parameters.Add(ParametroSql.NVarChar("@nombre_cancha", 60, cancha.NombreCancha));
+                    comando.Parameters.Add(ParametroSql.Hora("@hora_inicio_operacion", cancha.HoraInicioOperacion));
+                    comando.Parameters.Add(ParametroSql.Hora("@hora_fin_operacion", cancha.HoraFinOperacion));
                     SqlParameter idSalida = ParametroSql.EnteroSalida("@id_cancha_nueva");
                     comando.Parameters.Add(idSalida);
                     conexion.Open();
@@ -101,6 +103,8 @@ namespace SistemaCanchas.Datos
                     comando.CommandType = CommandType.StoredProcedure;
                     comando.Parameters.Add(ParametroSql.Entero("@id_cancha", cancha.IdCancha));
                     comando.Parameters.Add(ParametroSql.NVarChar("@nombre_cancha", 60, cancha.NombreCancha));
+                    comando.Parameters.Add(ParametroSql.Hora("@hora_inicio_operacion", cancha.HoraInicioOperacion));
+                    comando.Parameters.Add(ParametroSql.Hora("@hora_fin_operacion", cancha.HoraFinOperacion));
                     conexion.Open();
                     comando.ExecuteNonQuery();
                     return true;
@@ -168,7 +172,9 @@ namespace SistemaCanchas.Datos
             {
                 IdCancha = LectorSql.Entero(lector, "id_cancha"),
                 NombreCancha = LectorSql.Cadena(lector, "nombre_cancha"),
-                EstadoCancha = LectorSql.CadenaFija(lector, "estado_cancha")
+                EstadoCancha = LectorSql.CadenaFija(lector, "estado_cancha"),
+                HoraInicioOperacion = LectorSql.Hora(lector, "hora_inicio_operacion"),
+                HoraFinOperacion = LectorSql.Hora(lector, "hora_fin_operacion")
             };
         }
     }

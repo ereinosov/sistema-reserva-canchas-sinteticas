@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using SistemaCanchas.Entidades;
@@ -11,8 +12,10 @@ namespace SistemaCanchas.Negocio.Interfaces
     {
         /// <summary>Registra una cancha activa. Requiere administrador.</summary>
         /// <param name="nombreCancha">Nombre único.</param>
+        /// <param name="horaInicioOperacion">Inicio operativo de la cancha.</param>
+        /// <param name="horaFinOperacion">Fin operativo de la cancha.</param>
         /// <returns>Id generado.</returns>
-        int RegistrarCancha(string nombreCancha);
+        int RegistrarCancha(string nombreCancha, TimeSpan horaInicioOperacion, TimeSpan horaFinOperacion);
 
         /// <summary>Lista canchas. Requiere sesión iniciada.</summary>
         /// <returns>Todas las canchas.</returns>
@@ -25,7 +28,9 @@ namespace SistemaCanchas.Negocio.Interfaces
         /// <summary>Actualiza el nombre. Requiere administrador.</summary>
         /// <param name="idCancha">Identificador.</param>
         /// <param name="nombreCancha">Nuevo nombre único.</param>
-        void ModificarCancha(int idCancha, string nombreCancha);
+        /// <param name="horaInicioOperacion">Inicio operativo de la cancha.</param>
+        /// <param name="horaFinOperacion">Fin operativo de la cancha.</param>
+        void ModificarCancha(int idCancha, string nombreCancha, TimeSpan horaInicioOperacion, TimeSpan horaFinOperacion);
 
         /// <summary>
         /// Desactiva la cancha (RN10): no recibe reservas nuevas; las ya registradas no se alteran.
