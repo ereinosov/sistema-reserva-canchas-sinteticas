@@ -29,7 +29,6 @@ namespace SistemaCanchas.Datos
             _gestorConexion = gestorConexion;
         }
 
-        /// <inheritdoc />
         public IList<Horario> ConsultarDisponibilidad(int idCancha, DateTime fecha)
         {
             List<Horario> resultado = new List<Horario>();

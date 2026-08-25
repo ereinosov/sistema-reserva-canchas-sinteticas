@@ -211,10 +211,15 @@ namespace SistemaCanchas.Presentacion
             lblCliente.AutoSize = true;
             lblCliente.Location = new Point(16, 28);
             lblCliente.Text = "Cliente";
-            cboCliente.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboCliente.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            cboCliente.AutoCompleteSource = AutoCompleteSource.ListItems;
+            cboCliente.DropDownStyle = ComboBoxStyle.DropDown;
             cboCliente.Location = new Point(19, 48);
             cboCliente.Size = new Size(220, 23);
             cboCliente.TabIndex = 6;
+            cboCliente.SelectedIndexChanged += cboCliente_TextoCambiado;
+            cboCliente.TextUpdate += cboCliente_TextoCambiado;
+            cboCliente.Leave += cboCliente_TextoCambiado;
 
             lblCancha.AutoSize = true;
             lblCancha.Location = new Point(256, 28);
@@ -242,6 +247,7 @@ namespace SistemaCanchas.Presentacion
             cboHorario.Size = new Size(160, 23);
             cboHorario.TabIndex = 9;
 
+            btnRegistrar.Enabled = false;
             btnRegistrar.Location = new Point(19, 96);
             btnRegistrar.Size = new Size(100, 28);
             btnRegistrar.TabIndex = 10;

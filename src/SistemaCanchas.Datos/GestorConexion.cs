@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data.SqlClient;
 using System.Security;
 
@@ -31,7 +31,6 @@ namespace SistemaCanchas.Datos
             get { return InstanciaUnica; }
         }
 
-        /// <inheritdoc />
         public bool SesionActiva
         {
             get
@@ -43,13 +42,11 @@ namespace SistemaCanchas.Datos
             }
         }
 
-        /// <inheritdoc />
         public SqlConnection ObtenerConexionBootstrap()
         {
             return new SqlConnection(ConfiguracionApp.ObtenerCadenaBootstrap());
         }
 
-        /// <inheritdoc />
         public SqlConnection ObtenerConexionActiva()
         {
             lock (_candado)
@@ -63,7 +60,6 @@ namespace SistemaCanchas.Datos
             }
         }
 
-        /// <inheritdoc />
         public SqlConnection ObtenerConexionInstalacion()
         {
             SqlConnectionStringBuilder constructor = new SqlConnectionStringBuilder(ConfiguracionApp.ObtenerCadenaBootstrap());
@@ -75,7 +71,6 @@ namespace SistemaCanchas.Datos
             return new SqlConnection(constructor.ConnectionString);
         }
 
-        /// <inheritdoc />
         public void EstablecerSesion(string usuarioBd, string claveBdPlana)
         {
             if (string.IsNullOrWhiteSpace(usuarioBd))
@@ -116,7 +111,6 @@ namespace SistemaCanchas.Datos
             }
         }
 
-        /// <inheritdoc />
         public void CerrarSesion()
         {
             lock (_candado)
@@ -130,7 +124,6 @@ namespace SistemaCanchas.Datos
             }
         }
 
-        /// <inheritdoc />
         public string CifrarClaveBd(string clavePlana)
         {
             if (string.IsNullOrEmpty(clavePlana))
@@ -141,7 +134,6 @@ namespace SistemaCanchas.Datos
             return _cifrador.Cifrar(clavePlana);
         }
 
-        /// <inheritdoc />
         public string DescifrarClaveBd(string claveCifrada)
         {
             return _cifrador.Descifrar(claveCifrada);
@@ -173,4 +165,4 @@ namespace SistemaCanchas.Datos
             return seguro;
         }
     }
-}
+} 

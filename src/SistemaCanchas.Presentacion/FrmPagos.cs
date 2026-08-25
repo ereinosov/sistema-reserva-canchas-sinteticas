@@ -12,17 +12,32 @@ namespace SistemaCanchas.Presentacion
     public partial class FrmPagos : Form
     {
         private readonly IPagoService _pagoService;
+        private readonly IClienteService _clienteService;
+        private readonly ICanchaService _canchaService;
         private int _idReservaSeleccionada;
         private bool _tienePago;
+        private bool _reservaActiva;
 
-        public FrmPagos(IPagoService pagoService)
+        public FrmPagos(IPagoService pagoService, IClienteService clienteService, ICanchaService canchaService)
         {
             if (pagoService == null)
             {
                 throw new ArgumentNullException(nameof(pagoService));
             }
 
+            if (clienteService == null)
+            {
+                throw new ArgumentNullException(nameof(clienteService));
+            }
+
+            if (canchaService == null)
+            {
+                throw new ArgumentNullException(nameof(canchaService));
+            }
+
             _pagoService = pagoService;
+            _clienteService = clienteService;
+            _canchaService = canchaService;
             InitializeComponent();
         }
 
@@ -33,6 +48,7 @@ namespace SistemaCanchas.Presentacion
             cboEstadoPago.SelectedIndex = 0;
             dtpFechaPago.Value = DateTime.Today;
             btnRegistrar.Enabled = false;
+            CargarCombosFiltro();
             CargarPagos();
         }
 
@@ -44,12 +60,14 @@ namespace SistemaCanchas.Presentacion
             }
 
             _idReservaSeleccionada = Convert.ToInt32(dgvPagos.CurrentRow.Cells["colIdReserva"].Value);
-            string estado = Convert.ToString(dgvPagos.CurrentRow.Cells["colEstado"].Value);
+            string estadoPago = Convert.ToString(dgvPagos.CurrentRow.Cells["colEstado"].Value);
+            string estadoReserva = Convert.ToString(dgvPagos.CurrentRow.Cells["colEstadoReserva"].Value);
             object monto = dgvPagos.CurrentRow.Cells["colMonto"].Value;
             _tienePago = monto != null && monto != DBNull.Value && !string.IsNullOrWhiteSpace(Convert.ToString(monto));
+            _reservaActiva = string.Equals(estadoReserva, ValoresDominio.EstadoReserva.Activa, StringComparison.Ordinal);
             lblReservaSeleccionada.Text = "Reserva " + _idReservaSeleccionada + " — " +
                                           Convert.ToString(dgvPagos.CurrentRow.Cells["colCliente"].Value);
-            btnRegistrar.Enabled = !_tienePago;
+            btnRegistrar.Enabled = !_tienePago && _reservaActiva;
 
             if (_tienePago)
             {
@@ -60,7 +78,7 @@ namespace SistemaCanchas.Presentacion
                     dtpFechaPago.Value = ((DateTime)fecha).Date;
                 }
 
-                SeleccionarEstado(estado);
+                SeleccionarEstado(estadoPago);
             }
             else
             {
@@ -77,7 +95,22 @@ namespace SistemaCanchas.Presentacion
 
         private void btnCargar_Click(object sender, EventArgs e)
         {
-            txtFiltroReserva.Clear();
+            dtpFiltroFecha.Checked = false;
+            if (cboFiltroCliente.Items.Count > 0)
+            {
+                cboFiltroCliente.SelectedIndex = 0;
+            }
+
+            if (cboFiltroCancha.Items.Count > 0)
+            {
+                cboFiltroCancha.SelectedIndex = 0;
+            }
+
+            if (cboFiltroEstado.Items.Count > 0)
+            {
+                cboFiltroEstado.SelectedIndex = 0;
+            }
+
             CargarPagos();
         }
 
@@ -134,29 +167,53 @@ namespace SistemaCanchas.Presentacion
             }
         }
 
+        private void CargarCombosFiltro()
+        {
+            cboFiltroEstado.Items.Clear();
+            cboFiltroEstado.Items.Add(new ItemTexto(null, "Todos"));
+            cboFiltroEstado.Items.Add(new ItemTexto(ValoresDominio.EstadoReserva.Activa, "Activa"));
+            cboFiltroEstado.Items.Add(new ItemTexto(ValoresDominio.EstadoReserva.Cancelada, "Cancelada"));
+            cboFiltroEstado.SelectedIndex = 0;
+
+            IList<Cliente> clientes = _clienteService.ConsultarClientes(null, null);
+            cboFiltroCliente.Items.Clear();
+            cboFiltroCliente.Items.Add(new ItemId(0, "Todos"));
+            for (int i = 0; i < clientes.Count; i++)
+            {
+                cboFiltroCliente.Items.Add(new ItemId(clientes[i].IdCliente, clientes[i].NombreCliente));
+            }
+
+            cboFiltroCliente.SelectedIndex = 0;
+
+            IList<Cancha> canchas = _canchaService.ObtenerActivas();
+            cboFiltroCancha.Items.Clear();
+            cboFiltroCancha.Items.Add(new ItemId(0, "Todas"));
+            for (int i = 0; i < canchas.Count; i++)
+            {
+                cboFiltroCancha.Items.Add(new ItemId(canchas[i].IdCancha, canchas[i].NombreCancha));
+            }
+
+            cboFiltroCancha.SelectedIndex = 0;
+        }
+
         private void CargarPagos()
         {
             try
             {
-                int? idReserva = null;
-                if (!string.IsNullOrWhiteSpace(txtFiltroReserva.Text))
-                {
-                    int filtro;
-                    if (!int.TryParse(txtFiltroReserva.Text.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out filtro) ||
-                        filtro <= 0)
-                    {
-                        errValidacion.SetError(txtFiltroReserva, "Indique un identificador de reserva numérico.");
-                        return;
-                    }
-
-                    idReserva = filtro;
-                }
+                DateTime? fecha = dtpFiltroFecha.Checked ? (DateTime?)dtpFiltroFecha.Value.Date : null;
+                ItemId cliente = cboFiltroCliente.SelectedItem as ItemId;
+                ItemId cancha = cboFiltroCancha.SelectedItem as ItemId;
+                ItemTexto estado = cboFiltroEstado.SelectedItem as ItemTexto;
+                int? idCliente = cliente != null && cliente.Id > 0 ? (int?)cliente.Id : null;
+                int? idCancha = cancha != null && cancha.Id > 0 ? (int?)cancha.Id : null;
+                string estadoValor = estado != null ? estado.Valor : null;
 
                 errValidacion.Clear();
-                IList<Pago> pagos = _pagoService.ConsultarEstadoPago(idReserva);
+                IList<Pago> pagos = _pagoService.ConsultarEstadoPago(fecha, idCliente, idCancha, estadoValor);
                 dgvPagos.Rows.Clear();
                 _idReservaSeleccionada = 0;
                 _tienePago = false;
+                _reservaActiva = false;
                 btnRegistrar.Enabled = false;
                 lblReservaSeleccionada.Text = "Seleccione una reserva activa.";
 
@@ -166,8 +223,10 @@ namespace SistemaCanchas.Presentacion
                     dgvPagos.Rows.Add(
                         pago.IdReserva,
                         pago.NombreCliente,
+                        pago.NombreCancha,
                         pago.FechaHorario.Date,
                         FormatearHora(pago.HoraInicioHorario),
+                        pago.EstadoReserva,
                         pago.EstadoPago,
                         pago.MontoPago.HasValue ? (object)pago.MontoPago.Value : null,
                         pago.FechaPago.HasValue ? (object)pago.FechaPago.Value.Date : null);
@@ -208,6 +267,42 @@ namespace SistemaCanchas.Presentacion
             }
 
             throw ex;
+        }
+
+        private sealed class ItemId
+        {
+            internal ItemId(int id, string texto)
+            {
+                Id = id;
+                Texto = texto;
+            }
+
+            internal int Id { get; private set; }
+
+            internal string Texto { get; private set; }
+
+            public override string ToString()
+            {
+                return Texto;
+            }
+        }
+
+        private sealed class ItemTexto
+        {
+            internal ItemTexto(string valor, string texto)
+            {
+                Valor = valor;
+                Texto = texto;
+            }
+
+            internal string Valor { get; private set; }
+
+            internal string Texto { get; private set; }
+
+            public override string ToString()
+            {
+                return Texto;
+            }
         }
 
         private sealed class ItemEstado

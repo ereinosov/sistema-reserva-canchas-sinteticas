@@ -19,7 +19,14 @@ namespace SistemaCanchas.Presentacion
         private ComboBox cboRol;
         private Button btnRegistrar;
         private Button btnDesactivar;
+        private Button btnActivar;
         private Button btnCargar;
+        private Button btnGuardarNombre;
+        private Button btnCambiarClave;
+        private Label lblClaveNueva;
+        private Label lblConfirmarClave;
+        private TextBox txtClaveNueva;
+        private TextBox txtConfirmarClave;
         private GroupBox grpDatos;
         private ErrorProvider errValidacion;
         private DataGridViewTextBoxColumn colId;
@@ -58,7 +65,14 @@ namespace SistemaCanchas.Presentacion
             cboRol = new ComboBox();
             btnRegistrar = new Button();
             btnDesactivar = new Button();
+            btnActivar = new Button();
             btnCargar = new Button();
+            lblClaveNueva = new Label();
+            txtClaveNueva = new TextBox();
+            lblConfirmarClave = new Label();
+            txtConfirmarClave = new TextBox();
+            btnGuardarNombre = new Button();
+            btnCambiarClave = new Button();
             errValidacion = new ErrorProvider(components);
             ((System.ComponentModel.ISupportInitialize)dgvUsuarios).BeginInit();
             grpDatos.SuspendLayout();
@@ -98,6 +112,7 @@ namespace SistemaCanchas.Presentacion
             dgvUsuarios.RowHeadersVisible = false;
             dgvUsuarios.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvUsuarios.Size = new Size(736, 250);
+            dgvUsuarios.SelectionChanged += dgvUsuarios_SelectionChanged;
 
             grpDatos.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             grpDatos.Controls.Add(lblNombre);
@@ -110,10 +125,17 @@ namespace SistemaCanchas.Presentacion
             grpDatos.Controls.Add(cboRol);
             grpDatos.Controls.Add(btnRegistrar);
             grpDatos.Controls.Add(btnDesactivar);
+            grpDatos.Controls.Add(btnActivar);
             grpDatos.Controls.Add(btnCargar);
+            grpDatos.Controls.Add(lblClaveNueva);
+            grpDatos.Controls.Add(txtClaveNueva);
+            grpDatos.Controls.Add(lblConfirmarClave);
+            grpDatos.Controls.Add(txtConfirmarClave);
+            grpDatos.Controls.Add(btnGuardarNombre);
+            grpDatos.Controls.Add(btnCambiarClave);
             grpDatos.Location = new Point(16, 278);
-            grpDatos.Size = new Size(736, 164);
-            grpDatos.Text = "Nuevo usuario";
+            grpDatos.Size = new Size(736, 220);
+            grpDatos.Text = "Datos del usuario";
 
             lblNombre.AutoSize = true;
             lblNombre.Location = new Point(16, 28);
@@ -152,37 +174,79 @@ namespace SistemaCanchas.Presentacion
             cboRol.Size = new Size(180, 23);
             cboRol.TabIndex = 3;
 
-            btnRegistrar.Location = new Point(319, 102);
-            btnRegistrar.Size = new Size(110, 28);
+            btnRegistrar.Location = new Point(211, 102);
+            btnRegistrar.Size = new Size(100, 28);
             btnRegistrar.TabIndex = 4;
             btnRegistrar.Text = "Registrar";
             btnRegistrar.UseVisualStyleBackColor = true;
             btnRegistrar.Click += btnRegistrar_Click;
 
-            btnDesactivar.Location = new Point(435, 102);
-            btnDesactivar.Size = new Size(110, 28);
+            btnDesactivar.Location = new Point(317, 102);
+            btnDesactivar.Size = new Size(100, 28);
             btnDesactivar.TabIndex = 5;
             btnDesactivar.Text = "Desactivar";
             btnDesactivar.UseVisualStyleBackColor = true;
             btnDesactivar.Click += btnDesactivar_Click;
 
-            btnCargar.Location = new Point(551, 102);
+            btnActivar.Enabled = false;
+            btnActivar.Location = new Point(423, 102);
+            btnActivar.Size = new Size(100, 28);
+            btnActivar.TabIndex = 6;
+            btnActivar.Text = "Activar";
+            btnActivar.UseVisualStyleBackColor = true;
+            btnActivar.Click += btnActivar_Click;
+
+            btnCargar.Location = new Point(529, 102);
             btnCargar.Size = new Size(110, 28);
-            btnCargar.TabIndex = 6;
+            btnCargar.TabIndex = 7;
             btnCargar.Text = "Actualizar lista";
             btnCargar.UseVisualStyleBackColor = true;
             btnCargar.Click += btnCargar_Click;
+
+            lblClaveNueva.AutoSize = true;
+            lblClaveNueva.Location = new Point(16, 144);
+            lblClaveNueva.Text = "Clave nueva";
+
+            txtClaveNueva.Location = new Point(19, 164);
+            txtClaveNueva.MaxLength = 128;
+            txtClaveNueva.Size = new Size(180, 23);
+            txtClaveNueva.TabIndex = 8;
+            txtClaveNueva.UseSystemPasswordChar = true;
+
+            lblConfirmarClave.AutoSize = true;
+            lblConfirmarClave.Location = new Point(211, 144);
+            lblConfirmarClave.Text = "Confirmar clave";
+
+            txtConfirmarClave.Location = new Point(214, 164);
+            txtConfirmarClave.MaxLength = 128;
+            txtConfirmarClave.Size = new Size(180, 23);
+            txtConfirmarClave.TabIndex = 9;
+            txtConfirmarClave.UseSystemPasswordChar = true;
+
+            btnGuardarNombre.Location = new Point(411, 162);
+            btnGuardarNombre.Size = new Size(120, 28);
+            btnGuardarNombre.TabIndex = 10;
+            btnGuardarNombre.Text = "Guardar nombre";
+            btnGuardarNombre.UseVisualStyleBackColor = true;
+            btnGuardarNombre.Click += btnGuardarNombre_Click;
+
+            btnCambiarClave.Location = new Point(537, 162);
+            btnCambiarClave.Size = new Size(120, 28);
+            btnCambiarClave.TabIndex = 11;
+            btnCambiarClave.Text = "Cambiar clave";
+            btnCambiarClave.UseVisualStyleBackColor = true;
+            btnCambiarClave.Click += btnCambiarClave_Click;
 
             errValidacion.ContainerControl = this;
             errValidacion.BlinkStyle = ErrorBlinkStyle.NeverBlink;
 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(768, 462);
+            ClientSize = new Size(768, 518);
             Controls.Add(grpDatos);
             Controls.Add(dgvUsuarios);
             Font = new Font("Segoe UI", 9F);
-            MinimumSize = new Size(720, 420);
+            MinimumSize = new Size(720, 480);
             Name = "FrmUsuarios";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Usuarios";

@@ -32,6 +32,15 @@ namespace SistemaCanchas.Presentacion
         private void FrmLogin_Load(object sender, EventArgs e)
         {
             ActualizarEstadoBotonIngresar();
+            try
+            {
+                lnkPrimeraInstalacion.Visible = !_usuarioService.ExisteAlgunUsuario();
+            }
+            catch
+            {
+                lnkPrimeraInstalacion.Visible = true;
+            }
+
             txtUsuarioLogin.Focus();
         }
 

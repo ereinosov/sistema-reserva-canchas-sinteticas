@@ -44,7 +44,6 @@ namespace SistemaCanchas.Negocio
             _usuarioService = usuarioService;
         }
 
-        /// <inheritdoc />
         public ConsultaIngresos ConsultarIngresos(DateTime fechaInicio, DateTime fechaFin)
         {
             Usuario sesion = _usuarioService.ObtenerSesionActual();

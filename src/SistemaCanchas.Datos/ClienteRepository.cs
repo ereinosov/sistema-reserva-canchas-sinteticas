@@ -29,7 +29,6 @@ namespace SistemaCanchas.Datos
             _gestorConexion = gestorConexion;
         }
 
-        /// <inheritdoc />
         public int Insertar(Cliente cliente)
         {
             if (cliente == null)
@@ -57,7 +56,6 @@ namespace SistemaCanchas.Datos
             }
         }
 
-        /// <inheritdoc />
         public IList<Cliente> ObtenerTodos(string numeroDocumento, string nombre)
         {
             List<Cliente> resultado = new List<Cliente>();
@@ -89,7 +87,6 @@ namespace SistemaCanchas.Datos
             return resultado;
         }
 
-        /// <inheritdoc />
         public bool Actualizar(Cliente cliente)
         {
             if (cliente == null)
@@ -116,7 +113,6 @@ namespace SistemaCanchas.Datos
             }
         }
 
-        /// <inheritdoc />
         public bool Eliminar(int idCliente)
         {
             if (idCliente <= 0)

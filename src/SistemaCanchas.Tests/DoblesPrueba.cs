@@ -29,6 +29,16 @@ namespace SistemaCanchas.Tests
 
         public int IdDesactivado { get; private set; }
 
+        public int IdActivado { get; private set; }
+
+        public int IdClaveCambiada { get; private set; }
+
+        public string UltimoHashClave { get; private set; }
+
+        public int IdNombreActualizado { get; private set; }
+
+        public string UltimoNombreActualizado { get; private set; }
+
         public UsuarioRepositoryFake()
         {
             UsuariosExistentes = new List<Usuario>();
@@ -74,6 +84,26 @@ namespace SistemaCanchas.Tests
         public bool Desactivar(int idUsuario)
         {
             IdDesactivado = idUsuario;
+            return true;
+        }
+
+        public bool Activar(int idUsuario)
+        {
+            IdActivado = idUsuario;
+            return true;
+        }
+
+        public bool CambiarClave(int idUsuario, string claveAppHash)
+        {
+            IdClaveCambiada = idUsuario;
+            UltimoHashClave = claveAppHash;
+            return true;
+        }
+
+        public bool ActualizarNombre(int idUsuario, string nombreUsuario)
+        {
+            IdNombreActualizado = idUsuario;
+            UltimoNombreActualizado = nombreUsuario;
             return true;
         }
 
@@ -195,6 +225,26 @@ namespace SistemaCanchas.Tests
             throw new NotSupportedException();
         }
 
+        public void ActivarUsuario(int idUsuario)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void CambiarClaveUsuario(int idUsuario, string claveApp)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void ActualizarNombreUsuario(int idUsuario, string nombreUsuario)
+        {
+            throw new NotSupportedException();
+        }
+
+        public bool ExisteAlgunUsuario()
+        {
+            throw new NotSupportedException();
+        }
+
         public IList<Usuario> ObtenerTodos()
         {
             throw new NotSupportedException();
@@ -212,6 +262,8 @@ namespace SistemaCanchas.Tests
         public Cancha UltimaActualizada { get; private set; }
 
         public int IdDesactivado { get; private set; }
+
+        public int IdActivado { get; private set; }
 
         public int SiguienteId { get; set; }
 
@@ -277,6 +329,17 @@ namespace SistemaCanchas.Tests
             }
 
             IdDesactivado = idCancha;
+            return true;
+        }
+
+        public bool Activar(int idCancha)
+        {
+            if (ExcepcionALanzar != null)
+            {
+                throw ExcepcionALanzar;
+            }
+
+            IdActivado = idCancha;
             return true;
         }
     }
@@ -470,7 +533,13 @@ namespace SistemaCanchas.Tests
 
         public Pago UltimoInsertado { get; private set; }
 
-        public int? UltimoIdReservaFiltro { get; private set; }
+        public DateTime? UltimaFechaFiltro { get; private set; }
+
+        public int? UltimoClienteFiltro { get; private set; }
+
+        public int? UltimaCanchaFiltro { get; private set; }
+
+        public string UltimoEstadoFiltro { get; private set; }
 
         public int SiguienteId { get; set; }
 
@@ -493,14 +562,17 @@ namespace SistemaCanchas.Tests
             return id;
         }
 
-        public IList<Pago> ObtenerTodos(int? idReserva)
+        public IList<Pago> ObtenerTodos(DateTime? fecha, int? idCliente, int? idCancha, string estadoReserva)
         {
             if (ExcepcionALanzar != null)
             {
                 throw ExcepcionALanzar;
             }
 
-            UltimoIdReservaFiltro = idReserva;
+            UltimaFechaFiltro = fecha;
+            UltimoClienteFiltro = idCliente;
+            UltimaCanchaFiltro = idCancha;
+            UltimoEstadoFiltro = estadoReserva;
             return Pagos;
         }
     }

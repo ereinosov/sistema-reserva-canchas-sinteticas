@@ -14,11 +14,17 @@ namespace SistemaCanchas.Datos
         /// <summary>El usuario indicado no existe (sp_DesactivarUsuario).</summary>
         public const int UsuarioNoExiste = 50032;
 
+        /// <summary>El usuario ya está activo (sp_ActivarUsuario).</summary>
+        public const int UsuarioYaActivo = 50034;
+
         /// <summary>Nombre de cancha duplicado (sp_RegistrarCancha / sp_ModificarCancha).</summary>
         public const int CanchaDuplicada = 50020;
 
         /// <summary>La cancha indicada no existe.</summary>
         public const int CanchaNoExiste = 50021;
+
+        /// <summary>La cancha ya está activa (sp_ActivarCancha).</summary>
+        public const int CanchaYaActiva = 50023;
 
         /// <summary>Documento de cliente duplicado (RN07).</summary>
         public const int ClienteDuplicado = 50001;
@@ -31,6 +37,12 @@ namespace SistemaCanchas.Datos
 
         /// <summary>No se puede eliminar: pagos pendientes (RN02).</summary>
         public const int ClienteConPagosPendientes = 50004;
+
+        /// <summary>Teléfono de cliente duplicado.</summary>
+        public const int ClienteTelefonoDuplicado = 50013;
+
+        /// <summary>Correo de cliente duplicado.</summary>
+        public const int ClienteCorreoDuplicado = 50014;
 
         /// <summary>La franja horaria indicada no existe.</summary>
         public const int FranjaNoExiste = 50005;

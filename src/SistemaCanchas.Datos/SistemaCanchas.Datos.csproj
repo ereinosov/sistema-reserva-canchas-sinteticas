@@ -6,6 +6,7 @@
     <Description>Acceso a datos ADO.NET. Solo procedimientos almacenados del artefacto A11.</Description>
     <Version>0.1.0</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Configuration" />

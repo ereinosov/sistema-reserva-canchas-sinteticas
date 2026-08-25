@@ -29,7 +29,6 @@ namespace SistemaCanchas.Datos
             _gestorConexion = gestorConexion;
         }
 
-        /// <inheritdoc />
         public int Insertar(Reserva reserva)
         {
             if (reserva == null)
@@ -59,7 +58,6 @@ namespace SistemaCanchas.Datos
             }
         }
 
-        /// <inheritdoc />
         public IList<Reserva> ObtenerTodos(DateTime? fecha, int? idCliente, int? idCancha, string estadoReserva)
         {
             List<Reserva> resultado = new List<Reserva>();
@@ -93,7 +91,6 @@ namespace SistemaCanchas.Datos
             return resultado;
         }
 
-        /// <inheritdoc />
         public bool ActualizarHorario(int idReserva, int nuevoIdHorario)
         {
             try
@@ -115,7 +112,6 @@ namespace SistemaCanchas.Datos
             }
         }
 
-        /// <inheritdoc />
         public bool Cancelar(int idReserva)
         {
             try

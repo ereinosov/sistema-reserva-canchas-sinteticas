@@ -29,7 +29,6 @@ namespace SistemaCanchas.Datos
             _gestorConexion = gestorConexion;
         }
 
-        /// <inheritdoc />
         public int Insertar(Pago pago)
         {
             if (pago == null)
@@ -60,8 +59,7 @@ namespace SistemaCanchas.Datos
             }
         }
 
-        /// <inheritdoc />
-        public IList<Pago> ObtenerTodos(int? idReserva)
+        public IList<Pago> ObtenerTodos(DateTime? fecha, int? idCliente, int? idCancha, string estadoReserva)
         {
             List<Pago> resultado = new List<Pago>();
 
@@ -71,7 +69,10 @@ namespace SistemaCanchas.Datos
                 using (SqlCommand comando = new SqlCommand("sp_ConsultarEstadoPago", conexion))
                 {
                     comando.CommandType = CommandType.StoredProcedure;
-                    comando.Parameters.Add(ParametroSql.EnteroNulo("@id_reserva", idReserva));
+                    comando.Parameters.Add(ParametroSql.Fecha("@fecha", fecha));
+                    comando.Parameters.Add(ParametroSql.EnteroNulo("@id_cliente", idCliente));
+                    comando.Parameters.Add(ParametroSql.EnteroNulo("@id_cancha", idCancha));
+                    comando.Parameters.Add(ParametroSql.Char("@estado", 10, estadoReserva));
                     conexion.Open();
 
                     using (SqlDataReader lector = comando.ExecuteReader())
@@ -97,11 +98,13 @@ namespace SistemaCanchas.Datos
             {
                 IdReserva = LectorSql.Entero(lector, "id_reserva"),
                 NombreCliente = LectorSql.Cadena(lector, "nombre_cliente"),
+                NombreCancha = LectorSql.Cadena(lector, "nombre_cancha"),
                 FechaHorario = LectorSql.Fecha(lector, "fecha_horario"),
                 HoraInicioHorario = LectorSql.Hora(lector, "hora_inicio_horario"),
                 EstadoPago = LectorSql.CadenaFija(lector, "estado_pago"),
                 MontoPago = LectorSql.DecimalNulo(lector, "monto_pago"),
-                FechaPago = LectorSql.FechaNula(lector, "fecha_pago")
+                FechaPago = LectorSql.FechaNula(lector, "fecha_pago"),
+                EstadoReserva = LectorSql.CadenaFija(lector, "estado_reserva")
             };
         }
     }

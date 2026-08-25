@@ -52,5 +52,11 @@ namespace SistemaCanchas.Datos
         /// <param name="idUsuario">Identificador de USUARIOS.</param>
         /// <returns>true si el procedimiento terminó sin error.</returns>
         bool Desactivar(int idUsuario);
+
+        bool Activar(int idUsuario);
+
+        bool CambiarClave(int idUsuario, string claveAppHash);
+
+        bool ActualizarNombre(int idUsuario, string nombreUsuario);
     }
 }

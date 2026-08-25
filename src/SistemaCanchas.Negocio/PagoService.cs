@@ -45,7 +45,6 @@ namespace SistemaCanchas.Negocio
             _usuarioService = usuarioService;
         }
 
-        /// <inheritdoc />
         public int RegistrarPago(int idReserva, decimal monto, DateTime fechaPago, string estadoPago)
         {
             _usuarioService.ObtenerSesionActual();
@@ -55,13 +54,14 @@ namespace SistemaCanchas.Negocio
                 "No se pudo registrar el pago.");
         }
 
-        /// <inheritdoc />
-        public IList<Pago> ConsultarEstadoPago(int? idReserva)
+        public IList<Pago> ConsultarEstadoPago(DateTime? fecha, int? idCliente, int? idCancha, string estadoReserva)
         {
             _usuarioService.ObtenerSesionActual();
-            int? filtro = idReserva.HasValue && idReserva.Value > 0 ? idReserva : null;
+            int? cliente = idCliente.HasValue && idCliente.Value > 0 ? idCliente : null;
+            int? cancha = idCancha.HasValue && idCancha.Value > 0 ? idCancha : null;
+            string estado = ValidadorReserva.NormalizarEstado(estadoReserva);
             return EjecutarDatos(
-                () => _pagoRepository.ObtenerTodos(filtro),
+                () => _pagoRepository.ObtenerTodos(fecha, cliente, cancha, estado),
                 "No se pudo consultar el estado de pago.");
         }
 

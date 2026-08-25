@@ -130,6 +130,45 @@ namespace SistemaCanchas.Tests
         }
 
         [TestMethod]
+        public void ActivarCancha_YaActiva_LanzaValidacion()
+        {
+            CanchaRepositoryFake repositorio = new CanchaRepositoryFake();
+            repositorio.Canchas.Add(new Cancha
+            {
+                IdCancha = 2,
+                NombreCancha = "Norte",
+                EstadoCancha = ValoresDominio.EstadoCancha.Activa
+            });
+            CanchaService servicio = CrearServicioAdmin(repositorio);
+
+            try
+            {
+                servicio.ActivarCancha(2);
+                Assert.Fail("Debió lanzar ValidacionNegocioException.");
+            }
+            catch (ValidacionNegocioException)
+            {
+            }
+        }
+
+        [TestMethod]
+        public void ActivarCancha_Inactiva_Activa()
+        {
+            CanchaRepositoryFake repositorio = new CanchaRepositoryFake();
+            repositorio.Canchas.Add(new Cancha
+            {
+                IdCancha = 3,
+                NombreCancha = "Sur",
+                EstadoCancha = ValoresDominio.EstadoCancha.Inactiva
+            });
+            CanchaService servicio = CrearServicioAdmin(repositorio);
+
+            servicio.ActivarCancha(3);
+
+            Assert.AreEqual(3, repositorio.IdActivado);
+        }
+
+        [TestMethod]
         public void CanchaActiva_SegunEstado()
         {
             CanchaRepositoryFake repositorio = new CanchaRepositoryFake();

@@ -15,6 +15,7 @@ namespace SistemaCanchas.Presentacion
         private Button btnRegistrar;
         private Button btnModificar;
         private Button btnDesactivar;
+        private Button btnActivar;
         private Button btnCargar;
         private ErrorProvider errValidacion;
         private DataGridViewTextBoxColumn colId;
@@ -44,6 +45,7 @@ namespace SistemaCanchas.Presentacion
             btnRegistrar = new Button();
             btnModificar = new Button();
             btnDesactivar = new Button();
+            btnActivar = new Button();
             btnCargar = new Button();
             errValidacion = new ErrorProvider(components);
             ((System.ComponentModel.ISupportInitialize)dgvCanchas).BeginInit();
@@ -84,6 +86,7 @@ namespace SistemaCanchas.Presentacion
             grpDatos.Controls.Add(btnRegistrar);
             grpDatos.Controls.Add(btnModificar);
             grpDatos.Controls.Add(btnDesactivar);
+            grpDatos.Controls.Add(btnActivar);
             grpDatos.Controls.Add(btnCargar);
             grpDatos.Location = new Point(16, 278);
             grpDatos.Size = new Size(656, 128);
@@ -119,9 +122,17 @@ namespace SistemaCanchas.Presentacion
             btnDesactivar.UseVisualStyleBackColor = true;
             btnDesactivar.Click += btnDesactivar_Click;
 
-            btnCargar.Location = new Point(337, 88);
+            btnActivar.Enabled = false;
+            btnActivar.Location = new Point(337, 88);
+            btnActivar.Size = new Size(100, 28);
+            btnActivar.TabIndex = 4;
+            btnActivar.Text = "Activar";
+            btnActivar.UseVisualStyleBackColor = true;
+            btnActivar.Click += btnActivar_Click;
+
+            btnCargar.Location = new Point(443, 88);
             btnCargar.Size = new Size(120, 28);
-            btnCargar.TabIndex = 4;
+            btnCargar.TabIndex = 5;
             btnCargar.Text = "Actualizar lista";
             btnCargar.UseVisualStyleBackColor = true;
             btnCargar.Click += btnCargar_Click;

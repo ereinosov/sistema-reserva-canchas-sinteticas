@@ -28,7 +28,6 @@ namespace SistemaCanchas.Datos
             _gestorConexion = gestorConexion;
         }
 
-        /// <inheritdoc />
         public ConsultaIngresos Consultar(DateTime fechaInicio, DateTime fechaFin)
         {
             ConsultaIngresos resultado = new ConsultaIngresos();

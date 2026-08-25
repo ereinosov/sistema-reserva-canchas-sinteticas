@@ -38,6 +38,7 @@ namespace SistemaCanchas.Presentacion
 
             _idSeleccionado = Convert.ToInt32(dgvCanchas.CurrentRow.Cells["colId"].Value);
             txtNombreCancha.Text = Convert.ToString(dgvCanchas.CurrentRow.Cells["colNombre"].Value);
+            ActualizarBotonesEstado();
         }
 
         private void btnRegistrar_Click(object sender, EventArgs e)
@@ -136,6 +137,29 @@ namespace SistemaCanchas.Presentacion
             }
         }
 
+        private void btnActivar_Click(object sender, EventArgs e)
+        {
+            if (_idSeleccionado <= 0)
+            {
+                MessageBox.Show(
+                    "Seleccione una cancha de la lista.",
+                    TextosUi.TituloAplicacion,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                _canchaService.ActivarCancha(_idSeleccionado);
+                CargarCanchas();
+            }
+            catch (Exception ex)
+            {
+                MostrarError(ex);
+            }
+        }
+
         private void btnCargar_Click(object sender, EventArgs e)
         {
             CargarCanchas();
@@ -152,11 +176,29 @@ namespace SistemaCanchas.Presentacion
                     Cancha cancha = canchas[i];
                     dgvCanchas.Rows.Add(cancha.IdCancha, cancha.NombreCancha, cancha.EstadoCancha);
                 }
+
+                if (dgvCanchas.Rows.Count == 0)
+                {
+                    _idSeleccionado = 0;
+                    ActualizarBotonesEstado();
+                }
             }
             catch (Exception ex)
             {
                 MostrarError(ex);
             }
+        }
+
+        private void ActualizarBotonesEstado()
+        {
+            bool inactiva = false;
+            if (_idSeleccionado > 0 && dgvCanchas.CurrentRow != null)
+            {
+                string estado = Convert.ToString(dgvCanchas.CurrentRow.Cells["colEstado"].Value);
+                inactiva = string.Equals(estado, ValoresDominio.EstadoCancha.Inactiva, StringComparison.Ordinal);
+            }
+
+            btnActivar.Enabled = inactiva;
         }
 
         private bool ValidarNombre()

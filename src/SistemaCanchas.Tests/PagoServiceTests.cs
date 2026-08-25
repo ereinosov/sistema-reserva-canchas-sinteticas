@@ -105,21 +105,28 @@ namespace SistemaCanchas.Tests
             repositorio.Pagos.Add(new Pago { IdReserva = 1, EstadoPago = ValoresDominio.EstadoPago.Pendiente });
             PagoService servicio = CrearServicioEmpleado(repositorio);
 
-            IList<Pago> resultado = servicio.ConsultarEstadoPago(0);
+            IList<Pago> resultado = servicio.ConsultarEstadoPago(null, 0, 0, "   ");
 
             Assert.AreEqual(1, resultado.Count);
-            Assert.IsNull(repositorio.UltimoIdReservaFiltro);
+            Assert.IsNull(repositorio.UltimaFechaFiltro);
+            Assert.IsNull(repositorio.UltimoClienteFiltro);
+            Assert.IsNull(repositorio.UltimaCanchaFiltro);
+            Assert.IsNull(repositorio.UltimoEstadoFiltro);
         }
 
         [TestMethod]
-        public void ConsultarEstadoPago_ConId_PasaFiltro()
+        public void ConsultarEstadoPago_ConFiltros_PasaValores()
         {
             PagoRepositoryFake repositorio = new PagoRepositoryFake();
             PagoService servicio = CrearServicioEmpleado(repositorio);
+            DateTime fecha = new DateTime(2026, 8, 24);
 
-            servicio.ConsultarEstadoPago(9);
+            servicio.ConsultarEstadoPago(fecha, 4, 2, ValoresDominio.EstadoReserva.Activa);
 
-            Assert.AreEqual(9, repositorio.UltimoIdReservaFiltro);
+            Assert.AreEqual(fecha, repositorio.UltimaFechaFiltro);
+            Assert.AreEqual(4, repositorio.UltimoClienteFiltro);
+            Assert.AreEqual(2, repositorio.UltimaCanchaFiltro);
+            Assert.AreEqual(ValoresDominio.EstadoReserva.Activa, repositorio.UltimoEstadoFiltro);
         }
 
         private static PagoService CrearServicioEmpleado(PagoRepositoryFake repositorio)

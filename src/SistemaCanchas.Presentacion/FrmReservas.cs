@@ -132,9 +132,14 @@ namespace SistemaCanchas.Presentacion
             CargarFranjas();
         }
 
+        private void cboCliente_TextoCambiado(object sender, EventArgs e)
+        {
+            ActualizarBotonRegistrar();
+        }
+
         private void btnRegistrar_Click(object sender, EventArgs e)
         {
-            ItemId cliente = cboCliente.SelectedItem as ItemId;
+            ItemId cliente = ResolverCliente();
             ItemId horario = cboHorario.SelectedItem as ItemId;
             if (cliente == null || cliente.Id <= 0)
             {
@@ -292,6 +297,8 @@ namespace SistemaCanchas.Presentacion
             {
                 _suspenderEventos = false;
             }
+
+            ActualizarBotonRegistrar();
         }
 
         private void CargarReservas()
@@ -392,6 +399,39 @@ namespace SistemaCanchas.Presentacion
             {
                 _suspenderEventos = false;
             }
+        }
+
+        private ItemId ResolverCliente()
+        {
+            string texto = cboCliente.Text == null ? string.Empty : cboCliente.Text.Trim();
+            if (texto.Length == 0)
+            {
+                return null;
+            }
+
+            ItemId seleccionado = cboCliente.SelectedItem as ItemId;
+            if (seleccionado != null && seleccionado.Id > 0 &&
+                string.Equals(seleccionado.Texto, texto, StringComparison.OrdinalIgnoreCase))
+            {
+                return seleccionado;
+            }
+
+            for (int i = 0; i < cboCliente.Items.Count; i++)
+            {
+                ItemId item = cboCliente.Items[i] as ItemId;
+                if (item != null && string.Equals(item.Texto, texto, StringComparison.OrdinalIgnoreCase))
+                {
+                    return item;
+                }
+            }
+
+            return null;
+        }
+
+        private void ActualizarBotonRegistrar()
+        {
+            ItemId cliente = ResolverCliente();
+            btnRegistrar.Enabled = cliente != null && cliente.Id > 0;
         }
 
         private static string FormatearHora(TimeSpan hora)

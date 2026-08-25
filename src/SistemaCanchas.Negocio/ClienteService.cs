@@ -45,7 +45,6 @@ namespace SistemaCanchas.Negocio
             _usuarioService = usuarioService;
         }
 
-        /// <inheritdoc />
         public int RegistrarCliente(string nombre, string tipoDocumento, string numeroDocumento, string telefono, string correo)
         {
             _usuarioService.ObtenerSesionActual();
@@ -55,7 +54,6 @@ namespace SistemaCanchas.Negocio
                 "No se pudo registrar el cliente.");
         }
 
-        /// <inheritdoc />
         public IList<Cliente> ConsultarClientes(string numeroDocumento, string nombre)
         {
             _usuarioService.ObtenerSesionActual();
@@ -66,7 +64,6 @@ namespace SistemaCanchas.Negocio
                 "No se pudo consultar los clientes.");
         }
 
-        /// <inheritdoc />
         public void ModificarCliente(int idCliente, string nombre, string tipoDocumento, string numeroDocumento, string telefono, string correo)
         {
             _usuarioService.ObtenerSesionActual();
@@ -82,7 +79,6 @@ namespace SistemaCanchas.Negocio
                 "No se pudo modificar el cliente.");
         }
 
-        /// <inheritdoc />
         public void EliminarCliente(int idCliente)
         {
             Usuario sesion = _usuarioService.ObtenerSesionActual();
@@ -113,6 +109,16 @@ namespace SistemaCanchas.Negocio
                 if (ex.NumeroSql == CodigosSql.ClienteDuplicado)
                 {
                     throw new ValidacionNegocioException("Ya existe un cliente registrado con ese tipo y número de documento.");
+                }
+
+                if (ex.NumeroSql == CodigosSql.ClienteTelefonoDuplicado)
+                {
+                    throw new ValidacionNegocioException("Ya existe un cliente registrado con ese teléfono.");
+                }
+
+                if (ex.NumeroSql == CodigosSql.ClienteCorreoDuplicado)
+                {
+                    throw new ValidacionNegocioException("Ya existe un cliente registrado con ese correo.");
                 }
 
                 if (ex.NumeroSql == CodigosSql.ClienteNoExiste)

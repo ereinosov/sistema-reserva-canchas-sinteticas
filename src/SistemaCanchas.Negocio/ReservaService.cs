@@ -59,7 +59,6 @@ namespace SistemaCanchas.Negocio
             _usuarioService = usuarioService;
         }
 
-        /// <inheritdoc />
         public int CrearReserva(int idCliente, int idHorario)
         {
             Usuario sesion = _usuarioService.ObtenerSesionActual();
@@ -79,7 +78,6 @@ namespace SistemaCanchas.Negocio
                 "No se pudo registrar la reserva.");
         }
 
-        /// <inheritdoc />
         public IList<Reserva> ConsultarReservas(DateTime? fecha, int? idCliente, int? idCancha, string estadoReserva)
         {
             _usuarioService.ObtenerSesionActual();
@@ -91,7 +89,6 @@ namespace SistemaCanchas.Negocio
                 "No se pudo consultar las reservas.");
         }
 
-        /// <inheritdoc />
         public void ModificarHorario(int idReserva, int nuevoIdHorario)
         {
             _usuarioService.ObtenerSesionActual();
@@ -102,7 +99,6 @@ namespace SistemaCanchas.Negocio
                 "No se pudo modificar el horario de la reserva.");
         }
 
-        /// <inheritdoc />
         public void CancelarReserva(int idReserva)
         {
             _usuarioService.ObtenerSesionActual();
@@ -112,7 +108,6 @@ namespace SistemaCanchas.Negocio
                 "No se pudo cancelar la reserva.");
         }
 
-        /// <inheritdoc />
         public IList<Horario> ConsultarDisponibilidad(int idCancha, DateTime fecha)
         {
             _usuarioService.ObtenerSesionActual();

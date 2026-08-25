@@ -29,7 +29,6 @@ namespace SistemaCanchas.Datos
             _gestorConexion = gestorConexion;
         }
 
-        /// <inheritdoc />
         public int Insertar(Cancha cancha)
         {
             if (cancha == null)
@@ -57,7 +56,6 @@ namespace SistemaCanchas.Datos
             }
         }
 
-        /// <inheritdoc />
         public IList<Cancha> ObtenerTodos(string estadoCancha)
         {
             List<Cancha> resultado = new List<Cancha>();
@@ -88,7 +86,6 @@ namespace SistemaCanchas.Datos
             return resultado;
         }
 
-        /// <inheritdoc />
         public bool Actualizar(Cancha cancha)
         {
             if (cancha == null)
@@ -115,7 +112,6 @@ namespace SistemaCanchas.Datos
             }
         }
 
-        /// <inheritdoc />
         public bool Desactivar(int idCancha)
         {
             if (idCancha <= 0)
@@ -138,6 +134,31 @@ namespace SistemaCanchas.Datos
             catch (SqlException ex)
             {
                 throw new ErrorAccesoDatosException("No se pudo desactivar la cancha.", ex);
+            }
+        }
+
+        public bool Activar(int idCancha)
+        {
+            if (idCancha <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(idCancha), "El identificador de cancha debe ser positivo.");
+            }
+
+            try
+            {
+                using (SqlConnection conexion = _gestorConexion.ObtenerConexionActiva())
+                using (SqlCommand comando = new SqlCommand("sp_ActivarCancha", conexion))
+                {
+                    comando.CommandType = CommandType.StoredProcedure;
+                    comando.Parameters.Add(ParametroSql.Entero("@id_cancha", idCancha));
+                    conexion.Open();
+                    comando.ExecuteNonQuery();
+                    return true;
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new ErrorAccesoDatosException("No se pudo activar la cancha.", ex);
             }
         }
 

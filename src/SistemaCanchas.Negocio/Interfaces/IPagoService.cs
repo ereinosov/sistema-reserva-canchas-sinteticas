@@ -18,9 +18,6 @@ namespace SistemaCanchas.Negocio.Interfaces
         /// <returns>Id generado.</returns>
         int RegistrarPago(int idReserva, decimal monto, DateTime fechaPago, string estadoPago);
 
-        /// <summary>Consulta el estado de pago de reservas activas (RF10). Requiere sesión iniciada.</summary>
-        /// <param name="idReserva">Reserva concreta; null o 0 para todas las activas.</param>
-        /// <returns>Reservas activas con su pago, si existe.</returns>
-        IList<Pago> ConsultarEstadoPago(int? idReserva);
+        IList<Pago> ConsultarEstadoPago(DateTime? fecha, int? idCliente, int? idCancha, string estadoReserva);
     }
 }

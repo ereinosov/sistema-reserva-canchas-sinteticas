@@ -51,6 +51,14 @@ namespace SistemaCanchas.Negocio.Interfaces
         /// <param name="idUsuario">Identificador de USUARIOS.</param>
         void DesactivarUsuario(int idUsuario);
 
+        void ActivarUsuario(int idUsuario);
+
+        void CambiarClaveUsuario(int idUsuario, string claveApp);
+
+        void ActualizarNombreUsuario(int idUsuario, string nombreUsuario);
+
+        bool ExisteAlgunUsuario();
+
         /// <summary>
         /// Lista las cuentas sin secretos. Requiere sesión de administrador.
         /// </summary>

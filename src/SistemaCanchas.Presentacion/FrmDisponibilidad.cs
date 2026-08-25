@@ -32,6 +32,8 @@ namespace SistemaCanchas.Presentacion
 
         private void FrmDisponibilidad_Load(object sender, EventArgs e)
         {
+            dtpFecha.MinDate = DateTime.Today.AddYears(-1);
+            dtpFecha.MaxDate = DateTime.Today.AddYears(1);
             dtpFecha.Value = DateTime.Today;
             try
             {

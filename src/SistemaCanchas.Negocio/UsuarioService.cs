@@ -48,7 +48,6 @@ namespace SistemaCanchas.Negocio
             _gestorConexion = gestorConexion;
         }
 
-        /// <inheritdoc />
         public Usuario ValidarCredenciales(string usuarioLogin, string claveApp)
         {
             if (string.IsNullOrWhiteSpace(usuarioLogin) || string.IsNullOrEmpty(claveApp))
@@ -81,7 +80,6 @@ namespace SistemaCanchas.Negocio
             return _sesionActual;
         }
 
-        /// <inheritdoc />
         public Usuario ObtenerSesionActual()
         {
             if (_sesionActual == null)
@@ -92,14 +90,12 @@ namespace SistemaCanchas.Negocio
             return _sesionActual;
         }
 
-        /// <inheritdoc />
         public void CerrarSesion()
         {
             _sesionActual = null;
             _gestorConexion.CerrarSesion();
         }
 
-        /// <inheritdoc />
         public int RegistrarUsuario(string nombreUsuario, string usuarioLogin, string claveApp, string nombreRol)
         {
             ExigirAdministrador();
@@ -111,7 +107,6 @@ namespace SistemaCanchas.Negocio
                 (usuario, claveBdPlana, rol) => _usuarioRepository.Insertar(usuario, claveBdPlana, rol));
         }
 
-        /// <inheritdoc />
         public int RegistrarAdministradorInicial(string nombreUsuario, string usuarioLogin, string claveApp)
         {
             IList<Usuario> existentes = EjecutarDatos(
@@ -133,7 +128,6 @@ namespace SistemaCanchas.Negocio
                 (usuario, claveBdPlana, rol) => _usuarioRepository.InsertarDesdeInstalacion(usuario, claveBdPlana, rol));
         }
 
-        /// <inheritdoc />
         public void DesactivarUsuario(int idUsuario)
         {
             Usuario sesion = ExigirAdministrador();
@@ -159,7 +153,63 @@ namespace SistemaCanchas.Negocio
                 "No se pudo desactivar el usuario.");
         }
 
-        /// <inheritdoc />
+        public void ActivarUsuario(int idUsuario)
+        {
+            ExigirAdministrador();
+            IList<Usuario> usuarios = ObtenerTodos();
+            Usuario objetivo = BuscarPorId(usuarios, idUsuario);
+            if (objetivo == null)
+            {
+                throw new ValidacionNegocioException("El usuario indicado no existe.");
+            }
+
+            if (string.Equals(objetivo.EstadoUsuario, ValoresDominio.EstadoUsuario.Activo, StringComparison.Ordinal))
+            {
+                throw new ValidacionNegocioException("El usuario ya se encuentra activo.");
+            }
+
+            EjecutarDatos(
+                () => _usuarioRepository.Activar(idUsuario),
+                "No se pudo activar el usuario.");
+        }
+
+        public void CambiarClaveUsuario(int idUsuario, string claveApp)
+        {
+            ExigirAdministrador();
+            if (idUsuario <= 0)
+            {
+                throw new ValidacionNegocioException("Seleccione un usuario de la lista.");
+            }
+
+            ValidadorUsuario.ValidarClaveApp(claveApp);
+            string hash = BCrypt.Net.BCrypt.HashPassword(claveApp, ValoresDominio.CostoHashAplicacion);
+            EjecutarDatos(
+                () => _usuarioRepository.CambiarClave(idUsuario, hash),
+                "No se pudo cambiar la clave del usuario.");
+        }
+
+        public void ActualizarNombreUsuario(int idUsuario, string nombreUsuario)
+        {
+            ExigirAdministrador();
+            if (idUsuario <= 0)
+            {
+                throw new ValidacionNegocioException("Seleccione un usuario de la lista.");
+            }
+
+            ValidadorUsuario.ValidarNombre(nombreUsuario);
+            EjecutarDatos(
+                () => _usuarioRepository.ActualizarNombre(idUsuario, nombreUsuario.Trim()),
+                "No se pudo actualizar el nombre del usuario.");
+        }
+
+        public bool ExisteAlgunUsuario()
+        {
+            IList<Usuario> existentes = EjecutarDatos(
+                () => _usuarioRepository.ObtenerTodosDesdeInstalacion(),
+                "No se pudo comprobar si ya existe un usuario.");
+            return existentes.Count > 0;
+        }
+
         public IList<Usuario> ObtenerTodos()
         {
             ExigirAdministrador();
@@ -300,6 +350,11 @@ namespace SistemaCanchas.Negocio
                 if (ex.NumeroSql == CodigosSql.UsuarioNoExiste)
                 {
                     throw new ValidacionNegocioException("El usuario indicado no existe.");
+                }
+
+                if (ex.NumeroSql == CodigosSql.UsuarioYaActivo)
+                {
+                    throw new ValidacionNegocioException("El usuario ya se encuentra activo.");
                 }
 
                 throw new ErrorInfraestructuraException(mensajeInfraestructura + DetalleMotor(ex), ex);

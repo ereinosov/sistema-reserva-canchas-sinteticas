@@ -11,6 +11,7 @@ namespace SistemaCanchas.Presentacion
     public partial class FrmUsuarios : Form
     {
         private readonly IUsuarioService _usuarioService;
+        private int _idSeleccionado;
 
         public FrmUsuarios(IUsuarioService usuarioService)
         {
@@ -29,6 +30,20 @@ namespace SistemaCanchas.Presentacion
             cboRol.Items.Add(new ItemRol("Administrador", ValoresDominio.Rol.Administrador));
             cboRol.SelectedIndex = 0;
             CargarUsuarios();
+        }
+
+        private void dgvUsuarios_SelectionChanged(object sender, EventArgs e)
+        {
+            if (dgvUsuarios.CurrentRow == null || dgvUsuarios.CurrentRow.Index < 0)
+            {
+                _idSeleccionado = 0;
+                ActualizarBotonActivar();
+                return;
+            }
+
+            _idSeleccionado = Convert.ToInt32(dgvUsuarios.CurrentRow.Cells["colId"].Value);
+            txtNombreUsuario.Text = Convert.ToString(dgvUsuarios.CurrentRow.Cells["colNombre"].Value);
+            ActualizarBotonActivar();
         }
 
         private void btnRegistrar_Click(object sender, EventArgs e)
@@ -122,6 +137,130 @@ namespace SistemaCanchas.Presentacion
             }
         }
 
+        private void btnActivar_Click(object sender, EventArgs e)
+        {
+            if (_idSeleccionado <= 0)
+            {
+                MessageBox.Show(
+                    "Seleccione un usuario de la lista.",
+                    TextosUi.TituloAplicacion,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                _usuarioService.ActivarUsuario(_idSeleccionado);
+                CargarUsuarios();
+            }
+            catch (ValidacionNegocioException ex)
+            {
+                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (OperacionNoPermitidaException ex)
+            {
+                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (ErrorInfraestructuraException ex)
+            {
+                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnGuardarNombre_Click(object sender, EventArgs e)
+        {
+            if (_idSeleccionado <= 0)
+            {
+                MessageBox.Show(
+                    "Seleccione un usuario de la lista.",
+                    TextosUi.TituloAplicacion,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            errValidacion.Clear();
+            if (string.IsNullOrWhiteSpace(txtNombreUsuario.Text))
+            {
+                errValidacion.SetError(txtNombreUsuario, "Ingrese el nombre.");
+                return;
+            }
+
+            try
+            {
+                _usuarioService.ActualizarNombreUsuario(_idSeleccionado, txtNombreUsuario.Text);
+                MessageBox.Show(
+                    "Nombre actualizado.",
+                    TextosUi.TituloAplicacion,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                CargarUsuarios();
+            }
+            catch (ValidacionNegocioException ex)
+            {
+                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (OperacionNoPermitidaException ex)
+            {
+                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (ErrorInfraestructuraException ex)
+            {
+                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
+        private void btnCambiarClave_Click(object sender, EventArgs e)
+        {
+            if (_idSeleccionado <= 0)
+            {
+                MessageBox.Show(
+                    "Seleccione un usuario de la lista.",
+                    TextosUi.TituloAplicacion,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
+
+            errValidacion.Clear();
+            if (string.IsNullOrEmpty(txtClaveNueva.Text) || txtClaveNueva.Text.Length < ValoresDominio.LongitudMinimaClaveApp)
+            {
+                errValidacion.SetError(txtClaveNueva, "La clave debe tener al menos 8 caracteres.");
+                return;
+            }
+
+            if (!string.Equals(txtClaveNueva.Text, txtConfirmarClave.Text, StringComparison.Ordinal))
+            {
+                errValidacion.SetError(txtConfirmarClave, "La confirmación no coincide con la clave nueva.");
+                return;
+            }
+
+            try
+            {
+                _usuarioService.CambiarClaveUsuario(_idSeleccionado, txtClaveNueva.Text);
+                txtClaveNueva.Clear();
+                txtConfirmarClave.Clear();
+                MessageBox.Show(
+                    "Clave actualizada.",
+                    TextosUi.TituloAplicacion,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+            }
+            catch (ValidacionNegocioException ex)
+            {
+                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (OperacionNoPermitidaException ex)
+            {
+                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            catch (ErrorInfraestructuraException ex)
+            {
+                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
         private void btnCargar_Click(object sender, EventArgs e)
         {
             CargarUsuarios();
@@ -143,6 +282,12 @@ namespace SistemaCanchas.Presentacion
                         usuario.NombreRol,
                         usuario.EstadoUsuario);
                 }
+
+                if (dgvUsuarios.Rows.Count == 0)
+                {
+                    _idSeleccionado = 0;
+                    ActualizarBotonActivar();
+                }
             }
             catch (ErrorInfraestructuraException ex)
             {
@@ -152,6 +297,18 @@ namespace SistemaCanchas.Presentacion
             {
                 MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+        }
+
+        private void ActualizarBotonActivar()
+        {
+            bool inactivo = false;
+            if (_idSeleccionado > 0 && dgvUsuarios.CurrentRow != null)
+            {
+                string estado = Convert.ToString(dgvUsuarios.CurrentRow.Cells["colEstado"].Value);
+                inactivo = string.Equals(estado, ValoresDominio.EstadoUsuario.Inactivo, StringComparison.Ordinal);
+            }
+
+            btnActivar.Enabled = inactivo;
         }
 
         private bool ValidarFormato()
@@ -185,6 +342,8 @@ namespace SistemaCanchas.Presentacion
             txtNombreUsuario.Clear();
             txtUsuarioLogin.Clear();
             txtClaveApp.Clear();
+            txtClaveNueva.Clear();
+            txtConfirmarClave.Clear();
             cboRol.SelectedIndex = 0;
             txtNombreUsuario.Focus();
         }

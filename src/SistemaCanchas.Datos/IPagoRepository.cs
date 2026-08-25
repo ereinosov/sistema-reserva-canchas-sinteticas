@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using SistemaCanchas.Entidades;
@@ -14,9 +15,6 @@ namespace SistemaCanchas.Datos
         /// <returns>Id generado.</returns>
         int Insertar(Pago pago);
 
-        /// <summary>Consulta el estado de pago de reservas activas (sp_ConsultarEstadoPago, RF10).</summary>
-        /// <param name="idReserva">Reserva concreta o null para todas las activas.</param>
-        /// <returns>Reservas activas con su pago, si existe.</returns>
-        IList<Pago> ObtenerTodos(int? idReserva);
+        IList<Pago> ObtenerTodos(DateTime? fecha, int? idCliente, int? idCancha, string estadoReserva);
     }
 }

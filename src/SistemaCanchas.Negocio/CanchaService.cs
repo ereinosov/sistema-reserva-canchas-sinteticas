@@ -45,7 +45,6 @@ namespace SistemaCanchas.Negocio
             _usuarioService = usuarioService;
         }
 
-        /// <inheritdoc />
         public int RegistrarCancha(string nombreCancha)
         {
             ExigirAdministrador();
@@ -61,7 +60,6 @@ namespace SistemaCanchas.Negocio
                 "No se pudo registrar la cancha.");
         }
 
-        /// <inheritdoc />
         public IList<Cancha> ObtenerTodas()
         {
             _usuarioService.ObtenerSesionActual();
@@ -70,7 +68,6 @@ namespace SistemaCanchas.Negocio
                 "No se pudo consultar las canchas.");
         }
 
-        /// <inheritdoc />
         public IList<Cancha> ObtenerActivas()
         {
             _usuarioService.ObtenerSesionActual();
@@ -79,7 +76,6 @@ namespace SistemaCanchas.Negocio
                 "No se pudo consultar las canchas activas.");
         }
 
-        /// <inheritdoc />
         public void ModificarCancha(int idCancha, string nombreCancha)
         {
             ExigirAdministrador();
@@ -100,7 +96,6 @@ namespace SistemaCanchas.Negocio
                 "No se pudo modificar la cancha.");
         }
 
-        /// <inheritdoc />
         public void DesactivarCancha(int idCancha)
         {
             ExigirAdministrador();
@@ -126,7 +121,30 @@ namespace SistemaCanchas.Negocio
                 "No se pudo desactivar la cancha.");
         }
 
-        /// <inheritdoc />
+        public void ActivarCancha(int idCancha)
+        {
+            ExigirAdministrador();
+            if (idCancha <= 0)
+            {
+                throw new ValidacionNegocioException("Seleccione una cancha de la lista.");
+            }
+
+            Cancha actual = Buscar(idCancha);
+            if (actual == null)
+            {
+                throw new ValidacionNegocioException("La cancha indicada no existe.");
+            }
+
+            if (string.Equals(actual.EstadoCancha, ValoresDominio.EstadoCancha.Activa, StringComparison.Ordinal))
+            {
+                throw new ValidacionNegocioException("La cancha ya se encuentra activa.");
+            }
+
+            EjecutarDatos(
+                () => _canchaRepository.Activar(idCancha),
+                "No se pudo activar la cancha.");
+        }
+
         public bool CanchaActiva(int idCancha)
         {
             _usuarioService.ObtenerSesionActual();
@@ -193,6 +211,11 @@ namespace SistemaCanchas.Negocio
                 if (ex.NumeroSql == CodigosSql.CanchaNoExiste)
                 {
                     throw new ValidacionNegocioException("La cancha indicada no existe.");
+                }
+
+                if (ex.NumeroSql == CodigosSql.CanchaYaActiva)
+                {
+                    throw new ValidacionNegocioException("La cancha ya se encuentra activa.");
                 }
 
                 throw new ErrorInfraestructuraException(mensajeInfraestructura + DetalleMotor(ex), ex);

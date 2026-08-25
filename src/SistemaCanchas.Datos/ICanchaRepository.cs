@@ -28,5 +28,7 @@ namespace SistemaCanchas.Datos
         /// <param name="idCancha">Identificador.</param>
         /// <returns>true si el procedimiento terminó sin error.</returns>
         bool Desactivar(int idCancha);
+
+        bool Activar(int idCancha);
     }
 }

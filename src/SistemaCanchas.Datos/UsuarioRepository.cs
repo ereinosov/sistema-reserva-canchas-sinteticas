@@ -29,7 +29,6 @@ namespace SistemaCanchas.Datos
             _gestorConexion = gestorConexion;
         }
 
-        /// <inheritdoc />
         public Usuario ObtenerCredenciales(string usuarioLogin)
         {
             if (string.IsNullOrWhiteSpace(usuarioLogin))
@@ -65,31 +64,26 @@ namespace SistemaCanchas.Datos
             }
         }
 
-        /// <inheritdoc />
         public IList<Usuario> ObtenerTodos()
         {
             return ConsultarTodos(() => _gestorConexion.ObtenerConexionActiva());
         }
 
-        /// <inheritdoc />
         public IList<Usuario> ObtenerTodosDesdeInstalacion()
         {
             return ConsultarTodos(() => _gestorConexion.ObtenerConexionInstalacion());
         }
 
-        /// <inheritdoc />
         public int Insertar(Usuario usuario, string claveBdPlana, string nombreRol)
         {
             return InsertarInterno(usuario, claveBdPlana, nombreRol, () => _gestorConexion.ObtenerConexionActiva());
         }
 
-        /// <inheritdoc />
         public int InsertarDesdeInstalacion(Usuario usuario, string claveBdPlana, string nombreRol)
         {
             return InsertarInterno(usuario, claveBdPlana, nombreRol, () => _gestorConexion.ObtenerConexionInstalacion());
         }
 
-        /// <inheritdoc />
         public bool Desactivar(int idUsuario)
         {
             if (idUsuario <= 0)
@@ -112,6 +106,93 @@ namespace SistemaCanchas.Datos
             catch (SqlException ex)
             {
                 throw new ErrorAccesoDatosException("No se pudo desactivar el usuario.", ex);
+            }
+        }
+
+        public bool Activar(int idUsuario)
+        {
+            if (idUsuario <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(idUsuario), "El identificador de usuario debe ser positivo.");
+            }
+
+            try
+            {
+                using (SqlConnection conexion = _gestorConexion.ObtenerConexionActiva())
+                using (SqlCommand comando = new SqlCommand("sp_ActivarUsuario", conexion))
+                {
+                    comando.CommandType = CommandType.StoredProcedure;
+                    comando.Parameters.Add(ParametroSql.Entero("@id_usuario", idUsuario));
+                    conexion.Open();
+                    comando.ExecuteNonQuery();
+                    return true;
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new ErrorAccesoDatosException("No se pudo activar el usuario.", ex);
+            }
+        }
+
+        public bool CambiarClave(int idUsuario, string claveAppHash)
+        {
+            if (idUsuario <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(idUsuario), "El identificador de usuario debe ser positivo.");
+            }
+
+            if (string.IsNullOrEmpty(claveAppHash))
+            {
+                throw new ArgumentException("El hash de la clave es obligatorio.", nameof(claveAppHash));
+            }
+
+            try
+            {
+                using (SqlConnection conexion = _gestorConexion.ObtenerConexionActiva())
+                using (SqlCommand comando = new SqlCommand("sp_CambiarClaveUsuario", conexion))
+                {
+                    comando.CommandType = CommandType.StoredProcedure;
+                    comando.Parameters.Add(ParametroSql.Entero("@id_usuario", idUsuario));
+                    comando.Parameters.Add(ParametroSql.VarChar("@clave_app_hash", 255, claveAppHash));
+                    conexion.Open();
+                    comando.ExecuteNonQuery();
+                    return true;
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new ErrorAccesoDatosException("No se pudo cambiar la clave del usuario.", ex);
+            }
+        }
+
+        public bool ActualizarNombre(int idUsuario, string nombreUsuario)
+        {
+            if (idUsuario <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(idUsuario), "El identificador de usuario debe ser positivo.");
+            }
+
+            if (string.IsNullOrWhiteSpace(nombreUsuario))
+            {
+                throw new ArgumentException("El nombre es obligatorio.", nameof(nombreUsuario));
+            }
+
+            try
+            {
+                using (SqlConnection conexion = _gestorConexion.ObtenerConexionActiva())
+                using (SqlCommand comando = new SqlCommand("sp_ActualizarNombreUsuario", conexion))
+                {
+                    comando.CommandType = CommandType.StoredProcedure;
+                    comando.Parameters.Add(ParametroSql.Entero("@id_usuario", idUsuario));
+                    comando.Parameters.Add(ParametroSql.NVarChar("@nombre_usuario", 100, nombreUsuario));
+                    conexion.Open();
+                    comando.ExecuteNonQuery();
+                    return true;
+                }
+            }
+            catch (SqlException ex)
+            {
+                throw new ErrorAccesoDatosException("No se pudo actualizar el nombre del usuario.", ex);
             }
         }
 

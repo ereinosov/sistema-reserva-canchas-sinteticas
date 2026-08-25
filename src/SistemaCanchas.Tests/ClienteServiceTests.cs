@@ -83,6 +83,46 @@ namespace SistemaCanchas.Tests
         }
 
         [TestMethod]
+        public void RegistrarCliente_TelefonoDuplicado_LanzaValidacion()
+        {
+            ClienteRepositoryFake repositorio = new ClienteRepositoryFake
+            {
+                ExcepcionALanzar = new ErrorAccesoDatosException("duplicado", CodigosSql.ClienteTelefonoDuplicado)
+            };
+            ClienteService servicio = CrearServicioEmpleado(repositorio);
+
+            try
+            {
+                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "0102030405", "0987654321", "ana@uteq.edu.ec");
+                Assert.Fail("Debió lanzar ValidacionNegocioException.");
+            }
+            catch (ValidacionNegocioException ex)
+            {
+                StringAssert.Contains(ex.Message, "teléfono");
+            }
+        }
+
+        [TestMethod]
+        public void RegistrarCliente_CorreoDuplicado_LanzaValidacion()
+        {
+            ClienteRepositoryFake repositorio = new ClienteRepositoryFake
+            {
+                ExcepcionALanzar = new ErrorAccesoDatosException("duplicado", CodigosSql.ClienteCorreoDuplicado)
+            };
+            ClienteService servicio = CrearServicioEmpleado(repositorio);
+
+            try
+            {
+                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "0102030405", "0987654321", "ana@uteq.edu.ec");
+                Assert.Fail("Debió lanzar ValidacionNegocioException.");
+            }
+            catch (ValidacionNegocioException ex)
+            {
+                StringAssert.Contains(ex.Message, "correo");
+            }
+        }
+
+        [TestMethod]
         public void ConsultarClientes_EscapaComodinesLike()
         {
             ClienteRepositoryFake repositorio = new ClienteRepositoryFake();

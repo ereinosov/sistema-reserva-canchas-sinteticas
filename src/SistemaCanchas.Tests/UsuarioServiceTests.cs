@@ -1,3 +1,5 @@
+using System;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using SistemaCanchas.Datos.Excepciones;
@@ -356,6 +358,74 @@ namespace SistemaCanchas.Tests
             servicio.DesactivarUsuario(2);
 
             Assert.AreEqual(2, repositorio.IdDesactivado);
+        }
+
+        [TestMethod]
+        public void ActivarUsuario_Inactivo_Activa()
+        {
+            Usuario empleado = new Usuario
+            {
+                IdUsuario = 2,
+                NombreUsuario = "Ana",
+                UsuarioLogin = "ana",
+                NombreRol = ValoresDominio.Rol.Empleado,
+                EstadoUsuario = ValoresDominio.EstadoUsuario.Inactivo
+            };
+            UsuarioRepositoryFake repositorio = new UsuarioRepositoryFake
+            {
+                UsuarioADevolver = CrearUsuarioPersistido()
+            };
+            repositorio.UsuariosExistentes.Add(CrearUsuarioPersistido());
+            repositorio.UsuariosExistentes.Add(empleado);
+            UsuarioService servicio = CrearServicio(repositorio, new GestorConexionFake());
+            servicio.ValidarCredenciales("admin", ClaveAppValida);
+
+            servicio.ActivarUsuario(2);
+
+            Assert.AreEqual(2, repositorio.IdActivado);
+        }
+
+        [TestMethod]
+        public void CambiarClaveUsuario_HasheaConBcrypt()
+        {
+            UsuarioRepositoryFake repositorio = new UsuarioRepositoryFake
+            {
+                UsuarioADevolver = CrearUsuarioPersistido()
+            };
+            repositorio.UsuariosExistentes.Add(CrearUsuarioPersistido());
+            UsuarioService servicio = CrearServicio(repositorio, new GestorConexionFake());
+            servicio.ValidarCredenciales("admin", ClaveAppValida);
+
+            servicio.CambiarClaveUsuario(1, "Nueva.Clave#2026");
+
+            Assert.AreEqual(1, repositorio.IdClaveCambiada);
+            Assert.IsTrue(repositorio.UltimoHashClave.StartsWith("$2", StringComparison.Ordinal));
+            Assert.IsTrue(BCrypt.Net.BCrypt.Verify("Nueva.Clave#2026", repositorio.UltimoHashClave));
+        }
+
+        [TestMethod]
+        public void ActualizarNombreUsuario_PersisteNombre()
+        {
+            UsuarioRepositoryFake repositorio = new UsuarioRepositoryFake
+            {
+                UsuarioADevolver = CrearUsuarioPersistido()
+            };
+            repositorio.UsuariosExistentes.Add(CrearUsuarioPersistido());
+            UsuarioService servicio = CrearServicio(repositorio, new GestorConexionFake());
+            servicio.ValidarCredenciales("admin", ClaveAppValida);
+
+            servicio.ActualizarNombreUsuario(1, "  Admin Actualizado  ");
+
+            Assert.AreEqual(1, repositorio.IdNombreActualizado);
+            Assert.AreEqual("Admin Actualizado", repositorio.UltimoNombreActualizado);
+        }
+
+        [TestMethod]
+        public void ExisteAlgunUsuario_SinUsuarios_RetornaFalso()
+        {
+            UsuarioService servicio = CrearServicio(new UsuarioRepositoryFake(), new GestorConexionFake());
+
+            Assert.IsFalse(servicio.ExisteAlgunUsuario());
         }
 
         [TestMethod]

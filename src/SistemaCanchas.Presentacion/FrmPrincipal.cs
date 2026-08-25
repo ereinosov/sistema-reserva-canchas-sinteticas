@@ -107,7 +107,10 @@ namespace SistemaCanchas.Presentacion
 
         private void mnuPagos_Click(object sender, EventArgs e)
         {
-            using (FrmPagos formulario = new FrmPagos(new PagoService(_usuarioService)))
+            using (FrmPagos formulario = new FrmPagos(
+                new PagoService(_usuarioService),
+                new ClienteService(_usuarioService),
+                new CanchaService(_usuarioService)))
             {
                 formulario.ShowDialog(this);
             }

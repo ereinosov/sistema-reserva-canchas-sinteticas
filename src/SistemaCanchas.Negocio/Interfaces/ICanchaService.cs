@@ -34,6 +34,8 @@ namespace SistemaCanchas.Negocio.Interfaces
         /// <param name="idCancha">Identificador.</param>
         void DesactivarCancha(int idCancha);
 
+        void ActivarCancha(int idCancha);
+
         /// <summary>Indica si la cancha existe y está activa (RN10).</summary>
         /// <param name="idCancha">Identificador.</param>
         /// <returns>true si está activa.</returns>
