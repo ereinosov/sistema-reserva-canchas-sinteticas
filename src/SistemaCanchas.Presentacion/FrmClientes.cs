@@ -24,31 +24,30 @@ namespace SistemaCanchas.Presentacion
             _clienteService = clienteService;
             _puedeEliminar = puedeEliminar;
             InitializeComponent();
+            TextosUi.ConfigurarGrilla(dgvClientes);
         }
 
         private void FrmClientes_Load(object sender, EventArgs e)
         {
-            cboTipoDocumento.Items.Add(new ItemTipo("Cédula", ValoresDominio.TipoDocumento.Cedula));
-            cboTipoDocumento.Items.Add(new ItemTipo("Pasaporte", ValoresDominio.TipoDocumento.Pasaporte));
-            cboTipoDocumento.Items.Add(new ItemTipo("RUC", ValoresDominio.TipoDocumento.Ruc));
-            cboTipoDocumento.SelectedIndex = 0;
+            CargarTipos(cboTipoNuevo);
+            CargarTipos(cboTipoEdicion);
             btnEliminar.Visible = _puedeEliminar;
             CargarClientes();
         }
 
         private void dgvClientes_SelectionChanged(object sender, EventArgs e)
         {
-            if (dgvClientes.CurrentRow == null || dgvClientes.CurrentRow.Index < 0)
+            ActualizarPanelEdicion();
+        }
+
+        private void dgvClientes_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0)
             {
                 return;
             }
 
-            _idSeleccionado = Convert.ToInt32(dgvClientes.CurrentRow.Cells["colId"].Value);
-            txtNombreCliente.Text = Convert.ToString(dgvClientes.CurrentRow.Cells["colNombre"].Value);
-            txtNumeroDocumento.Text = Convert.ToString(dgvClientes.CurrentRow.Cells["colDocumento"].Value);
-            txtTelefonoCliente.Text = Convert.ToString(dgvClientes.CurrentRow.Cells["colTelefono"].Value);
-            txtCorreoCliente.Text = Convert.ToString(dgvClientes.CurrentRow.Cells["colCorreo"].Value);
-            SeleccionarTipo(Convert.ToString(dgvClientes.CurrentRow.Cells["colTipo"].Value));
+            MostrarSeleccion(dgvClientes.Rows[e.RowIndex]);
         }
 
         private void btnBuscar_Click(object sender, EventArgs e)
@@ -65,21 +64,21 @@ namespace SistemaCanchas.Presentacion
 
         private void btnRegistrar_Click(object sender, EventArgs e)
         {
-            ItemTipo tipo = cboTipoDocumento.SelectedItem as ItemTipo;
+            ItemTipo tipo = cboTipoNuevo.SelectedItem as ItemTipo;
             if (tipo == null)
             {
-                errValidacion.SetError(cboTipoDocumento, "Seleccione el tipo de documento.");
+                errValidacion.SetError(cboTipoNuevo, "Seleccione el tipo de documento.");
                 return;
             }
 
             try
             {
                 _clienteService.RegistrarCliente(
-                    txtNombreCliente.Text,
+                    txtNombreNuevo.Text,
                     tipo.Valor,
-                    txtNumeroDocumento.Text,
-                    txtTelefonoCliente.Text,
-                    txtCorreoCliente.Text);
+                    txtNumeroNuevo.Text,
+                    txtTelefonoNuevo.Text,
+                    txtCorreoNuevo.Text);
 
                 MessageBox.Show(
                     "Cliente registrado.",
@@ -87,7 +86,7 @@ namespace SistemaCanchas.Presentacion
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
 
-                LimpiarFormulario();
+                LimpiarAlta();
                 CargarClientes();
             }
             catch (Exception ex)
@@ -108,10 +107,10 @@ namespace SistemaCanchas.Presentacion
                 return;
             }
 
-            ItemTipo tipo = cboTipoDocumento.SelectedItem as ItemTipo;
+            ItemTipo tipo = cboTipoEdicion.SelectedItem as ItemTipo;
             if (tipo == null)
             {
-                errValidacion.SetError(cboTipoDocumento, "Seleccione el tipo de documento.");
+                errValidacion.SetError(cboTipoEdicion, "Seleccione el tipo de documento.");
                 return;
             }
 
@@ -119,11 +118,11 @@ namespace SistemaCanchas.Presentacion
             {
                 _clienteService.ModificarCliente(
                     _idSeleccionado,
-                    txtNombreCliente.Text,
+                    txtNombreEdicion.Text,
                     tipo.Valor,
-                    txtNumeroDocumento.Text,
-                    txtTelefonoCliente.Text,
-                    txtCorreoCliente.Text);
+                    txtNumeroEdicion.Text,
+                    txtTelefonoEdicion.Text,
+                    txtCorreoEdicion.Text);
 
                 MessageBox.Show(
                     "Cliente actualizado.",
@@ -166,7 +165,6 @@ namespace SistemaCanchas.Presentacion
             try
             {
                 _clienteService.EliminarCliente(_idSeleccionado);
-                LimpiarFormulario();
                 CargarClientes();
             }
             catch (Exception ex)
@@ -183,17 +181,28 @@ namespace SistemaCanchas.Presentacion
                     txtFiltroDocumento.Text,
                     txtFiltroNombre.Text);
 
-                dgvClientes.Rows.Clear();
-                for (int i = 0; i < clientes.Count; i++)
+                dgvClientes.SelectionChanged -= dgvClientes_SelectionChanged;
+                try
                 {
-                    Cliente cliente = clientes[i];
-                    dgvClientes.Rows.Add(
-                        cliente.IdCliente,
-                        cliente.NombreCliente,
-                        cliente.TipoDocumentoCliente,
-                        cliente.NumeroDocumentoCliente,
-                        cliente.TelefonoCliente,
-                        cliente.CorreoCliente);
+                    dgvClientes.Rows.Clear();
+                    for (int i = 0; i < clientes.Count; i++)
+                    {
+                        Cliente cliente = clientes[i];
+                        dgvClientes.Rows.Add(
+                            cliente.IdCliente,
+                            cliente.NombreCliente,
+                            cliente.TipoDocumentoCliente,
+                            cliente.NumeroDocumentoCliente,
+                            cliente.TelefonoCliente,
+                            cliente.CorreoCliente);
+                    }
+
+                    TextosUi.QuitarSeleccionGrilla(dgvClientes);
+                    MostrarSinSeleccion();
+                }
+                finally
+                {
+                    dgvClientes.SelectionChanged += dgvClientes_SelectionChanged;
                 }
             }
             catch (Exception ex)
@@ -202,25 +211,73 @@ namespace SistemaCanchas.Presentacion
             }
         }
 
-        private void LimpiarFormulario()
+        private void ActualizarPanelEdicion()
         {
-            _idSeleccionado = 0;
-            txtNombreCliente.Clear();
-            txtNumeroDocumento.Clear();
-            txtTelefonoCliente.Clear();
-            txtCorreoCliente.Clear();
-            cboTipoDocumento.SelectedIndex = 0;
-            txtNombreCliente.Focus();
+            if (dgvClientes.CurrentRow == null || dgvClientes.CurrentRow.Index < 0 ||
+                dgvClientes.SelectedRows.Count == 0)
+            {
+                MostrarSinSeleccion();
+                return;
+            }
+
+            MostrarSeleccion(dgvClientes.CurrentRow);
         }
 
-        private void SeleccionarTipo(string valor)
+        private void MostrarSinSeleccion()
         {
-            for (int i = 0; i < cboTipoDocumento.Items.Count; i++)
+            _idSeleccionado = 0;
+            grpSeleccionado.Enabled = false;
+            lblSeleccionado.Text = "Seleccione un cliente de la lista para editarlo.";
+            txtNombreEdicion.Clear();
+            txtNumeroEdicion.Clear();
+            txtTelefonoEdicion.Clear();
+            txtCorreoEdicion.Clear();
+            if (cboTipoEdicion.Items.Count > 0)
             {
-                ItemTipo item = cboTipoDocumento.Items[i] as ItemTipo;
+                cboTipoEdicion.SelectedIndex = 0;
+            }
+        }
+
+        private void MostrarSeleccion(DataGridViewRow fila)
+        {
+            _idSeleccionado = Convert.ToInt32(fila.Cells["colId"].Value);
+            string nombre = Convert.ToString(fila.Cells["colNombre"].Value);
+            grpSeleccionado.Enabled = true;
+            lblSeleccionado.Text = "Editando: " + nombre + ".";
+            txtNombreEdicion.Text = nombre;
+            txtNumeroEdicion.Text = Convert.ToString(fila.Cells["colDocumento"].Value);
+            txtTelefonoEdicion.Text = Convert.ToString(fila.Cells["colTelefono"].Value);
+            txtCorreoEdicion.Text = Convert.ToString(fila.Cells["colCorreo"].Value);
+            SeleccionarTipo(cboTipoEdicion, Convert.ToString(fila.Cells["colTipo"].Value));
+        }
+
+        private void LimpiarAlta()
+        {
+            txtNombreNuevo.Clear();
+            txtNumeroNuevo.Clear();
+            txtTelefonoNuevo.Clear();
+            txtCorreoNuevo.Clear();
+            cboTipoNuevo.SelectedIndex = 0;
+            txtNombreNuevo.Focus();
+        }
+
+        private static void CargarTipos(ComboBox combo)
+        {
+            combo.Items.Clear();
+            combo.Items.Add(new ItemTipo("Cédula", ValoresDominio.TipoDocumento.Cedula));
+            combo.Items.Add(new ItemTipo("Pasaporte", ValoresDominio.TipoDocumento.Pasaporte));
+            combo.Items.Add(new ItemTipo("RUC", ValoresDominio.TipoDocumento.Ruc));
+            combo.SelectedIndex = 0;
+        }
+
+        private static void SeleccionarTipo(ComboBox combo, string valor)
+        {
+            for (int i = 0; i < combo.Items.Count; i++)
+            {
+                ItemTipo item = combo.Items[i] as ItemTipo;
                 if (item != null && string.Equals(item.Valor, valor, StringComparison.OrdinalIgnoreCase))
                 {
-                    cboTipoDocumento.SelectedIndex = i;
+                    combo.SelectedIndex = i;
                     return;
                 }
             }

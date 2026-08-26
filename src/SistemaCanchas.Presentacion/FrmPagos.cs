@@ -39,6 +39,7 @@ namespace SistemaCanchas.Presentacion
             _clienteService = clienteService;
             _canchaService = canchaService;
             InitializeComponent();
+            TextosUi.ConfigurarGrilla(dgvPagos);
         }
 
         private void FrmPagos_Load(object sender, EventArgs e)
@@ -54,38 +55,17 @@ namespace SistemaCanchas.Presentacion
 
         private void dgvPagos_SelectionChanged(object sender, EventArgs e)
         {
-            if (dgvPagos.CurrentRow == null || dgvPagos.CurrentRow.Index < 0)
+            ActualizarPanelPago();
+        }
+
+        private void dgvPagos_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0)
             {
                 return;
             }
 
-            _idReservaSeleccionada = Convert.ToInt32(dgvPagos.CurrentRow.Cells["colIdReserva"].Value);
-            string estadoPago = Convert.ToString(dgvPagos.CurrentRow.Cells["colEstado"].Value);
-            string estadoReserva = Convert.ToString(dgvPagos.CurrentRow.Cells["colEstadoReserva"].Value);
-            object monto = dgvPagos.CurrentRow.Cells["colMonto"].Value;
-            _tienePago = monto != null && monto != DBNull.Value && !string.IsNullOrWhiteSpace(Convert.ToString(monto));
-            _reservaActiva = string.Equals(estadoReserva, ValoresDominio.EstadoReserva.Activa, StringComparison.Ordinal);
-            lblReservaSeleccionada.Text = "Reserva " + _idReservaSeleccionada + " — " +
-                                          Convert.ToString(dgvPagos.CurrentRow.Cells["colCliente"].Value);
-            btnRegistrar.Enabled = !_tienePago && _reservaActiva;
-
-            if (_tienePago)
-            {
-                txtMontoPago.Text = Convert.ToString(monto);
-                object fecha = dgvPagos.CurrentRow.Cells["colFechaPago"].Value;
-                if (fecha is DateTime)
-                {
-                    dtpFechaPago.Value = ((DateTime)fecha).Date;
-                }
-
-                SeleccionarEstado(estadoPago);
-            }
-            else
-            {
-                txtMontoPago.Clear();
-                dtpFechaPago.Value = DateTime.Today;
-                cboEstadoPago.SelectedIndex = 0;
-            }
+            MostrarSeleccion(dgvPagos.Rows[e.RowIndex]);
         }
 
         private void btnBuscar_Click(object sender, EventArgs e)
@@ -210,32 +190,119 @@ namespace SistemaCanchas.Presentacion
 
                 errValidacion.Clear();
                 IList<Pago> pagos = _pagoService.ConsultarEstadoPago(fecha, idCliente, idCancha, estadoValor);
-                dgvPagos.Rows.Clear();
-                _idReservaSeleccionada = 0;
-                _tienePago = false;
-                _reservaActiva = false;
-                btnRegistrar.Enabled = false;
-                lblReservaSeleccionada.Text = "Seleccione una reserva activa.";
-
-                for (int i = 0; i < pagos.Count; i++)
+                dgvPagos.SelectionChanged -= dgvPagos_SelectionChanged;
+                try
                 {
-                    Pago pago = pagos[i];
-                    dgvPagos.Rows.Add(
-                        pago.IdReserva,
-                        pago.NombreCliente,
-                        pago.NombreCancha,
-                        pago.FechaHorario.Date,
-                        FormatearHora(pago.HoraInicioHorario),
-                        pago.EstadoReserva,
-                        pago.EstadoPago,
-                        pago.MontoPago.HasValue ? (object)pago.MontoPago.Value : null,
-                        pago.FechaPago.HasValue ? (object)pago.FechaPago.Value.Date : null);
+                    dgvPagos.Rows.Clear();
+                    MostrarSinSeleccion();
+
+                    for (int i = 0; i < pagos.Count; i++)
+                    {
+                        Pago pago = pagos[i];
+                        dgvPagos.Rows.Add(
+                            pago.IdReserva,
+                            pago.NombreCliente,
+                            pago.NombreCancha,
+                            pago.FechaHorario.Date,
+                            FormatearHora(pago.HoraInicioHorario),
+                            pago.EstadoReserva,
+                            pago.EstadoPago,
+                            pago.MontoPago.HasValue ? (object)pago.MontoPago.Value : null,
+                            pago.FechaPago.HasValue ? (object)pago.FechaPago.Value.Date : null);
+                    }
+
+                    TextosUi.QuitarSeleccionGrilla(dgvPagos);
+                    MostrarSinSeleccion();
+                }
+                finally
+                {
+                    dgvPagos.SelectionChanged += dgvPagos_SelectionChanged;
                 }
             }
             catch (Exception ex)
             {
                 MostrarError(ex);
             }
+        }
+
+        private void ActualizarPanelPago()
+        {
+            if (dgvPagos.CurrentRow == null || dgvPagos.CurrentRow.Index < 0 ||
+                dgvPagos.SelectedRows.Count == 0)
+            {
+                MostrarSinSeleccion();
+                return;
+            }
+
+            MostrarSeleccion(dgvPagos.CurrentRow);
+        }
+
+        private void MostrarSinSeleccion()
+        {
+            _idReservaSeleccionada = 0;
+            _tienePago = false;
+            _reservaActiva = false;
+            grpDatos.Enabled = false;
+            btnRegistrar.Enabled = false;
+            lblReservaSeleccionada.Text = "Seleccione una reserva activa de la lista para registrar su pago.";
+            txtMontoPago.Clear();
+            txtMontoPago.Enabled = true;
+            dtpFechaPago.Enabled = true;
+            cboEstadoPago.Enabled = true;
+        }
+
+        private void MostrarSeleccion(DataGridViewRow fila)
+        {
+            _idReservaSeleccionada = Convert.ToInt32(fila.Cells["colIdReserva"].Value);
+            string estadoPago = Convert.ToString(fila.Cells["colEstado"].Value);
+            string estadoReserva = Convert.ToString(fila.Cells["colEstadoReserva"].Value);
+            string cliente = Convert.ToString(fila.Cells["colCliente"].Value);
+            object monto = fila.Cells["colMonto"].Value;
+            _tienePago = monto != null && monto != DBNull.Value && !string.IsNullOrWhiteSpace(Convert.ToString(monto));
+            _reservaActiva = string.Equals(estadoReserva, ValoresDominio.EstadoReserva.Activa, StringComparison.Ordinal);
+
+            grpDatos.Enabled = true;
+            if (_tienePago)
+            {
+                lblReservaSeleccionada.Text = "La reserva " + _idReservaSeleccionada + " de " + cliente + " ya tiene un pago registrado.";
+                txtMontoPago.Text = Convert.ToString(monto);
+                object fecha = fila.Cells["colFechaPago"].Value;
+                if (fecha is DateTime)
+                {
+                    dtpFechaPago.Value = ((DateTime)fecha).Date;
+                }
+
+                SeleccionarEstado(estadoPago);
+                txtMontoPago.Enabled = false;
+                dtpFechaPago.Enabled = false;
+                cboEstadoPago.Enabled = false;
+                btnRegistrar.Enabled = false;
+                return;
+            }
+
+            if (!_reservaActiva)
+            {
+                lblReservaSeleccionada.Text = "La reserva " + _idReservaSeleccionada + " de " + cliente + " no está activa. No se puede registrar pago.";
+                txtMontoPago.Clear();
+                txtMontoPago.Enabled = false;
+                dtpFechaPago.Enabled = false;
+                cboEstadoPago.Enabled = false;
+                btnRegistrar.Enabled = false;
+                return;
+            }
+
+            lblReservaSeleccionada.Text = "Registrando pago de la reserva " + _idReservaSeleccionada + " — " + cliente + ".";
+            txtMontoPago.Clear();
+            dtpFechaPago.Value = DateTime.Today;
+            if (cboEstadoPago.Items.Count > 0)
+            {
+                cboEstadoPago.SelectedIndex = 0;
+            }
+
+            txtMontoPago.Enabled = true;
+            dtpFechaPago.Enabled = true;
+            cboEstadoPago.Enabled = true;
+            btnRegistrar.Enabled = true;
         }
 
         private void SeleccionarEstado(string valor)

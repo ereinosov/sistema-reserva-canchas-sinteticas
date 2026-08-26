@@ -7,6 +7,18 @@ using SistemaCanchas.Entidades;
 
 namespace SistemaCanchas.Tests
 {
+    // Dobles en memoria. Simulan la base para que los tests no dependan de SQL Server.
+    internal static class ErrorPrueba
+    {
+        internal static void Lanzar(Exception error)
+        {
+            if (error != null)
+            {
+                throw error;
+            }
+        }
+    }
+
     internal sealed class UsuarioRepositoryFake : IUsuarioRepository
     {
         public Usuario UsuarioADevolver { get; set; }
@@ -48,20 +60,14 @@ namespace SistemaCanchas.Tests
         public Usuario ObtenerCredenciales(string usuarioLogin)
         {
             UltimoLoginConsultado = usuarioLogin;
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             return UsuarioADevolver;
         }
 
         public IList<Usuario> ObtenerTodos()
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             return UsuariosExistentes;
         }
@@ -109,10 +115,7 @@ namespace SistemaCanchas.Tests
 
         private int Registrar(Usuario usuario, string claveBdPlana, string nombreRol, bool instalacion)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             UltimoInsertado = usuario;
             UltimaClaveBdPlana = claveBdPlana;
@@ -275,10 +278,7 @@ namespace SistemaCanchas.Tests
 
         public int Insertar(Cancha cancha)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             UltimaInsertada = cancha;
             int id = SiguienteId;
@@ -288,10 +288,7 @@ namespace SistemaCanchas.Tests
 
         public IList<Cancha> ObtenerTodos(string estadoCancha)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             if (string.IsNullOrEmpty(estadoCancha))
             {
@@ -312,10 +309,7 @@ namespace SistemaCanchas.Tests
 
         public bool Actualizar(Cancha cancha)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             UltimaActualizada = cancha;
             return true;
@@ -323,10 +317,7 @@ namespace SistemaCanchas.Tests
 
         public bool Desactivar(int idCancha)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             IdDesactivado = idCancha;
             return true;
@@ -334,10 +325,7 @@ namespace SistemaCanchas.Tests
 
         public bool Activar(int idCancha)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             IdActivado = idCancha;
             return true;
@@ -370,10 +358,7 @@ namespace SistemaCanchas.Tests
 
         public int Insertar(Cliente cliente)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             UltimoInsertado = cliente;
             int id = SiguienteId;
@@ -383,10 +368,7 @@ namespace SistemaCanchas.Tests
 
         public IList<Cliente> ObtenerTodos(string numeroDocumento, string nombre)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             UltimoDocumentoFiltro = numeroDocumento;
             UltimoNombreFiltro = nombre;
@@ -395,10 +377,7 @@ namespace SistemaCanchas.Tests
 
         public bool Actualizar(Cliente cliente)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             UltimoActualizado = cliente;
             return true;
@@ -406,10 +385,7 @@ namespace SistemaCanchas.Tests
 
         public bool Eliminar(int idCliente)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             IdEliminado = idCliente;
             return true;
@@ -450,10 +426,7 @@ namespace SistemaCanchas.Tests
 
         public int Insertar(Reserva reserva, IList<int> idsHorario)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             UltimaInsertada = reserva;
             UltimosIdsHorario = idsHorario;
@@ -469,10 +442,7 @@ namespace SistemaCanchas.Tests
 
         public IList<Reserva> ObtenerTodos(DateTime? fecha, int? idCliente, int? idCancha, string estadoReserva)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             UltimaFechaFiltro = fecha;
             UltimoClienteFiltro = idCliente;
@@ -483,10 +453,7 @@ namespace SistemaCanchas.Tests
 
         public bool ActualizarHorario(int idReserva, int nuevoIdHorario)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             IdReservaActualizada = idReserva;
             IdHorarioActualizado = nuevoIdHorario;
@@ -495,10 +462,7 @@ namespace SistemaCanchas.Tests
 
         public bool Cancelar(int idReserva)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             IdCancelada = idReserva;
             return true;
@@ -522,10 +486,7 @@ namespace SistemaCanchas.Tests
 
         public IList<Horario> ConsultarDisponibilidad(int idCancha, DateTime fecha)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             UltimoIdCancha = idCancha;
             UltimaFecha = fecha;
@@ -559,10 +520,7 @@ namespace SistemaCanchas.Tests
 
         public int Insertar(Pago pago)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             UltimoInsertado = pago;
             int id = SiguienteId;
@@ -572,10 +530,7 @@ namespace SistemaCanchas.Tests
 
         public IList<Pago> ObtenerTodos(DateTime? fecha, int? idCliente, int? idCancha, string estadoReserva)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             UltimaFechaFiltro = fecha;
             UltimoClienteFiltro = idCliente;
@@ -602,10 +557,7 @@ namespace SistemaCanchas.Tests
 
         public ConsultaIngresos Consultar(DateTime fechaInicio, DateTime fechaFin)
         {
-            if (ExcepcionALanzar != null)
-            {
-                throw ExcepcionALanzar;
-            }
+            ErrorPrueba.Lanzar(ExcepcionALanzar);
 
             UltimaFechaInicio = fechaInicio;
             UltimaFechaFin = fechaFin;

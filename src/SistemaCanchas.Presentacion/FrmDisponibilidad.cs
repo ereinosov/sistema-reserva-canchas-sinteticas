@@ -28,6 +28,7 @@ namespace SistemaCanchas.Presentacion
             _reservaService = reservaService;
             _canchaService = canchaService;
             InitializeComponent();
+            TextosUi.ConfigurarGrilla(dgvDisponibilidad);
         }
 
         private void FrmDisponibilidad_Load(object sender, EventArgs e)
@@ -94,6 +95,8 @@ namespace SistemaCanchas.Presentacion
                         FormatearHora(franja.HoraFinHorario),
                         franja.EstadoFranja);
                 }
+
+                TextosUi.QuitarSeleccionGrilla(dgvDisponibilidad);
             }
             catch (Exception ex)
             {

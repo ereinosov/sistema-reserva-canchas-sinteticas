@@ -84,6 +84,10 @@ namespace SistemaCanchas.Datos
             {
                 throw new ErrorAccesoDatosException("No se pudo consultar las canchas.", ex);
             }
+            catch (IndexOutOfRangeException ex)
+            {
+                throw new ErrorAccesoDatosException("No se pudo consultar las canchas.", ex);
+            }
 
             return resultado;
         }

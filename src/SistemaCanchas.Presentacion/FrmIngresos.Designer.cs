@@ -80,6 +80,8 @@ namespace SistemaCanchas.Presentacion
 
             dgvIngresos.AllowUserToAddRows = false;
             dgvIngresos.AllowUserToDeleteRows = false;
+            dgvIngresos.AllowUserToResizeColumns = false;
+            dgvIngresos.AllowUserToResizeRows = false;
             dgvIngresos.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dgvIngresos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvIngresos.BackgroundColor = Color.White;
@@ -93,6 +95,7 @@ namespace SistemaCanchas.Presentacion
             dgvIngresos.Name = "dgvIngresos";
             dgvIngresos.ReadOnly = true;
             dgvIngresos.RowHeadersVisible = false;
+            dgvIngresos.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             dgvIngresos.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvIngresos.Size = new Size(816, 300);
 

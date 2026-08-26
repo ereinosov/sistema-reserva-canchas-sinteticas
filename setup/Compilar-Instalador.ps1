@@ -27,14 +27,7 @@ Get-ChildItem -LiteralPath $payload -File |
 
 New-Item -ItemType Directory -Path $sqlDestino -Force | Out-Null
 $docs = Join-Path $raiz 'docs'
-@(
-    'A11_Script_DDL.sql',
-    'A11_Complemento_Trustworthy.sql',
-    'A11_Complemento_sp_ConsultarUsuarios.sql',
-    'A11_Complemento_GrantGenerarHorarios.sql'
-) | ForEach-Object {
-    Copy-Item -LiteralPath (Join-Path $docs $_) -Destination $sqlDestino -Force
-}
+Copy-Item -LiteralPath (Join-Path $docs 'A11_Script_DDL.sql') -Destination $sqlDestino -Force
 
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'LEAME_INSTALACION.txt') -Destination $payload -Force
 Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'ProtegerCadenaConexion.ps1') -Destination $payload -Force

@@ -8,7 +8,8 @@ namespace SistemaCanchas.Presentacion
         private System.ComponentModel.IContainer components;
         private DataGridView dgvReservas;
         private GroupBox grpFiltros;
-        private GroupBox grpDatos;
+        private GroupBox grpNuevo;
+        private GroupBox grpSeleccionado;
         private Label lblFiltroFecha;
         private Label lblFiltroCliente;
         private Label lblFiltroCancha;
@@ -28,6 +29,13 @@ namespace SistemaCanchas.Presentacion
         private DateTimePicker dtpFecha;
         private CheckedListBox clbHorarios;
         private Button btnRegistrar;
+        private Label lblSeleccionado;
+        private Label lblCanchaEdicion;
+        private Label lblFechaEdicion;
+        private Label lblHorarioEdicion;
+        private ComboBox cboCanchaEdicion;
+        private DateTimePicker dtpFechaEdicion;
+        private CheckedListBox clbHorariosEdicion;
         private Button btnModificar;
         private Button btnCancelar;
         private ErrorProvider errValidacion;
@@ -73,7 +81,7 @@ namespace SistemaCanchas.Presentacion
             cboFiltroEstado = new ComboBox();
             btnBuscar = new Button();
             btnCargar = new Button();
-            grpDatos = new GroupBox();
+            grpNuevo = new GroupBox();
             lblCliente = new Label();
             cboCliente = new ComboBox();
             lblCancha = new Label();
@@ -83,12 +91,21 @@ namespace SistemaCanchas.Presentacion
             lblHorario = new Label();
             clbHorarios = new CheckedListBox();
             btnRegistrar = new Button();
+            grpSeleccionado = new GroupBox();
+            lblSeleccionado = new Label();
+            lblCanchaEdicion = new Label();
+            cboCanchaEdicion = new ComboBox();
+            lblFechaEdicion = new Label();
+            dtpFechaEdicion = new DateTimePicker();
+            lblHorarioEdicion = new Label();
+            clbHorariosEdicion = new CheckedListBox();
             btnModificar = new Button();
             btnCancelar = new Button();
             errValidacion = new ErrorProvider(components);
             ((System.ComponentModel.ISupportInitialize)dgvReservas).BeginInit();
             grpFiltros.SuspendLayout();
-            grpDatos.SuspendLayout();
+            grpNuevo.SuspendLayout();
+            grpSeleccionado.SuspendLayout();
             SuspendLayout();
 
             colId.HeaderText = "Id";
@@ -112,6 +129,8 @@ namespace SistemaCanchas.Presentacion
 
             dgvReservas.AllowUserToAddRows = false;
             dgvReservas.AllowUserToDeleteRows = false;
+            dgvReservas.AllowUserToResizeColumns = false;
+            dgvReservas.AllowUserToResizeRows = false;
             dgvReservas.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dgvReservas.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvReservas.BackgroundColor = Color.White;
@@ -125,9 +144,11 @@ namespace SistemaCanchas.Presentacion
             dgvReservas.Name = "dgvReservas";
             dgvReservas.ReadOnly = true;
             dgvReservas.RowHeadersVisible = false;
+            dgvReservas.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             dgvReservas.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            dgvReservas.Size = new Size(952, 250);
+            dgvReservas.Size = new Size(952, 190);
             dgvReservas.SelectionChanged += dgvReservas_SelectionChanged;
+            dgvReservas.CellClick += dgvReservas_CellClick;
 
             grpFiltros.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             grpFiltros.Controls.Add(lblFiltroFecha);
@@ -192,81 +213,123 @@ namespace SistemaCanchas.Presentacion
             btnCargar.UseVisualStyleBackColor = true;
             btnCargar.Click += btnCargar_Click;
 
-            grpDatos.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            grpDatos.Controls.Add(lblCliente);
-            grpDatos.Controls.Add(cboCliente);
-            grpDatos.Controls.Add(lblCancha);
-            grpDatos.Controls.Add(cboCancha);
-            grpDatos.Controls.Add(lblFecha);
-            grpDatos.Controls.Add(dtpFecha);
-            grpDatos.Controls.Add(lblHorario);
-            grpDatos.Controls.Add(clbHorarios);
-            grpDatos.Controls.Add(btnRegistrar);
-            grpDatos.Controls.Add(btnModificar);
-            grpDatos.Controls.Add(btnCancelar);
-            grpDatos.Location = new Point(16, 348);
-            grpDatos.Size = new Size(952, 186);
-            grpDatos.Text = "Datos de la reserva";
+            grpNuevo.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            grpNuevo.Controls.Add(lblCliente);
+            grpNuevo.Controls.Add(cboCliente);
+            grpNuevo.Controls.Add(lblCancha);
+            grpNuevo.Controls.Add(cboCancha);
+            grpNuevo.Controls.Add(lblFecha);
+            grpNuevo.Controls.Add(dtpFecha);
+            grpNuevo.Controls.Add(lblHorario);
+            grpNuevo.Controls.Add(clbHorarios);
+            grpNuevo.Controls.Add(btnRegistrar);
+            grpNuevo.Location = new Point(16, 294);
+            grpNuevo.Size = new Size(468, 236);
+            grpNuevo.Text = "Nueva reserva";
 
             lblCliente.AutoSize = true;
-            lblCliente.Location = new Point(16, 28);
+            lblCliente.Location = new Point(16, 24);
             lblCliente.Text = "Cliente";
             cboCliente.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             cboCliente.AutoCompleteSource = AutoCompleteSource.ListItems;
             cboCliente.DropDownStyle = ComboBoxStyle.DropDown;
-            cboCliente.Location = new Point(19, 48);
-            cboCliente.Size = new Size(220, 23);
+            cboCliente.Location = new Point(19, 44);
+            cboCliente.Size = new Size(200, 23);
             cboCliente.TabIndex = 6;
             cboCliente.SelectedIndexChanged += cboCliente_TextoCambiado;
             cboCliente.TextUpdate += cboCliente_TextoCambiado;
             cboCliente.Leave += cboCliente_TextoCambiado;
 
             lblCancha.AutoSize = true;
-            lblCancha.Location = new Point(256, 28);
+            lblCancha.Location = new Point(230, 24);
             lblCancha.Text = "Cancha";
             cboCancha.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboCancha.Location = new Point(259, 48);
-            cboCancha.Size = new Size(180, 23);
+            cboCancha.Location = new Point(233, 44);
+            cboCancha.Size = new Size(140, 23);
             cboCancha.TabIndex = 7;
             cboCancha.SelectedIndexChanged += cboCancha_SelectedIndexChanged;
 
             lblFecha.AutoSize = true;
-            lblFecha.Location = new Point(456, 28);
+            lblFecha.Location = new Point(16, 76);
             lblFecha.Text = "Fecha";
             dtpFecha.Format = DateTimePickerFormat.Short;
-            dtpFecha.Location = new Point(459, 48);
+            dtpFecha.Location = new Point(19, 96);
             dtpFecha.Size = new Size(120, 23);
             dtpFecha.TabIndex = 8;
             dtpFecha.ValueChanged += dtpFecha_ValueChanged;
 
             lblHorario.AutoSize = true;
-            lblHorario.Location = new Point(596, 28);
+            lblHorario.Location = new Point(230, 76);
             lblHorario.Text = "Franjas libres";
             clbHorarios.CheckOnClick = true;
-            clbHorarios.Location = new Point(599, 48);
-            clbHorarios.Size = new Size(200, 94);
+            clbHorarios.Location = new Point(233, 96);
+            clbHorarios.Size = new Size(216, 84);
             clbHorarios.TabIndex = 9;
 
             btnRegistrar.Enabled = false;
-            btnRegistrar.Location = new Point(19, 148);
-            btnRegistrar.Size = new Size(100, 28);
+            btnRegistrar.Location = new Point(19, 196);
+            btnRegistrar.Size = new Size(160, 28);
             btnRegistrar.TabIndex = 10;
-            btnRegistrar.Text = "Registrar";
+            btnRegistrar.Text = "Registrar reserva";
             btnRegistrar.UseVisualStyleBackColor = true;
             btnRegistrar.Click += btnRegistrar_Click;
 
-            btnModificar.Enabled = false;
-            btnModificar.Location = new Point(125, 148);
+            grpSeleccionado.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            grpSeleccionado.Controls.Add(lblSeleccionado);
+            grpSeleccionado.Controls.Add(lblCanchaEdicion);
+            grpSeleccionado.Controls.Add(cboCanchaEdicion);
+            grpSeleccionado.Controls.Add(lblFechaEdicion);
+            grpSeleccionado.Controls.Add(dtpFechaEdicion);
+            grpSeleccionado.Controls.Add(lblHorarioEdicion);
+            grpSeleccionado.Controls.Add(clbHorariosEdicion);
+            grpSeleccionado.Controls.Add(btnModificar);
+            grpSeleccionado.Controls.Add(btnCancelar);
+            grpSeleccionado.Enabled = false;
+            grpSeleccionado.Location = new Point(492, 294);
+            grpSeleccionado.Size = new Size(476, 236);
+            grpSeleccionado.Text = "Editar reserva seleccionada";
+
+            lblSeleccionado.AutoSize = false;
+            lblSeleccionado.Location = new Point(16, 22);
+            lblSeleccionado.Size = new Size(444, 32);
+            lblSeleccionado.Text = "Seleccione una reserva activa de la lista para cambiar horario o cancelar.";
+
+            lblCanchaEdicion.AutoSize = true;
+            lblCanchaEdicion.Location = new Point(16, 58);
+            lblCanchaEdicion.Text = "Cancha";
+            cboCanchaEdicion.DropDownStyle = ComboBoxStyle.DropDownList;
+            cboCanchaEdicion.Location = new Point(19, 78);
+            cboCanchaEdicion.Size = new Size(180, 23);
+            cboCanchaEdicion.TabIndex = 11;
+            cboCanchaEdicion.SelectedIndexChanged += cboCanchaEdicion_SelectedIndexChanged;
+
+            lblFechaEdicion.AutoSize = true;
+            lblFechaEdicion.Location = new Point(210, 58);
+            lblFechaEdicion.Text = "Fecha";
+            dtpFechaEdicion.Format = DateTimePickerFormat.Short;
+            dtpFechaEdicion.Location = new Point(213, 78);
+            dtpFechaEdicion.Size = new Size(120, 23);
+            dtpFechaEdicion.TabIndex = 12;
+            dtpFechaEdicion.ValueChanged += dtpFechaEdicion_ValueChanged;
+
+            lblHorarioEdicion.AutoSize = true;
+            lblHorarioEdicion.Location = new Point(16, 110);
+            lblHorarioEdicion.Text = "Nueva franja libre (una sola)";
+            clbHorariosEdicion.CheckOnClick = true;
+            clbHorariosEdicion.Location = new Point(19, 130);
+            clbHorariosEdicion.Size = new Size(314, 58);
+            clbHorariosEdicion.TabIndex = 13;
+
+            btnModificar.Location = new Point(19, 196);
             btnModificar.Size = new Size(140, 28);
-            btnModificar.TabIndex = 11;
+            btnModificar.TabIndex = 14;
             btnModificar.Text = "Cambiar horario";
             btnModificar.UseVisualStyleBackColor = true;
             btnModificar.Click += btnModificar_Click;
 
-            btnCancelar.Enabled = false;
-            btnCancelar.Location = new Point(271, 148);
-            btnCancelar.Size = new Size(130, 28);
-            btnCancelar.TabIndex = 12;
+            btnCancelar.Location = new Point(165, 196);
+            btnCancelar.Size = new Size(140, 28);
+            btnCancelar.TabIndex = 15;
             btnCancelar.Text = "Cancelar reserva";
             btnCancelar.UseVisualStyleBackColor = true;
             btnCancelar.Click += btnCancelar_Click;
@@ -276,23 +339,25 @@ namespace SistemaCanchas.Presentacion
 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(984, 556);
-            Controls.Add(grpDatos);
+            ClientSize = new Size(984, 546);
+            Controls.Add(grpSeleccionado);
+            Controls.Add(grpNuevo);
             Controls.Add(dgvReservas);
             Controls.Add(grpFiltros);
             Font = new Font("Segoe UI", 9F);
-            MinimumSize = new Size(900, 500);
+            MinimumSize = new Size(920, 560);
             Name = "FrmReservas";
             StartPosition = FormStartPosition.CenterParent;
             Text = "Reservas";
             Load += FrmReservas_Load;
-            // Aplicar icono de la aplicación (usa el icono del ejecutable)
             this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
             ((System.ComponentModel.ISupportInitialize)dgvReservas).EndInit();
             grpFiltros.ResumeLayout(false);
             grpFiltros.PerformLayout();
-            grpDatos.ResumeLayout(false);
-            grpDatos.PerformLayout();
+            grpNuevo.ResumeLayout(false);
+            grpNuevo.PerformLayout();
+            grpSeleccionado.ResumeLayout(false);
+            grpSeleccionado.PerformLayout();
             ResumeLayout(false);
         }
     }

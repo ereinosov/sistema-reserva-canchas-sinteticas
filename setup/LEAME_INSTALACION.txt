@@ -12,10 +12,8 @@ ANTES DE USAR EL PROGRAMA
    (localdb)\MSSQLLocalDB  —  no use "localhost".
 3. Base ReservaCanchasDB:
    - Si la instancia está vacía: ejecute UNA VEZ, en SSMS, el archivo
-     sql\A11_Script_DDL.sql de esta carpeta de instalación.
-   - Si la base YA EXISTE: NO vuelva a ejecutar A11 (hace DROP TABLE).
-     Use solo los complementos de sql\ según el síntoma (TRUSTWORTHY,
-     ConsultarUsuarios, GRANT de horarios). Ver artefacto A17.
+     sql\A11_Script_DDL.sql. Es el único script SQL del proyecto.
+   - Si la base YA EXISTE: no vuelva a ejecutarlo (borra las tablas).
 
 CONFIGURACIÓN (exe.config)
 - Data Source debe coincidir con su instancia.

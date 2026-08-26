@@ -37,17 +37,20 @@ namespace SistemaCanchas.Presentacion
             _clienteService = clienteService;
             _canchaService = canchaService;
             InitializeComponent();
+            TextosUi.ConfigurarGrilla(dgvReservas);
         }
 
         private void FrmReservas_Load(object sender, EventArgs e)
         {
             dtpFecha.MinDate = DateTime.Today;
             dtpFecha.Value = DateTime.Today;
+            dtpFechaEdicion.MinDate = DateTime.Today;
+            dtpFechaEdicion.Value = DateTime.Today;
             try
             {
                 CargarCombos();
                 CargarReservas();
-                CargarFranjas();
+                CargarFranjas(clbHorarios, cboCancha, dtpFecha);
             }
             catch (Exception ex)
             {
@@ -57,33 +60,22 @@ namespace SistemaCanchas.Presentacion
 
         private void dgvReservas_SelectionChanged(object sender, EventArgs e)
         {
-            if (_suspenderEventos || dgvReservas.CurrentRow == null || dgvReservas.CurrentRow.Index < 0)
+            if (_suspenderEventos)
             {
                 return;
             }
 
-            _idSeleccionado = Convert.ToInt32(dgvReservas.CurrentRow.Cells["colId"].Value);
-            string estado = Convert.ToString(dgvReservas.CurrentRow.Cells["colEstado"].Value);
-            bool activa = string.Equals(estado, ValoresDominio.EstadoReserva.Activa, StringComparison.Ordinal);
-            btnModificar.Enabled = activa;
-            btnCancelar.Enabled = activa;
+            ActualizarPanelEdicion();
+        }
 
-            object valorFecha = dgvReservas.CurrentRow.Cells["colFecha"].Value;
-            if (valorFecha is DateTime)
+        private void dgvReservas_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0)
             {
-                DateTime fecha = ((DateTime)valorFecha).Date;
-                if (fecha < DateTime.Today)
-                {
-                    fecha = DateTime.Today;
-                }
-
-                _suspenderEventos = true;
-                dtpFecha.Value = fecha;
-                _suspenderEventos = false;
+                return;
             }
 
-            SeleccionarCanchaPorNombre(Convert.ToString(dgvReservas.CurrentRow.Cells["colCancha"].Value));
-            CargarFranjas();
+            MostrarSeleccion(dgvReservas.Rows[e.RowIndex]);
         }
 
         private void btnBuscar_Click(object sender, EventArgs e)
@@ -119,7 +111,7 @@ namespace SistemaCanchas.Presentacion
                 return;
             }
 
-            CargarFranjas();
+            CargarFranjas(clbHorarios, cboCancha, dtpFecha);
         }
 
         private void dtpFecha_ValueChanged(object sender, EventArgs e)
@@ -129,7 +121,27 @@ namespace SistemaCanchas.Presentacion
                 return;
             }
 
-            CargarFranjas();
+            CargarFranjas(clbHorarios, cboCancha, dtpFecha);
+        }
+
+        private void cboCanchaEdicion_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_suspenderEventos)
+            {
+                return;
+            }
+
+            CargarFranjas(clbHorariosEdicion, cboCanchaEdicion, dtpFechaEdicion);
+        }
+
+        private void dtpFechaEdicion_ValueChanged(object sender, EventArgs e)
+        {
+            if (_suspenderEventos)
+            {
+                return;
+            }
+
+            CargarFranjas(clbHorariosEdicion, cboCanchaEdicion, dtpFechaEdicion);
         }
 
         private void cboCliente_TextoCambiado(object sender, EventArgs e)
@@ -140,7 +152,7 @@ namespace SistemaCanchas.Presentacion
         private void btnRegistrar_Click(object sender, EventArgs e)
         {
             ItemId cliente = ResolverCliente();
-            IList<int> horarios = ObtenerHorariosMarcados();
+            IList<int> horarios = ObtenerHorariosMarcados(clbHorarios);
             if (cliente == null || cliente.Id <= 0)
             {
                 errValidacion.SetError(cboCliente, "Seleccione un cliente.");
@@ -162,9 +174,8 @@ namespace SistemaCanchas.Presentacion
                     TextosUi.TituloAplicacion,
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
-                _idSeleccionado = 0;
                 CargarReservas();
-                CargarFranjas();
+                CargarFranjas(clbHorarios, cboCancha, dtpFecha);
             }
             catch (Exception ex)
             {
@@ -184,10 +195,10 @@ namespace SistemaCanchas.Presentacion
                 return;
             }
 
-            IList<int> horarios = ObtenerHorariosMarcados();
+            IList<int> horarios = ObtenerHorariosMarcados(clbHorariosEdicion);
             if (horarios.Count != 1)
             {
-                errValidacion.SetError(clbHorarios, "Seleccione una sola franja libre para cambiar el horario.");
+                errValidacion.SetError(clbHorariosEdicion, "Seleccione una sola franja libre para cambiar el horario.");
                 return;
             }
 
@@ -201,7 +212,7 @@ namespace SistemaCanchas.Presentacion
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
                 CargarReservas();
-                CargarFranjas();
+                CargarFranjas(clbHorarios, cboCancha, dtpFecha);
             }
             catch (Exception ex)
             {
@@ -236,9 +247,8 @@ namespace SistemaCanchas.Presentacion
             try
             {
                 _reservaService.CancelarReserva(_idSeleccionado);
-                _idSeleccionado = 0;
                 CargarReservas();
-                CargarFranjas();
+                CargarFranjas(clbHorarios, cboCancha, dtpFecha);
             }
             catch (Exception ex)
             {
@@ -277,18 +287,25 @@ namespace SistemaCanchas.Presentacion
 
                 IList<Cancha> canchas = _canchaService.ObtenerActivas();
                 cboCancha.Items.Clear();
+                cboCanchaEdicion.Items.Clear();
                 cboFiltroCancha.Items.Clear();
                 cboFiltroCancha.Items.Add(new ItemId(0, "Todas"));
                 for (int i = 0; i < canchas.Count; i++)
                 {
                     ItemId item = new ItemId(canchas[i].IdCancha, canchas[i].NombreCancha);
                     cboCancha.Items.Add(item);
+                    cboCanchaEdicion.Items.Add(item);
                     cboFiltroCancha.Items.Add(item);
                 }
 
                 if (cboCancha.Items.Count > 0)
                 {
                     cboCancha.SelectedIndex = 0;
+                }
+
+                if (cboCanchaEdicion.Items.Count > 0)
+                {
+                    cboCanchaEdicion.SelectedIndex = 0;
                 }
 
                 cboFiltroCancha.SelectedIndex = 0;
@@ -330,6 +347,9 @@ namespace SistemaCanchas.Presentacion
                         reserva.EstadoReserva,
                         reserva.RegistradoPor);
                 }
+
+                TextosUi.QuitarSeleccionGrilla(dgvReservas);
+                MostrarSinSeleccion();
             }
             catch (Exception ex)
             {
@@ -341,10 +361,68 @@ namespace SistemaCanchas.Presentacion
             }
         }
 
-        private void CargarFranjas()
+        private void ActualizarPanelEdicion()
         {
-            clbHorarios.Items.Clear();
-            ItemId cancha = cboCancha.SelectedItem as ItemId;
+            if (dgvReservas.CurrentRow == null || dgvReservas.CurrentRow.Index < 0 ||
+                dgvReservas.SelectedRows.Count == 0)
+            {
+                MostrarSinSeleccion();
+                return;
+            }
+
+            MostrarSeleccion(dgvReservas.CurrentRow);
+        }
+
+        private void MostrarSinSeleccion()
+        {
+            _idSeleccionado = 0;
+            grpSeleccionado.Enabled = false;
+            lblSeleccionado.Text = "Seleccione una reserva activa de la lista para cambiar horario o cancelar.";
+            clbHorariosEdicion.Items.Clear();
+        }
+
+        private void MostrarSeleccion(DataGridViewRow fila)
+        {
+            _idSeleccionado = Convert.ToInt32(fila.Cells["colId"].Value);
+            string cliente = Convert.ToString(fila.Cells["colCliente"].Value);
+            string cancha = Convert.ToString(fila.Cells["colCancha"].Value);
+            string estado = Convert.ToString(fila.Cells["colEstado"].Value);
+            bool activa = string.Equals(estado, ValoresDominio.EstadoReserva.Activa, StringComparison.Ordinal);
+
+            grpSeleccionado.Enabled = true;
+            lblSeleccionado.Text = "Editando reserva de " + cliente + " en " + cancha + " — " + estado + ".";
+            btnModificar.Enabled = activa;
+            btnCancelar.Enabled = activa;
+
+            object valorFecha = fila.Cells["colFecha"].Value;
+            _suspenderEventos = true;
+            try
+            {
+                if (valorFecha is DateTime)
+                {
+                    DateTime fecha = ((DateTime)valorFecha).Date;
+                    if (fecha < DateTime.Today)
+                    {
+                        fecha = DateTime.Today;
+                    }
+
+                    dtpFechaEdicion.Value = fecha;
+                }
+
+                SeleccionarCancha(cboCanchaEdicion, cancha);
+            }
+            finally
+            {
+                _suspenderEventos = false;
+            }
+
+            CargarFranjas(clbHorariosEdicion, cboCanchaEdicion, dtpFechaEdicion);
+        }
+
+        private void CargarFranjas(CheckedListBox lista, ComboBox comboCancha, DateTimePicker selectorFecha)
+        {
+            lista.Items.Clear();
+            ItemId cancha = comboCancha.SelectedItem as ItemId;
             if (cancha == null || cancha.Id <= 0)
             {
                 return;
@@ -352,7 +430,7 @@ namespace SistemaCanchas.Presentacion
 
             try
             {
-                IList<Horario> franjas = _reservaService.ConsultarDisponibilidad(cancha.Id, dtpFecha.Value.Date);
+                IList<Horario> franjas = _reservaService.ConsultarDisponibilidad(cancha.Id, selectorFecha.Value.Date);
                 for (int i = 0; i < franjas.Count; i++)
                 {
                     if (!string.Equals(franjas[i].EstadoFranja, ValoresDominio.EstadoFranja.Libre, StringComparison.Ordinal))
@@ -361,7 +439,7 @@ namespace SistemaCanchas.Presentacion
                     }
 
                     string texto = FormatearHora(franjas[i].HoraInicioHorario) + " - " + FormatearHora(franjas[i].HoraFinHorario);
-                    clbHorarios.Items.Add(new ItemId(franjas[i].IdHorario, texto));
+                    lista.Items.Add(new ItemId(franjas[i].IdHorario, texto));
                 }
             }
             catch (Exception ex)
@@ -370,29 +448,21 @@ namespace SistemaCanchas.Presentacion
             }
         }
 
-        private void SeleccionarCanchaPorNombre(string nombre)
+        private static void SeleccionarCancha(ComboBox combo, string nombre)
         {
             if (string.IsNullOrWhiteSpace(nombre))
             {
                 return;
             }
 
-            _suspenderEventos = true;
-            try
+            for (int i = 0; i < combo.Items.Count; i++)
             {
-                for (int i = 0; i < cboCancha.Items.Count; i++)
+                ItemId item = combo.Items[i] as ItemId;
+                if (item != null && string.Equals(item.Texto, nombre, StringComparison.OrdinalIgnoreCase))
                 {
-                    ItemId item = cboCancha.Items[i] as ItemId;
-                    if (item != null && string.Equals(item.Texto, nombre, StringComparison.OrdinalIgnoreCase))
-                    {
-                        cboCancha.SelectedIndex = i;
-                        return;
-                    }
+                    combo.SelectedIndex = i;
+                    return;
                 }
-            }
-            finally
-            {
-                _suspenderEventos = false;
             }
         }
 
@@ -423,12 +493,12 @@ namespace SistemaCanchas.Presentacion
             return null;
         }
 
-        private IList<int> ObtenerHorariosMarcados()
+        private static IList<int> ObtenerHorariosMarcados(CheckedListBox lista)
         {
             List<int> ids = new List<int>();
-            for (int i = 0; i < clbHorarios.CheckedItems.Count; i++)
+            for (int i = 0; i < lista.CheckedItems.Count; i++)
             {
-                ItemId item = clbHorarios.CheckedItems[i] as ItemId;
+                ItemId item = lista.CheckedItems[i] as ItemId;
                 if (item != null && item.Id > 0)
                 {
                     ids.Add(item.Id);

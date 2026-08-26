@@ -10,24 +10,23 @@ namespace SistemaCanchas.Tests
     [TestClass]
     public class CifradorAesTests
     {
-        private static readonly byte[] ClavePrueba = CrearClaveFija();
+        private static readonly byte[] Clave = ClaveFija();
 
         [TestMethod]
-        public void Cifrar_Descifrar_DevuelveElTextoOriginal()
+        public void CifrarYDescifrar_DevuelveElMismoTexto()
         {
-            CifradorAes cifrador = new CifradorAes(ClavePrueba);
+            CifradorAes cifrador = new CifradorAes(Clave);
             const string plano = "ClaveSql#2026-Prueba";
 
             string cifrado = cifrador.Cifrar(plano);
-            string recuperado = cifrador.Descifrar(cifrado);
 
-            Assert.AreEqual(plano, recuperado);
+            Assert.AreEqual(plano, cifrador.Descifrar(cifrado));
         }
 
         [TestMethod]
-        public void Cifrar_DosVecesElMismoTexto_ProduceValoresDistintosPorIvAleatorio()
+        public void CifrarDosVeces_DaValoresDistintos()
         {
-            CifradorAes cifrador = new CifradorAes(ClavePrueba);
+            CifradorAes cifrador = new CifradorAes(Clave);
             const string plano = "misma-clave";
 
             string primero = cifrador.Cifrar(plano);
@@ -39,74 +38,46 @@ namespace SistemaCanchas.Tests
         }
 
         [TestMethod]
-        public void Descifrar_TextoNoBase64_LanzaErrorCifrado()
+        public void Descifrar_TextoInvalido_Falla()
         {
-            CifradorAes cifrador = new CifradorAes(ClavePrueba);
+            CifradorAes cifrador = new CifradorAes(Clave);
 
-            try
-            {
-                cifrador.Descifrar("esto no es base64 $$$");
-                Assert.Fail("Debió lanzar ErrorCifradoException.");
-            }
-            catch (ErrorCifradoException)
-            {
-            }
+            Assert.ThrowsException<ErrorCifradoException>(
+                () => cifrador.Descifrar("esto no es base64 $$$"));
         }
 
         [TestMethod]
-        public void Descifrar_ValorCorto_LanzaErrorCifrado()
+        public void Descifrar_ValorCorto_Falla()
         {
-            CifradorAes cifrador = new CifradorAes(ClavePrueba);
+            CifradorAes cifrador = new CifradorAes(Clave);
             string corto = Convert.ToBase64String(new byte[8]);
 
-            try
-            {
-                cifrador.Descifrar(corto);
-                Assert.Fail("Debió lanzar ErrorCifradoException.");
-            }
-            catch (ErrorCifradoException)
-            {
-            }
+            Assert.ThrowsException<ErrorCifradoException>(
+                () => cifrador.Descifrar(corto));
         }
 
         [TestMethod]
-        public void Descifrar_ClaveDistinta_LanzaErrorCifrado()
+        public void Descifrar_OtraClave_Falla()
         {
-            CifradorAes cifradorOrigen = new CifradorAes(ClavePrueba);
-            string cifrado = cifradorOrigen.Cifrar("secreto");
-
+            string cifrado = new CifradorAes(Clave).Cifrar("secreto");
             byte[] otraClave = new byte[32];
             for (int i = 0; i < otraClave.Length; i++)
             {
                 otraClave[i] = (byte)(i + 1);
             }
 
-            CifradorAes cifradorAjeno = new CifradorAes(otraClave);
-
-            try
-            {
-                cifradorAjeno.Descifrar(cifrado);
-                Assert.Fail("Debió lanzar ErrorCifradoException.");
-            }
-            catch (ErrorCifradoException)
-            {
-            }
+            Assert.ThrowsException<ErrorCifradoException>(
+                () => new CifradorAes(otraClave).Descifrar(cifrado));
         }
 
         [TestMethod]
-        public void Constructor_ClaveDeTamanoIncorrecto_LanzaArgumentException()
+        public void Constructor_ClaveCorta_Falla()
         {
-            try
-            {
-                CifradorAes cifrador = new CifradorAes(new byte[16]);
-                Assert.Fail("Debió lanzar ArgumentException.");
-            }
-            catch (ArgumentException)
-            {
-            }
+            Assert.ThrowsException<ArgumentException>(
+                () => new CifradorAes(new byte[16]));
         }
 
-        private static byte[] CrearClaveFija()
+        private static byte[] ClaveFija()
         {
             byte[] clave = new byte[32];
             for (int i = 0; i < clave.Length; i++)

@@ -12,253 +12,165 @@
 | Grupo | CHRS |
 | Integrantes | Calderón Saltos Joseph Alexander · Herrera Barco Humberto Aldair · Reinoso Vélez Eduardo David · Silva Triviño John Jairo |
 | Período | Mayo – Agosto 2026 |
-| Fecha | 24 de agosto de 2026 |
-| Sistema descrito | Aplicación de escritorio *Sistema de Reserva de Canchas Sintéticas* (versión de entrega A13 / paquete A18 1.0.0) |
-| Destinatarios | Empleado de mostrador y administrador del complejo |
-| Norma de referencia | ISO/IEC/IEEE 26514:2022 (documentación de usuario); Pressman & Maxim (2019), manuales de operación |
+| Fecha | 25 de agosto de 2026 |
+| Para quién | Empleado de mostrador y administrador del complejo |
 
-Este documento explica **cómo usar el programa ya instalado**. La instalación de la base de datos y del paquete está en A17 y A18; aquí no se piden conocimientos de SQL ni de Visual Studio.
+Este texto explica **cómo usar el programa ya instalado**. La base de datos y el instalador están en A17 y A18. Aquí no hace falta saber SQL.
 
 ---
 
-## 1. Para qué sirve el sistema
+## 1. Para qué sirve
 
-El programa centraliza el trabajo diario de una cancha sintética de fútbol:
+Sirve para el día a día de una cancha sintética: clientes, horarios libres, reservas, cobros y, si es administrador, canchas, cuentas e ingresos.
 
-- registrar y buscar clientes;
-- ver horarios libres u ocupados;
-- crear, cambiar o cancelar reservas;
-- registrar el pago de una reserva;
-- (solo administrador) administrar canchas y cuentas, y consultar ingresos.
-
-Horario de operación que usa el sistema: **16 franjas de 60 minutos**, de **06:00 a 22:00**.
+Cada cancha tiene su propio horario de apertura y cierre. El sistema arma franjas de **60 minutos** dentro de ese horario.
 
 ## 2. Quién puede hacer qué
 
-Hay dos perfiles. El menú se ajusta solo: lo que no corresponde a su perfil **no aparece**.
+El menú se recorta solo. Lo que no le toca **no aparece**.
 
 | Tarea | Empleado | Administrador |
 |---|---|---|
 | Iniciar sesión | Sí | Sí |
-| Clientes: registrar, buscar, modificar | Sí | Sí |
-| Clientes: eliminar | No (el botón no se muestra) | Sí, con condiciones |
-| Reservas y disponibilidad | Sí | Sí |
-| Pagos | Sí | Sí |
-| Canchas | No | Sí |
-| Usuarios | No | Sí |
-| Ingresos | No | Sí |
+| Clientes (alta, búsqueda, edición) | Sí | Sí |
+| Eliminar cliente | No | Sí, si no tiene reservas activas ni pagos pendientes |
+| Reservas, disponibilidad, pagos | Sí | Sí |
+| Canchas, usuarios, ingresos | No | Sí |
 
-En la barra inferior de la ventana principal verá `Usuario:` y `Rol:`.
+Abajo a la izquierda de la ventana principal se ve `Usuario:` y `Rol:`.
 
-## 3. Arranque e inicio de sesión
+## 3. Entrar
 
-1. Abra **Sistema de Reserva de Canchas Sintéticas** (acceso directo o menú Inicio).
-2. En **Inicio de sesión** complete:
-   - **Usuario** (máximo 30 caracteres)
-   - **Clave** (los caracteres no se muestran)
-3. Pulse **Ingresar** (Enter también sirve). **Salir** cierra el programa.
+1. Abra **Sistema de Reserva de Canchas Sintéticas**.
+2. Escriba **Usuario** y **Clave**.
+3. **Ingresar** (también Enter). **Salir** cierra el programa.
 
-El botón **Ingresar** permanece inactivo hasta que ambos campos tengan texto.
+El botón Ingresar se activa cuando hay texto en los dos campos.
 
-**Si algo falla**
-
-| Mensaje o situación | Qué hacer |
+| Si sale esto | Qué hacer |
 |---|---|
-| *Ingrese el usuario.* / *Ingrese la clave.* | Complete el campo marcado. |
-| *Usuario o clave incorrectos.* | Vuelva a escribir la clave. El programa no indica si el usuario existe. |
-| *El usuario se encuentra inactivo y no puede iniciar sesión.* | Pida al administrador que revise la cuenta. |
-| Aviso de conexión / servidor | Compruebe que el equipo tenga red hacia SQL Server / LocalDB y que la base esté creada (quien instaló el sistema). |
+| *Ingrese el usuario.* / *Ingrese la clave.* | Complete el campo. |
+| *Usuario o clave incorrectos.* | Vuelva a escribir la clave. El aviso no dice si el usuario existe. |
+| *El usuario se encuentra inactivo…* | Pida al administrador que active la cuenta. |
+| Error de servidor | Quien instaló el sistema debe revisar LocalDB / SQL Server. |
 
-Al cerrar la ventana principal (o **Archivo → Cerrar sesión**) vuelve a la pantalla de ingreso. **Archivo → Salir** cierra toda la aplicación.
+**Archivo → Cerrar sesión** vuelve al login. **Archivo → Salir** cierra todo.
 
-### 3.1 Primera vez en un equipo nuevo (solo si aún no hay cuentas)
+### Primera vez en un equipo (sin cuentas)
 
-En el login, el enlace **Primera configuración (administrador inicial)** abre **Configuración inicial**:
+En el login, **Primera configuración (administrador inicial)**. Nombre, usuario (empieza por letra), clave de 8 caracteres o más, confirmar. **Crear**. Después entre con esa clave. Si ya hay usuarios, este paso no se puede repetir.
 
-| Campo | Qué escribir |
-|---|---|
-| Nombre | Nombre visible de la persona |
-| Usuario de acceso | Entre 3 y 30 caracteres; empieza por letra; solo letras, dígitos o `_` |
-| Clave (mínimo 8 caracteres) | Clave con la que entrará al programa |
-| Confirmar clave | Debe coincidir |
-
-**Crear** da de alta el primer administrador. Luego el login muestra *Administrador creado. Ingrese la clave para iniciar sesión.* Si ya existen usuarios, el sistema rechaza repetir este paso.
-
-Hace falta una cuenta de Windows con permiso de administrador en SQL Server (la usó quien ejecutó el script de la base). El empleado de mostrador **no** usa esta pantalla en el día a día.
+Hace falta una cuenta de Windows con permiso en SQL Server. El empleado de mostrador no usa esta pantalla.
 
 ## 4. Ventana principal
-
-Tras un ingreso correcto aparece la ventana **Sistema de Reserva de Canchas Sintéticas**.
 
 | Menú | Opciones |
 |---|---|
 | **Archivo** | Cerrar sesión · Salir |
 | **Gestión** | Clientes · Reservas · Pagos |
-| **Consultas** | Disponibilidad · Ingresos (esta última solo administrador) |
-| **Administración** | Canchas · Usuarios (todo el menú solo administrador) |
+| **Consultas** | Disponibilidad · Ingresos (solo admin) |
+| **Administración** | Canchas · Usuarios (solo admin) |
 
-Cada opción abre una ventana propia. Ciérrela cuando termine; la principal sigue abierta.
+Cada opción abre su ventana. Ciérrela cuando termine.
+
+En las listas **no viene ninguna fila marcada**. Para editar hay que hacer clic. Tampoco se pueden estirar columnas ni filas a mano.
+
+Casi todas las ventanas de gestión tienen **dos recuadros abajo**:
+
+- A la **izquierda**: alta (datos nuevos). Elegir una fila **no** copia esos datos.
+- A la **derecha**: lo seleccionado. Empieza apagado hasta que haga clic en la lista.
 
 ---
 
 ## 5. Clientes *(Gestión → Clientes)*
 
-Ventana **Clientes**. Arriba, **Búsqueda**; abajo, **Datos del cliente**.
+Arriba: búsqueda por nombre y/o documento. **Buscar** / **Ver todos**.
 
-**Buscar:** filtre por **Nombre** y/o **Documento** y pulse **Buscar**. **Ver todos** limpia los filtros.
+**Nuevo cliente** (izquierda): nombre, tipo (cédula, pasaporte o RUC), número, teléfono, correo. **Registrar**.
 
-**Registrar** un cliente nuevo:
+**Editar cliente seleccionado** (derecha): se llena al hacer clic en una fila. **Modificar**. El administrador ve **Eliminar** (pide confirmación).
 
-1. Complete **Nombre**, **Tipo de documento**, **Número**, **Teléfono** y **Correo**.
-2. Tipos: **Cédula**, **Pasaporte** o **RUC**.
-3. Pulse **Registrar**. Debe ver *Cliente registrado.*
-
-**Modificar:** seleccione la fila, edite los datos y pulse **Modificar**. Mensaje: *Cliente actualizado.*
-
-**Eliminar** (solo administrador): el botón **Eliminar** no existe para el empleado. El administrador selecciona la fila, confirma *¿Eliminar el cliente seleccionado? Solo se permite si no tiene reservas activas ni pagos pendientes.*
-
-| Lista (columnas) | Nombre · Tipo · Documento · Teléfono · Correo |
-|---|---|
-
-**Reglas que verá en pantalla**
-
-- La cédula debe ser **exactamente 10 dígitos**.
-- Teléfono: 7 a 15 dígitos; puede empezar con `+`.
-- Correo con formato válido (debe incluir `@` y un dominio).
-- No puede haber dos clientes con el mismo tipo y número de documento.
-- No se elimina un cliente con reservas activas o con pagos pendientes.
+- Cédula: exactamente 10 dígitos y dígito verificador válido.
+- Teléfono: 7 a 15 dígitos; puede ir con `+`.
+- No se repite tipo+número, ni teléfono, ni correo.
 
 ## 6. Disponibilidad *(Consultas → Disponibilidad)*
 
-Ventana **Disponibilidad**. Elija **Cancha** y **Fecha**, pulse **Consultar**.
-
-Aparecen las 16 franjas del día, con **Inicio**, **Fin** y **Estado** (`libre` u `ocupada`).
-
-- Solo se listan canchas **activas**.
-- Si no hay canchas activas, el sistema pide *Seleccione una cancha activa.*
-
-Use esta consulta **antes** de reservar, o vaya directo a Reservas: allí el combo **Franja libre** ya oculta las ocupadas.
+Elija cancha y fecha, **Consultar**. Verá inicio, fin y estado (`libre` / `ocupada`). Solo canchas activas. El número de franjas depende del horario de esa cancha.
 
 ## 7. Reservas *(Gestión → Reservas)*
 
-Ventana **Reservas**.
+Filtros arriba: fecha, cliente, cancha, estado.
 
-**Búsqueda:** **Fecha**, **Cliente**, **Cancha**, **Estado** (Todos / Activa / Cancelada). **Buscar** aplica filtros; **Ver todas** los quita.
+**Nueva reserva** (izquierda): cliente, cancha, fecha (no días pasados) y **una o varias** franjas libres. **Registrar**.
 
-**Datos de la reserva:** **Cliente**, **Cancha**, **Fecha**, **Franja libre**.
+**Editar reserva seleccionada** (derecha): al hacer clic en una activa puede **Cambiar horario** (una franja) o **Cancelar**. La cancelada no se borra; la hora queda libre.
 
-El calendario de fecha **no permite días anteriores a hoy**.
-
-**Registrar**
-
-1. Cliente y cancha existentes (si falta el cliente, créelo primero).
-2. Fecha de hoy o futura.
-3. Una **Franja libre** (formato `06:00 - 07:00`, etc.).
-4. **Registrar** → *Reserva registrada.*
-
-La lista muestra quién **Registró** la reserva (el usuario de la sesión).
-
-**Cambiar horario:** seleccione una reserva **activa**, elija otra franja libre y pulse **Cambiar horario**. Mensaje: *Horario de la reserva actualizado.* Las canceladas no se reprograman.
-
-**Cancelar reserva:** seleccione una activa y confirme *¿Cancelar la reserva seleccionada? La franja quedará libre.* La reserva queda en estado **cancelada** (no se borra el historial).
-
-**Mensajes frecuentes**
-
-- *La franja horaria seleccionada ya se encuentra ocupada.* Otra persona la tomó; vuelva a consultar.
-- *No se pueden registrar ni reprogramar reservas con fecha anterior a la actual.*
-- *La cancha de la franja seleccionada no está activa.*
+Si otra persona tomó la misma hora: *La franja horaria seleccionada ya se encuentra ocupada.*
 
 ## 8. Pagos *(Gestión → Pagos)*
 
-Ventana **Pagos**. Lista reservas (con o sin pago). **Id reserva** + **Buscar**, o **Ver todas**.
+La lista muestra reservas con o sin pago. El recuadro de abajo **está apagado** hasta que elija una fila.
 
-Seleccione una reserva **sin monto** en la columna **Monto**. El recuadro **Registrar pago** muestra *Reserva N — nombre del cliente*.
+- Reserva activa sin pago: complete monto, fecha y estado (**Pagado** o **Pendiente**) y **Registrar pago**.
+- Si ya tiene pago, el recuadro lo dice y no deja cargar otro.
+- Si la reserva no está activa, tampoco deja pagar.
 
-| Campo | Uso |
-|---|---|
-| Monto | Número mayor que cero (hasta 9.999.999,99) |
-| Fecha | Fecha del pago (por defecto hoy) |
-| Estado | **Pagado** (predeterminado) o **Pendiente** |
+Solo hay **un pago por reserva**. Los ingresos del admin suman únicamente los **pagados**, según la **fecha de la franja**, no la del botón.
 
-**Registrar pago** → *Pago registrado.* El botón se deshabilita si esa reserva ya tiene pago: *La reserva seleccionada ya tiene un pago registrado.* Solo hay **un pago por reserva**.
+## 9. Canchas *(Administración → Canchas)* — solo admin
 
-Los ingresos del administrador **solo suman los pagos en estado Pagado**, según la **fecha de la franja** reservada (no la fecha en que se pulsó el botón, si difieren).
+**Nueva cancha**: nombre, hora de abre y de cierra. **Registrar**. El nombre no se duplica. El cierre debe ser después de la apertura.
 
-## 9. Canchas *(Administración → Canchas)* — solo administrador
+**Editar cancha seleccionada**: nombre, horario, **Guardar cambios**, **Desactivar** o **Activar**. Desactivar impide reservas nuevas; las que ya estaban no se tocan.
 
-Ventana **Canchas**. **Nombre** (máximo 60 caracteres).
+## 10. Usuarios *(Administración → Usuarios)* — solo admin
 
-- **Registrar** → *Cancha registrada.* El nombre no puede repetirse.
-- **Modificar** el nombre de la fila seleccionada → *Cancha actualizada.*
-- **Desactivar:** confirma *¿Desactivar la cancha seleccionada? No recibirá reservas nuevas. Las reservas ya registradas no se modifican.* Estado **inactiva**. No se usa para reservas nuevas; el historial se conserva.
-- **Actualizar lista** recarga la tabla (Id, Nombre, Estado).
+**Nuevo usuario**: nombre, usuario de acceso, clave (≥ 8), rol empleado o administrador. **Registrar**. Ese recuadro no se llena al elegir una fila.
 
-## 10. Usuarios *(Administración → Usuarios)* — solo administrador
+**Editar usuario seleccionado**: cambia el nombre, la clave (escribirla dos veces) o activa/desactiva. No puede desactivarse a sí mismo ni al único administrador activo.
 
-Ventana **Usuarios**. Recuadro **Nuevo usuario**.
+## 11. Ingresos *(Consultas → Ingresos)* — solo admin
 
-| Campo | Uso |
-|---|---|
-| Nombre | Nombre visible |
-| Usuario de acceso | 3–30 caracteres; empieza por letra; letras, dígitos o `_` |
-| Clave | Mínimo 8 caracteres |
-| Rol | **Empleado** (predeterminado) o **Administrador** |
+**Desde** y **Hasta** (por defecto: mes actual hasta hoy). **Consultar**. Total y detalle de pagos **pagado** cuya franja cae en el rango. Si *Desde* es posterior a *Hasta*, lo rechaza.
 
-**Registrar** → *Usuario registrado. Ya puede iniciar sesión con esa cuenta.*
+## 12. Un turno típico (empleado)
 
-**Desactivar:** seleccione la fila y confirme. Esa persona ya no entra; el historial permanece. No puede desactivarse a sí mismo ni al **único** administrador activo.
+1. Entrar.
+2. Si el cliente es nuevo → Clientes, recuadro izquierdo.
+3. Reservas → recuadro izquierdo: cliente, cancha, fecha, franjas, Registrar.
+4. Cuando pague → Pagos, clic en la reserva, monto, Registrar pago.
+5. Cerrar sesión al terminar.
 
-**Actualizar lista** recarga Id, Nombre, Usuario, Rol y Estado.
-
-## 11. Ingresos *(Consultas → Ingresos)* — solo administrador
-
-Ventana **Ingresos**. **Rango de fechas de franja:** **Desde** y **Hasta** (al abrir: primer día del mes actual hasta hoy). **Consultar**.
-
-El total (*Total ingresos: …*) y el detalle incluyen solo pagos **pagado** cuya **fecha de franja** cae en el rango. Columnas: Pago, Reserva, Cliente, Cancha, Fecha franja, Inicio, Monto, Fecha pago.
-
-Si *Desde* es posterior a *Hasta*, el sistema lo rechaza.
-
-## 12. Flujo de un día típico (empleado)
-
-1. Iniciar sesión.
-2. **Disponibilidad** (opcional) o ir a **Reservas**.
-3. Si el cliente es nuevo: **Clientes → Registrar**.
-4. **Reservas → Registrar** (cliente, cancha, fecha, franja libre).
-5. Cuando pague: **Pagos**, seleccionar la reserva, monto y **Registrar pago** (estado **Pagado** si el dinero ya ingresó).
-6. **Archivo → Cerrar sesión** al terminar el turno.
-
-El administrador, además, da de alta canchas y cuentas al inicio de temporada y revisa **Ingresos** al cierre del día o del mes.
+El administrador da de alta canchas y cuentas cuando hace falta y mira Ingresos al cierre.
 
 ## 13. Preguntas frecuentes
 
-**¿Por qué no veo Canchas, Usuarios o Ingresos?**  
-Su rol es empleado. Esas opciones solo existen para administrador.
+**No veo Canchas, Usuarios o Ingresos.**  
+Es empleado. Esas opciones son de administrador.
 
-**¿Puedo reservar ayer “porque el partido ya se jugó”?**  
+**¿Puedo anotar un partido de ayer?**  
 No. El calendario no deja fechas pasadas.
 
 **¿Dos reservas a la misma hora en la misma cancha?**  
-No. Si lo intenta, verá que la franja está ocupada.
+No.
 
-**¿Borro una reserva cancelada?**  
-No. Queda cancelada y la hora se libera para otra reserva.
+**Al hacer clic en la lista se me borró lo que iba a registrar.**  
+Ya no: el alta (izquierda) y la edición (derecha) están separados.
 
 **Olvidé la clave.**  
-El programa no recupera claves. El administrador crea otra cuenta o, en un caso extremo, quien mantiene el servidor debe intervenir. No hay “olvidé mi contraseña” en la pantalla de login.
+El programa no la recupera. El administrador crea otra cuenta o cambia la clave desde Usuarios.
 
-**Desinstalé el programa y nadie puede entrar.**  
-La clave de cifrado de la estación (`aes.key`) no se borra a propósito. Si alguien la eliminó a mano, las cuentas existentes no podrán autenticarse. Avise a quien instaló el sistema (A18).
+**Desinstalé el programa y nadie entra.**  
+La clave de cifrado de esa PC (`aes.key`) no se borra a propósito. Si alguien la eliminó a mano, hay que avisar a quien instaló el sistema.
 
-## 14. Cómo repetir / actualizar este manual
+## 14. Cambios del documento
 
-Si cambia un texto de botón, un menú o un mensaje de validación en A13, hay que actualizar **este** archivo en la misma entrega. El manual no cita códigos internos de requisitos: describe la pantalla tal como la ve el usuario.
-
-## 15. Control de cambios del artefacto
-
-| Versión | Fecha | Descripción |
+| Versión | Fecha | Qué cambió |
 |---|---|---|
-| 1.0 | 24 ago 2026 | Manual de operación alineado a menús, campos y mensajes de A13 |
+| 1.0 | 24 ago 2026 | Primera versión alineada a menús y mensajes |
+| 1.1 | 25 ago 2026 | Paneles de alta y edición; varias franjas; horario por cancha; pagos al seleccionar; grillas fijas |
 
 ---
 
-*Fin del artefacto A19. Con este documento queda cerrado el ciclo de artefactos A1–A19 del proyecto.*
+*Con A19 se cierra el ciclo de artefactos A1–A19.*

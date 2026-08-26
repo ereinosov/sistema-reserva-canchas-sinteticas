@@ -13,182 +13,126 @@ namespace SistemaCanchas.Tests
     [TestClass]
     public class CanchaServiceTests
     {
-        private static readonly TimeSpan HoraInicio = TimeSpan.FromHours(ValoresDominio.HoraInicioFranja);
-        private static readonly TimeSpan HoraFin = TimeSpan.FromHours(ValoresDominio.HoraFinOperacion);
+        private static readonly TimeSpan Abre = TimeSpan.FromHours(ValoresDominio.HoraInicioFranja);
+        private static readonly TimeSpan Cierra = TimeSpan.FromHours(ValoresDominio.HoraFinOperacion);
+
         [TestMethod]
-        public void RegistrarCancha_SinSesion_LanzaSesionNoIniciada()
+        public void Registrar_SinSesion_Falla()
         {
             CanchaService servicio = new CanchaService(new CanchaRepositoryFake(), new UsuarioServiceFake());
 
-            try
-            {
-                servicio.RegistrarCancha("Cancha 1", HoraInicio, HoraFin);
-                Assert.Fail("Debió lanzar SesionNoIniciadaException.");
-            }
-            catch (SesionNoIniciadaException)
-            {
-            }
+            Assert.ThrowsException<SesionNoIniciadaException>(
+                () => servicio.RegistrarCancha("Cancha 1", Abre, Cierra));
         }
 
         [TestMethod]
-        public void RegistrarCancha_Empleado_LanzaOperacionNoPermitida()
+        public void Registrar_Empleado_NoPuede()
         {
-            CanchaService servicio = CrearServicio(CrearSesionEmpleado(), new CanchaRepositoryFake());
+            CanchaService servicio = new CanchaService(
+                new CanchaRepositoryFake(),
+                new UsuarioServiceFake { Sesion = SesionPrueba.Empleado() });
 
-            try
-            {
-                servicio.RegistrarCancha("Cancha 1", HoraInicio, HoraFin);
-                Assert.Fail("Debió lanzar OperacionNoPermitidaException.");
-            }
-            catch (OperacionNoPermitidaException)
-            {
-            }
+            Assert.ThrowsException<OperacionNoPermitidaException>(
+                () => servicio.RegistrarCancha("Cancha 1", Abre, Cierra));
         }
 
         [TestMethod]
-        public void RegistrarCancha_NombreVacio_LanzaValidacion()
+        public void Registrar_NombreVacio_Falla()
         {
-            CanchaService servicio = CrearServicioAdmin(new CanchaRepositoryFake());
-
-            try
-            {
-                servicio.RegistrarCancha("   ", HoraInicio, HoraFin);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioAdmin().RegistrarCancha("   ", Abre, Cierra));
         }
 
         [TestMethod]
-        public void RegistrarCancha_NombreValido_PersisteRecortado()
+        public void Registrar_HorarioInvertido_Falla()
         {
-            CanchaRepositoryFake repositorio = new CanchaRepositoryFake();
-            CanchaService servicio = CrearServicioAdmin(repositorio);
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioAdmin().RegistrarCancha("Cancha 1", Cierra, Abre));
+        }
 
-            int id = servicio.RegistrarCancha("  Cancha Norte  ", HoraInicio, HoraFin);
+        [TestMethod]
+        public void Registrar_NombreValido_GuardaSinEspaciosDeMas()
+        {
+            CanchaRepositoryFake repo = new CanchaRepositoryFake();
+
+            int id = ServicioAdmin(repo).RegistrarCancha("  Cancha Norte  ", Abre, Cierra);
 
             Assert.AreEqual(1, id);
-            Assert.AreEqual("Cancha Norte", repositorio.UltimaInsertada.NombreCancha);
-            Assert.AreEqual(ValoresDominio.EstadoCancha.Activa, repositorio.UltimaInsertada.EstadoCancha);
-            Assert.AreEqual(HoraInicio, repositorio.UltimaInsertada.HoraInicioOperacion);
-            Assert.AreEqual(HoraFin, repositorio.UltimaInsertada.HoraFinOperacion);
+            Assert.AreEqual("Cancha Norte", repo.UltimaInsertada.NombreCancha);
+            Assert.AreEqual(ValoresDominio.EstadoCancha.Activa, repo.UltimaInsertada.EstadoCancha);
+            Assert.AreEqual(Abre, repo.UltimaInsertada.HoraInicioOperacion);
+            Assert.AreEqual(Cierra, repo.UltimaInsertada.HoraFinOperacion);
         }
 
         [TestMethod]
-        public void RegistrarCancha_NombreDuplicado_LanzaValidacion()
+        public void Registrar_NombreDuplicado_Falla()
         {
-            CanchaRepositoryFake repositorio = new CanchaRepositoryFake
+            CanchaRepositoryFake repo = new CanchaRepositoryFake
             {
                 ExcepcionALanzar = new ErrorAccesoDatosException("duplicada", CodigosSql.CanchaDuplicada)
             };
-            CanchaService servicio = CrearServicioAdmin(repositorio);
 
-            try
-            {
-                servicio.RegistrarCancha("Cancha 1", HoraInicio, HoraFin);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioAdmin(repo).RegistrarCancha("Cancha 1", Abre, Cierra));
         }
 
         [TestMethod]
-        public void DesactivarCancha_YaInactiva_LanzaValidacion()
+        public void Modificar_ActualizaNombreYHorario()
         {
-            CanchaRepositoryFake repositorio = new CanchaRepositoryFake();
-            repositorio.Canchas.Add(new Cancha
-            {
-                IdCancha = 3,
-                NombreCancha = "Sur",
-                EstadoCancha = ValoresDominio.EstadoCancha.Inactiva
-            });
-            CanchaService servicio = CrearServicioAdmin(repositorio);
+            CanchaRepositoryFake repo = new CanchaRepositoryFake();
 
-            try
-            {
-                servicio.DesactivarCancha(3);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            ServicioAdmin(repo).ModificarCancha(4, "  Cancha Central  ", Abre, Cierra);
+
+            Assert.AreEqual(4, repo.UltimaActualizada.IdCancha);
+            Assert.AreEqual("Cancha Central", repo.UltimaActualizada.NombreCancha);
+            Assert.AreEqual(Abre, repo.UltimaActualizada.HoraInicioOperacion);
         }
 
         [TestMethod]
-        public void DesactivarCancha_Activa_Desactiva()
+        public void Desactivar_YaInactiva_Falla()
         {
-            CanchaRepositoryFake repositorio = new CanchaRepositoryFake();
-            repositorio.Canchas.Add(new Cancha
-            {
-                IdCancha = 2,
-                NombreCancha = "Norte",
-                EstadoCancha = ValoresDominio.EstadoCancha.Activa
-            });
-            CanchaService servicio = CrearServicioAdmin(repositorio);
+            CanchaRepositoryFake repo = Cancha(3, "Sur", ValoresDominio.EstadoCancha.Inactiva);
 
-            servicio.DesactivarCancha(2);
-
-            Assert.AreEqual(2, repositorio.IdDesactivado);
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioAdmin(repo).DesactivarCancha(3));
         }
 
         [TestMethod]
-        public void ActivarCancha_YaActiva_LanzaValidacion()
+        public void Desactivar_Activa_Desactiva()
         {
-            CanchaRepositoryFake repositorio = new CanchaRepositoryFake();
-            repositorio.Canchas.Add(new Cancha
-            {
-                IdCancha = 2,
-                NombreCancha = "Norte",
-                EstadoCancha = ValoresDominio.EstadoCancha.Activa
-            });
-            CanchaService servicio = CrearServicioAdmin(repositorio);
+            CanchaRepositoryFake repo = Cancha(2, "Norte", ValoresDominio.EstadoCancha.Activa);
 
-            try
-            {
-                servicio.ActivarCancha(2);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            ServicioAdmin(repo).DesactivarCancha(2);
+
+            Assert.AreEqual(2, repo.IdDesactivado);
         }
 
         [TestMethod]
-        public void ActivarCancha_Inactiva_Activa()
+        public void Activar_YaActiva_Falla()
         {
-            CanchaRepositoryFake repositorio = new CanchaRepositoryFake();
-            repositorio.Canchas.Add(new Cancha
-            {
-                IdCancha = 3,
-                NombreCancha = "Sur",
-                EstadoCancha = ValoresDominio.EstadoCancha.Inactiva
-            });
-            CanchaService servicio = CrearServicioAdmin(repositorio);
+            CanchaRepositoryFake repo = Cancha(2, "Norte", ValoresDominio.EstadoCancha.Activa);
 
-            servicio.ActivarCancha(3);
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioAdmin(repo).ActivarCancha(2));
+        }
 
-            Assert.AreEqual(3, repositorio.IdActivado);
+        [TestMethod]
+        public void Activar_Inactiva_Activa()
+        {
+            CanchaRepositoryFake repo = Cancha(3, "Sur", ValoresDominio.EstadoCancha.Inactiva);
+
+            ServicioAdmin(repo).ActivarCancha(3);
+
+            Assert.AreEqual(3, repo.IdActivado);
         }
 
         [TestMethod]
         public void CanchaActiva_SegunEstado()
         {
-            CanchaRepositoryFake repositorio = new CanchaRepositoryFake();
-            repositorio.Canchas.Add(new Cancha
-            {
-                IdCancha = 1,
-                NombreCancha = "Norte",
-                EstadoCancha = ValoresDominio.EstadoCancha.Activa
-            });
-            repositorio.Canchas.Add(new Cancha
-            {
-                IdCancha = 2,
-                NombreCancha = "Sur",
-                EstadoCancha = ValoresDominio.EstadoCancha.Inactiva
-            });
-            CanchaService servicio = CrearServicioAdmin(repositorio);
+            CanchaRepositoryFake repo = new CanchaRepositoryFake();
+            repo.Canchas.Add(new Cancha { IdCancha = 1, NombreCancha = "Norte", EstadoCancha = ValoresDominio.EstadoCancha.Activa });
+            repo.Canchas.Add(new Cancha { IdCancha = 2, NombreCancha = "Sur", EstadoCancha = ValoresDominio.EstadoCancha.Inactiva });
+            CanchaService servicio = ServicioAdmin(repo);
 
             Assert.IsTrue(servicio.CanchaActiva(1));
             Assert.IsFalse(servicio.CanchaActiva(2));
@@ -196,88 +140,32 @@ namespace SistemaCanchas.Tests
         }
 
         [TestMethod]
-        public void ModificarCancha_ActualizaNombre()
+        public void ObtenerActivas_NoIncluyeInactivas()
         {
-            CanchaRepositoryFake repositorio = new CanchaRepositoryFake();
-            CanchaService servicio = CrearServicioAdmin(repositorio);
-
-            servicio.ModificarCancha(4, "  Cancha Central  ", HoraInicio, HoraFin);
-
-            Assert.AreEqual(4, repositorio.UltimaActualizada.IdCancha);
-            Assert.AreEqual("Cancha Central", repositorio.UltimaActualizada.NombreCancha);
-            Assert.AreEqual(HoraInicio, repositorio.UltimaActualizada.HoraInicioOperacion);
-            Assert.AreEqual(HoraFin, repositorio.UltimaActualizada.HoraFinOperacion);
-        }
-
-        [TestMethod]
-        public void RegistrarCancha_HorarioInvertido_LanzaValidacion()
-        {
-            CanchaService servicio = CrearServicioAdmin(new CanchaRepositoryFake());
-
-            try
-            {
-                servicio.RegistrarCancha("Cancha 1", HoraFin, HoraInicio);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
-        }
-
-        [TestMethod]
-        public void ObtenerActivas_FiltraInactivas()
-        {
-            CanchaRepositoryFake repositorio = new CanchaRepositoryFake();
-            repositorio.Canchas.Add(new Cancha
-            {
-                IdCancha = 1,
-                NombreCancha = "Norte",
-                EstadoCancha = ValoresDominio.EstadoCancha.Activa
-            });
-            repositorio.Canchas.Add(new Cancha
-            {
-                IdCancha = 2,
-                NombreCancha = "Sur",
-                EstadoCancha = ValoresDominio.EstadoCancha.Inactiva
-            });
-            CanchaService servicio = CrearServicioAdmin(repositorio);
+            CanchaRepositoryFake repo = new CanchaRepositoryFake();
+            repo.Canchas.Add(new Cancha { IdCancha = 1, NombreCancha = "Norte", EstadoCancha = ValoresDominio.EstadoCancha.Activa });
+            repo.Canchas.Add(new Cancha { IdCancha = 2, NombreCancha = "Sur", EstadoCancha = ValoresDominio.EstadoCancha.Inactiva });
+            CanchaService servicio = ServicioAdmin(repo);
 
             Assert.AreEqual(1, servicio.ObtenerActivas().Count);
             Assert.AreEqual(2, servicio.ObtenerTodas().Count);
         }
 
-        private static CanchaService CrearServicioAdmin(CanchaRepositoryFake repositorio)
+        private static CanchaRepositoryFake Cancha(int id, string nombre, string estado)
         {
-            return CrearServicio(CrearSesionAdmin(), repositorio);
+            CanchaRepositoryFake repo = new CanchaRepositoryFake();
+            repo.Canchas.Add(new Cancha { IdCancha = id, NombreCancha = nombre, EstadoCancha = estado });
+            return repo;
         }
 
-        private static CanchaService CrearServicio(Usuario sesion, CanchaRepositoryFake repositorio)
+        private static CanchaService ServicioAdmin()
         {
-            return new CanchaService(repositorio, new UsuarioServiceFake { Sesion = sesion });
+            return ServicioAdmin(new CanchaRepositoryFake());
         }
 
-        private static Usuario CrearSesionAdmin()
+        private static CanchaService ServicioAdmin(CanchaRepositoryFake repo)
         {
-            return new Usuario
-            {
-                IdUsuario = 1,
-                NombreUsuario = "John",
-                UsuarioLogin = "admin",
-                NombreRol = ValoresDominio.Rol.Administrador,
-                EstadoUsuario = ValoresDominio.EstadoUsuario.Activo
-            };
-        }
-
-        private static Usuario CrearSesionEmpleado()
-        {
-            return new Usuario
-            {
-                IdUsuario = 2,
-                NombreUsuario = "Ana",
-                UsuarioLogin = "ana",
-                NombreRol = ValoresDominio.Rol.Empleado,
-                EstadoUsuario = ValoresDominio.EstadoUsuario.Activo
-            };
+            return new CanchaService(repo, new UsuarioServiceFake { Sesion = SesionPrueba.Admin() });
         }
     }
 }

@@ -58,6 +58,8 @@ namespace SistemaCanchas.Presentacion
 
             dgvDisponibilidad.AllowUserToAddRows = false;
             dgvDisponibilidad.AllowUserToDeleteRows = false;
+            dgvDisponibilidad.AllowUserToResizeColumns = false;
+            dgvDisponibilidad.AllowUserToResizeRows = false;
             dgvDisponibilidad.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dgvDisponibilidad.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvDisponibilidad.BackgroundColor = Color.White;
@@ -68,6 +70,7 @@ namespace SistemaCanchas.Presentacion
             dgvDisponibilidad.Name = "dgvDisponibilidad";
             dgvDisponibilidad.ReadOnly = true;
             dgvDisponibilidad.RowHeadersVisible = false;
+            dgvDisponibilidad.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             dgvDisponibilidad.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvDisponibilidad.Size = new Size(552, 300);
 

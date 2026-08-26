@@ -120,13 +120,15 @@ namespace SistemaCanchas.Presentacion
             }
             catch (CredencialesInvalidasException ex)
             {
-                MostrarErrorLogin(ex.Message);
                 txtClaveApp.Clear();
+                MostrarErrorLogin(ex.Message);
+                errValidacion.SetError(txtClaveApp, ex.Message);
                 txtClaveApp.Focus();
             }
             catch (UsuarioInactivoException ex)
             {
                 MostrarErrorLogin(ex.Message);
+                errValidacion.SetError(txtUsuarioLogin, ex.Message);
             }
             catch (ErrorInfraestructuraException ex)
             {

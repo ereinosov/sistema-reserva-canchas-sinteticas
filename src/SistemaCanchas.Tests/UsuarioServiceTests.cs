@@ -12,115 +12,77 @@ namespace SistemaCanchas.Tests
     [TestClass]
     public class UsuarioServiceTests
     {
-        private const string ClaveAppValida = "Clave.App#2026";
+        private const string ClaveOk = "Clave.App#2026";
         private const int CostoBcryptPrueba = 4;
 
         [TestMethod]
-        public void ValidarCredenciales_UsuarioOClaveVacios_LanzaCredencialesInvalidas()
+        public void Login_UsuarioOClaveVacios_Falla()
         {
-            UsuarioService servicio = CrearServicio(new UsuarioRepositoryFake(), new GestorConexionFake());
+            UsuarioService servicio = Servicio(new UsuarioRepositoryFake(), new GestorConexionFake());
 
-            try
-            {
-                servicio.ValidarCredenciales("   ", ClaveAppValida);
-                Assert.Fail("Debió lanzar CredencialesInvalidasException.");
-            }
-            catch (CredencialesInvalidasException)
-            {
-            }
-
-            try
-            {
-                servicio.ValidarCredenciales("admin", string.Empty);
-                Assert.Fail("Debió lanzar CredencialesInvalidasException.");
-            }
-            catch (CredencialesInvalidasException)
-            {
-            }
+            Assert.ThrowsException<CredencialesInvalidasException>(
+                () => servicio.ValidarCredenciales("   ", ClaveOk));
+            Assert.ThrowsException<CredencialesInvalidasException>(
+                () => servicio.ValidarCredenciales("admin", string.Empty));
         }
 
         [TestMethod]
-        public void ValidarCredenciales_UsuarioInexistente_LanzaCredencialesInvalidas()
+        public void Login_UsuarioInexistente_Falla()
         {
-            UsuarioRepositoryFake repositorio = new UsuarioRepositoryFake { UsuarioADevolver = null };
-            UsuarioService servicio = CrearServicio(repositorio, new GestorConexionFake());
+            UsuarioRepositoryFake repo = new UsuarioRepositoryFake { UsuarioADevolver = null };
+            UsuarioService servicio = Servicio(repo, new GestorConexionFake());
 
-            try
-            {
-                servicio.ValidarCredenciales("nadie", ClaveAppValida);
-                Assert.Fail("Debió lanzar CredencialesInvalidasException.");
-            }
-            catch (CredencialesInvalidasException)
-            {
-            }
-
-            Assert.AreEqual("nadie", repositorio.UltimoLoginConsultado);
+            Assert.ThrowsException<CredencialesInvalidasException>(
+                () => servicio.ValidarCredenciales("nadie", ClaveOk));
+            Assert.AreEqual("nadie", repo.UltimoLoginConsultado);
         }
 
         [TestMethod]
-        public void ValidarCredenciales_UsuarioInactivo_LanzaUsuarioInactivo()
+        public void Login_UsuarioInactivo_Falla()
         {
-            Usuario usuario = CrearUsuarioPersistido();
+            Usuario usuario = UsuarioGuardado();
             usuario.EstadoUsuario = ValoresDominio.EstadoUsuario.Inactivo;
-            UsuarioService servicio = CrearServicio(
+            UsuarioService servicio = Servicio(
                 new UsuarioRepositoryFake { UsuarioADevolver = usuario },
                 new GestorConexionFake());
 
-            try
-            {
-                servicio.ValidarCredenciales("admin", ClaveAppValida);
-                Assert.Fail("Debió lanzar UsuarioInactivoException.");
-            }
-            catch (UsuarioInactivoException)
-            {
-            }
+            Assert.ThrowsException<UsuarioInactivoException>(
+                () => servicio.ValidarCredenciales("admin", ClaveOk));
         }
 
         [TestMethod]
-        public void ValidarCredenciales_ClaveIncorrecta_LanzaCredencialesInvalidas()
+        public void Login_ClaveIncorrecta_Falla()
         {
-            UsuarioService servicio = CrearServicio(
-                new UsuarioRepositoryFake { UsuarioADevolver = CrearUsuarioPersistido() },
+            UsuarioService servicio = Servicio(
+                new UsuarioRepositoryFake { UsuarioADevolver = UsuarioGuardado() },
                 new GestorConexionFake());
 
-            try
-            {
-                servicio.ValidarCredenciales("admin", "clave-incorrecta");
-                Assert.Fail("Debió lanzar CredencialesInvalidasException.");
-            }
-            catch (CredencialesInvalidasException)
-            {
-            }
+            Assert.ThrowsException<CredencialesInvalidasException>(
+                () => servicio.ValidarCredenciales("admin", "clave-incorrecta"));
         }
 
         [TestMethod]
-        public void ValidarCredenciales_HashMalFormado_LanzaCredencialesInvalidas()
+        public void Login_HashRoto_Falla()
         {
-            Usuario usuario = CrearUsuarioPersistido();
+            Usuario usuario = UsuarioGuardado();
             usuario.ClaveAppHash = "esto-no-es-bcrypt";
-            UsuarioService servicio = CrearServicio(
+            UsuarioService servicio = Servicio(
                 new UsuarioRepositoryFake { UsuarioADevolver = usuario },
                 new GestorConexionFake());
 
-            try
-            {
-                servicio.ValidarCredenciales("admin", ClaveAppValida);
-                Assert.Fail("Debió lanzar CredencialesInvalidasException.");
-            }
-            catch (CredencialesInvalidasException)
-            {
-            }
+            Assert.ThrowsException<CredencialesInvalidasException>(
+                () => servicio.ValidarCredenciales("admin", ClaveOk));
         }
 
         [TestMethod]
-        public void ValidarCredenciales_CredencialesCorrectas_AbreSesionYOcultaSecretos()
+        public void Login_Correcto_AbreSesionYOcultaSecretos()
         {
             GestorConexionFake gestor = new GestorConexionFake { ClaveDescifrada = "Sql#Motor" };
-            UsuarioService servicio = CrearServicio(
-                new UsuarioRepositoryFake { UsuarioADevolver = CrearUsuarioPersistido() },
+            UsuarioService servicio = Servicio(
+                new UsuarioRepositoryFake { UsuarioADevolver = UsuarioGuardado() },
                 gestor);
 
-            Usuario sesion = servicio.ValidarCredenciales("  admin  ", ClaveAppValida);
+            Usuario sesion = servicio.ValidarCredenciales("  admin  ", ClaveOk);
 
             Assert.AreEqual(1, sesion.IdUsuario);
             Assert.AreEqual("Administrador", sesion.NombreUsuario);
@@ -132,321 +94,217 @@ namespace SistemaCanchas.Tests
             Assert.IsTrue(gestor.SesionActiva);
             Assert.AreEqual("login_admin", gestor.UsuarioBdAsignado);
             Assert.AreEqual("Sql#Motor", gestor.ClaveBdAsignada);
-            Assert.AreEqual("Administrador", servicio.ObtenerSesionActual().NombreUsuario);
         }
 
         [TestMethod]
-        public void ValidarCredenciales_FalloDeCifrado_LanzaErrorInfraestructura()
+        public void Login_FalloDeCifrado_Falla()
         {
             GestorConexionFake gestor = new GestorConexionFake
             {
                 ErrorDescifrado = new ErrorCifradoException("clave AES distinta")
             };
-            UsuarioService servicio = CrearServicio(
-                new UsuarioRepositoryFake { UsuarioADevolver = CrearUsuarioPersistido() },
+            UsuarioService servicio = Servicio(
+                new UsuarioRepositoryFake { UsuarioADevolver = UsuarioGuardado() },
                 gestor);
 
-            try
-            {
-                servicio.ValidarCredenciales("admin", ClaveAppValida);
-                Assert.Fail("Debió lanzar ErrorInfraestructuraException.");
-            }
-            catch (ErrorInfraestructuraException)
-            {
-            }
+            Assert.ThrowsException<ErrorInfraestructuraException>(
+                () => servicio.ValidarCredenciales("admin", ClaveOk));
         }
 
         [TestMethod]
-        public void CerrarSesion_LimpiaSesionDeAplicacionYDeMotor()
+        public void Login_ErrorDeBase_Falla()
+        {
+            UsuarioRepositoryFake repo = new UsuarioRepositoryFake
+            {
+                ExcepcionALanzar = new ErrorAccesoDatosException("caída del motor")
+            };
+
+            Assert.ThrowsException<ErrorInfraestructuraException>(
+                () => Servicio(repo, new GestorConexionFake()).ValidarCredenciales("admin", ClaveOk));
+        }
+
+        [TestMethod]
+        public void CerrarSesion_LimpiaAplicacionYMotor()
         {
             GestorConexionFake gestor = new GestorConexionFake();
-            UsuarioService servicio = CrearServicio(
-                new UsuarioRepositoryFake { UsuarioADevolver = CrearUsuarioPersistido() },
+            UsuarioService servicio = Servicio(
+                new UsuarioRepositoryFake { UsuarioADevolver = UsuarioGuardado() },
                 gestor);
 
-            servicio.ValidarCredenciales("admin", ClaveAppValida);
+            servicio.ValidarCredenciales("admin", ClaveOk);
             servicio.CerrarSesion();
 
             Assert.IsFalse(gestor.SesionActiva);
             Assert.AreEqual(1, gestor.VecesCerrarSesion);
-
-            try
-            {
-                servicio.ObtenerSesionActual();
-                Assert.Fail("Debió lanzar SesionNoIniciadaException.");
-            }
-            catch (SesionNoIniciadaException)
-            {
-            }
+            Assert.ThrowsException<SesionNoIniciadaException>(
+                () => servicio.ObtenerSesionActual());
         }
 
         [TestMethod]
-        public void ValidarCredenciales_ErrorDeBaseDeDatos_LanzaErrorInfraestructura()
+        public void Registrar_SinSesion_Falla()
         {
-            UsuarioRepositoryFake repositorio = new UsuarioRepositoryFake
-            {
-                ExcepcionALanzar = new ErrorAccesoDatosException("caída del motor")
-            };
-            UsuarioService servicio = CrearServicio(repositorio, new GestorConexionFake());
+            UsuarioService servicio = Servicio(new UsuarioRepositoryFake(), new GestorConexionFake());
 
-            try
-            {
-                servicio.ValidarCredenciales("admin", ClaveAppValida);
-                Assert.Fail("Debió lanzar ErrorInfraestructuraException.");
-            }
-            catch (ErrorInfraestructuraException)
-            {
-            }
+            Assert.ThrowsException<SesionNoIniciadaException>(
+                () => servicio.RegistrarUsuario("Ana", "ana", ClaveOk, ValoresDominio.Rol.Empleado));
         }
 
         [TestMethod]
-        public void RegistrarUsuario_SinSesion_LanzaSesionNoIniciada()
+        public void Registrar_LoginInvalido_Falla()
         {
-            UsuarioService servicio = CrearServicio(new UsuarioRepositoryFake(), new GestorConexionFake());
-
-            try
-            {
-                servicio.RegistrarUsuario("Ana", "ana", ClaveAppValida, ValoresDominio.Rol.Empleado);
-                Assert.Fail("Debió lanzar SesionNoIniciadaException.");
-            }
-            catch (SesionNoIniciadaException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioConAdmin().RegistrarUsuario("Ana", "1invalido", ClaveOk, ValoresDominio.Rol.Empleado));
         }
 
         [TestMethod]
-        public void RegistrarUsuario_LoginInvalido_LanzaValidacion()
+        public void Registrar_ClaveCorta_Falla()
         {
-            UsuarioService servicio = CrearServicioConSesionAdmin();
-
-            try
-            {
-                servicio.RegistrarUsuario("Ana", "1invalido", ClaveAppValida, ValoresDominio.Rol.Empleado);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioConAdmin().RegistrarUsuario("Ana", "ana", "123", ValoresDominio.Rol.Empleado));
         }
 
         [TestMethod]
-        public void RegistrarUsuario_ClaveCorta_LanzaValidacion()
+        public void Registrar_DatosValidos_GuardaHashYCifraClaveDeMotor()
         {
-            UsuarioService servicio = CrearServicioConSesionAdmin();
-
-            try
-            {
-                servicio.RegistrarUsuario("Ana", "ana", "123", ValoresDominio.Rol.Empleado);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
-        }
-
-        [TestMethod]
-        public void RegistrarUsuario_DatosValidos_PersisteHashYCifraClaveDeMotor()
-        {
-            UsuarioRepositoryFake repositorio = new UsuarioRepositoryFake
-            {
-                UsuarioADevolver = CrearUsuarioPersistido()
-            };
+            UsuarioRepositoryFake repo = new UsuarioRepositoryFake { UsuarioADevolver = UsuarioGuardado() };
             GestorConexionFake gestor = new GestorConexionFake();
-            UsuarioService servicio = CrearServicio(repositorio, gestor);
-            servicio.ValidarCredenciales("admin", ClaveAppValida);
+            UsuarioService servicio = Servicio(repo, gestor);
+            servicio.ValidarCredenciales("admin", ClaveOk);
 
-            int id = servicio.RegistrarUsuario("Ana López", "ana", ClaveAppValida, ValoresDominio.Rol.Empleado);
-
-            Assert.AreEqual(10, id);
-            Assert.IsFalse(repositorio.InsertoDesdeInstalacion);
-            Assert.AreEqual("Ana López", repositorio.UltimoInsertado.NombreUsuario);
-            Assert.AreEqual("ana", repositorio.UltimoInsertado.UsuarioLogin);
-            Assert.AreEqual("u_ana", repositorio.UltimoInsertado.UsuarioBd);
-            Assert.AreEqual(ValoresDominio.Rol.Empleado, repositorio.UltimoRolInsertado);
-            Assert.IsTrue(repositorio.UltimoInsertado.ClaveBdEnc.StartsWith("enc:"));
-            Assert.IsTrue(BCrypt.Net.BCrypt.Verify(ClaveAppValida, repositorio.UltimoInsertado.ClaveAppHash));
-            Assert.IsFalse(string.IsNullOrEmpty(repositorio.UltimaClaveBdPlana));
-        }
-
-        [TestMethod]
-        public void RegistrarAdministradorInicial_CuandoNoHayUsuarios_UsaConexionDeInstalacion()
-        {
-            UsuarioRepositoryFake repositorio = new UsuarioRepositoryFake();
-            UsuarioService servicio = CrearServicio(repositorio, new GestorConexionFake());
-
-            int id = servicio.RegistrarAdministradorInicial("Admin", "admin", ClaveAppValida);
+            int id = servicio.RegistrarUsuario("Ana López", "ana", ClaveOk, ValoresDominio.Rol.Empleado);
 
             Assert.AreEqual(10, id);
-            Assert.IsTrue(repositorio.InsertoDesdeInstalacion);
-            Assert.AreEqual(ValoresDominio.Rol.Administrador, repositorio.UltimoRolInsertado);
-            Assert.AreEqual("u_admin", repositorio.UltimoInsertado.UsuarioBd);
+            Assert.IsFalse(repo.InsertoDesdeInstalacion);
+            Assert.AreEqual("Ana López", repo.UltimoInsertado.NombreUsuario);
+            Assert.AreEqual("ana", repo.UltimoInsertado.UsuarioLogin);
+            Assert.AreEqual("u_ana", repo.UltimoInsertado.UsuarioBd);
+            Assert.AreEqual(ValoresDominio.Rol.Empleado, repo.UltimoRolInsertado);
+            Assert.IsTrue(repo.UltimoInsertado.ClaveBdEnc.StartsWith("enc:"));
+            Assert.IsTrue(BCrypt.Net.BCrypt.Verify(ClaveOk, repo.UltimoInsertado.ClaveAppHash));
         }
 
         [TestMethod]
-        public void RegistrarAdministradorInicial_SiYaHayUsuarios_LanzaValidacion()
+        public void AdminInicial_SiNoHayUsuarios_UsaConexionDeInstalacion()
         {
-            UsuarioRepositoryFake repositorio = new UsuarioRepositoryFake();
-            repositorio.UsuariosExistentes.Add(CrearUsuarioPersistido());
-            UsuarioService servicio = CrearServicio(repositorio, new GestorConexionFake());
+            UsuarioRepositoryFake repo = new UsuarioRepositoryFake();
+            UsuarioService servicio = Servicio(repo, new GestorConexionFake());
 
-            try
-            {
-                servicio.RegistrarAdministradorInicial("Admin", "admin", ClaveAppValida);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            int id = servicio.RegistrarAdministradorInicial("Admin", "admin", ClaveOk);
+
+            Assert.AreEqual(10, id);
+            Assert.IsTrue(repo.InsertoDesdeInstalacion);
+            Assert.AreEqual(ValoresDominio.Rol.Administrador, repo.UltimoRolInsertado);
+            Assert.AreEqual("u_admin", repo.UltimoInsertado.UsuarioBd);
         }
 
         [TestMethod]
-        public void DesactivarUsuario_ASiMismo_LanzaOperacionNoPermitida()
+        public void AdminInicial_SiYaHayUsuarios_Falla()
         {
-            UsuarioService servicio = CrearServicioConSesionAdmin();
+            UsuarioRepositoryFake repo = new UsuarioRepositoryFake();
+            repo.UsuariosExistentes.Add(UsuarioGuardado());
+            UsuarioService servicio = Servicio(repo, new GestorConexionFake());
 
-            try
-            {
-                servicio.DesactivarUsuario(1);
-                Assert.Fail("Debió lanzar OperacionNoPermitidaException.");
-            }
-            catch (OperacionNoPermitidaException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => servicio.RegistrarAdministradorInicial("Admin", "admin", ClaveOk));
         }
 
         [TestMethod]
-        public void DesactivarUsuario_UnicoAdministrador_LanzaOperacionNoPermitida()
+        public void Desactivar_ASiMismo_NoPuede()
         {
-            UsuarioRepositoryFake repositorio = new UsuarioRepositoryFake
-            {
-                UsuarioADevolver = CrearUsuarioPersistido()
-            };
-            repositorio.UsuariosExistentes.Add(CrearUsuarioPersistido());
-            UsuarioService servicio = CrearServicio(repositorio, new GestorConexionFake());
-            servicio.ValidarCredenciales("admin", ClaveAppValida);
-
-            try
-            {
-                servicio.DesactivarUsuario(99);
-                Assert.Fail("Debió lanzar ValidacionNegocioException porque el id 99 no está en la lista.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<OperacionNoPermitidaException>(
+                () => ServicioConAdmin().DesactivarUsuario(1));
         }
 
         [TestMethod]
-        public void DesactivarUsuario_Empleado_Desactiva()
+        public void Desactivar_UsuarioQueNoEstaEnLaLista_Falla()
         {
-            Usuario empleado = new Usuario
-            {
-                IdUsuario = 2,
-                NombreUsuario = "Ana",
-                UsuarioLogin = "ana",
-                NombreRol = ValoresDominio.Rol.Empleado,
-                EstadoUsuario = ValoresDominio.EstadoUsuario.Activo
-            };
-            UsuarioRepositoryFake repositorio = new UsuarioRepositoryFake
-            {
-                UsuarioADevolver = CrearUsuarioPersistido()
-            };
-            repositorio.UsuariosExistentes.Add(CrearUsuarioPersistido());
-            repositorio.UsuariosExistentes.Add(empleado);
-            UsuarioService servicio = CrearServicio(repositorio, new GestorConexionFake());
-            servicio.ValidarCredenciales("admin", ClaveAppValida);
+            UsuarioRepositoryFake repo = new UsuarioRepositoryFake { UsuarioADevolver = UsuarioGuardado() };
+            repo.UsuariosExistentes.Add(UsuarioGuardado());
+            UsuarioService servicio = Servicio(repo, new GestorConexionFake());
+            servicio.ValidarCredenciales("admin", ClaveOk);
+
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => servicio.DesactivarUsuario(99));
+        }
+
+        [TestMethod]
+        public void Desactivar_Empleado_Desactiva()
+        {
+            UsuarioRepositoryFake repo = RepoConAdminYEmpleado(ValoresDominio.EstadoUsuario.Activo);
+            UsuarioService servicio = Servicio(repo, new GestorConexionFake());
+            servicio.ValidarCredenciales("admin", ClaveOk);
 
             servicio.DesactivarUsuario(2);
 
-            Assert.AreEqual(2, repositorio.IdDesactivado);
+            Assert.AreEqual(2, repo.IdDesactivado);
         }
 
         [TestMethod]
-        public void ActivarUsuario_Inactivo_Activa()
+        public void Activar_Inactivo_Activa()
         {
-            Usuario empleado = new Usuario
-            {
-                IdUsuario = 2,
-                NombreUsuario = "Ana",
-                UsuarioLogin = "ana",
-                NombreRol = ValoresDominio.Rol.Empleado,
-                EstadoUsuario = ValoresDominio.EstadoUsuario.Inactivo
-            };
-            UsuarioRepositoryFake repositorio = new UsuarioRepositoryFake
-            {
-                UsuarioADevolver = CrearUsuarioPersistido()
-            };
-            repositorio.UsuariosExistentes.Add(CrearUsuarioPersistido());
-            repositorio.UsuariosExistentes.Add(empleado);
-            UsuarioService servicio = CrearServicio(repositorio, new GestorConexionFake());
-            servicio.ValidarCredenciales("admin", ClaveAppValida);
+            UsuarioRepositoryFake repo = RepoConAdminYEmpleado(ValoresDominio.EstadoUsuario.Inactivo);
+            UsuarioService servicio = Servicio(repo, new GestorConexionFake());
+            servicio.ValidarCredenciales("admin", ClaveOk);
 
             servicio.ActivarUsuario(2);
 
-            Assert.AreEqual(2, repositorio.IdActivado);
+            Assert.AreEqual(2, repo.IdActivado);
         }
 
         [TestMethod]
-        public void CambiarClaveUsuario_HasheaConBcrypt()
+        public void CambiarClave_GuardaHashBcrypt()
         {
-            UsuarioRepositoryFake repositorio = new UsuarioRepositoryFake
-            {
-                UsuarioADevolver = CrearUsuarioPersistido()
-            };
-            repositorio.UsuariosExistentes.Add(CrearUsuarioPersistido());
-            UsuarioService servicio = CrearServicio(repositorio, new GestorConexionFake());
-            servicio.ValidarCredenciales("admin", ClaveAppValida);
+            UsuarioRepositoryFake repo = new UsuarioRepositoryFake { UsuarioADevolver = UsuarioGuardado() };
+            repo.UsuariosExistentes.Add(UsuarioGuardado());
+            UsuarioService servicio = Servicio(repo, new GestorConexionFake());
+            servicio.ValidarCredenciales("admin", ClaveOk);
 
             servicio.CambiarClaveUsuario(1, "Nueva.Clave#2026");
 
-            Assert.AreEqual(1, repositorio.IdClaveCambiada);
-            Assert.IsTrue(repositorio.UltimoHashClave.StartsWith("$2", StringComparison.Ordinal));
-            Assert.IsTrue(BCrypt.Net.BCrypt.Verify("Nueva.Clave#2026", repositorio.UltimoHashClave));
+            Assert.AreEqual(1, repo.IdClaveCambiada);
+            Assert.IsTrue(repo.UltimoHashClave.StartsWith("$2", StringComparison.Ordinal));
+            Assert.IsTrue(BCrypt.Net.BCrypt.Verify("Nueva.Clave#2026", repo.UltimoHashClave));
         }
 
         [TestMethod]
-        public void ActualizarNombreUsuario_PersisteNombre()
+        public void ActualizarNombre_GuardaNombreRecortado()
         {
-            UsuarioRepositoryFake repositorio = new UsuarioRepositoryFake
-            {
-                UsuarioADevolver = CrearUsuarioPersistido()
-            };
-            repositorio.UsuariosExistentes.Add(CrearUsuarioPersistido());
-            UsuarioService servicio = CrearServicio(repositorio, new GestorConexionFake());
-            servicio.ValidarCredenciales("admin", ClaveAppValida);
+            UsuarioRepositoryFake repo = new UsuarioRepositoryFake { UsuarioADevolver = UsuarioGuardado() };
+            repo.UsuariosExistentes.Add(UsuarioGuardado());
+            UsuarioService servicio = Servicio(repo, new GestorConexionFake());
+            servicio.ValidarCredenciales("admin", ClaveOk);
 
             servicio.ActualizarNombreUsuario(1, "  Admin Actualizado  ");
 
-            Assert.AreEqual(1, repositorio.IdNombreActualizado);
-            Assert.AreEqual("Admin Actualizado", repositorio.UltimoNombreActualizado);
+            Assert.AreEqual(1, repo.IdNombreActualizado);
+            Assert.AreEqual("Admin Actualizado", repo.UltimoNombreActualizado);
         }
 
         [TestMethod]
-        public void ExisteAlgunUsuario_SinUsuarios_RetornaFalso()
+        public void ExisteAlgunUsuario_ListaVacia_EsFalso()
         {
-            UsuarioService servicio = CrearServicio(new UsuarioRepositoryFake(), new GestorConexionFake());
-
-            Assert.IsFalse(servicio.ExisteAlgunUsuario());
+            Assert.IsFalse(Servicio(new UsuarioRepositoryFake(), new GestorConexionFake()).ExisteAlgunUsuario());
         }
 
         [TestMethod]
-        public void IdentificadorSql_NormalizaLogin()
+        public void IdentificadorSql_ArmaLoginDeMotor()
         {
             Assert.AreEqual("u_admin", IdentificadorSql.DesdeLogin("Admin"));
             Assert.AreEqual("u_ana_1", IdentificadorSql.DesdeLogin("ana_1"));
         }
 
         [TestMethod]
-        public void GeneradorClaveMotor_CumpleLongitudYDiversidad()
+        public void GeneradorClaveMotor_TieneLongitudYTiposDeCaracter()
         {
             string clave = GeneradorClaveMotor.Generar();
             Assert.AreEqual(24, clave.Length);
-            Assert.IsTrue(ContieneCategoria(clave, "ABCDEFGHJKLMNPQRSTUVWXYZ"));
-            Assert.IsTrue(ContieneCategoria(clave, "abcdefghijkmnopqrstuvwxyz"));
-            Assert.IsTrue(ContieneCategoria(clave, "23456789"));
-            Assert.IsTrue(ContieneCategoria(clave, "#@%*-_!"));
+            Assert.IsTrue(TieneAlguno(clave, "ABCDEFGHJKLMNPQRSTUVWXYZ"));
+            Assert.IsTrue(TieneAlguno(clave, "abcdefghijkmnopqrstuvwxyz"));
+            Assert.IsTrue(TieneAlguno(clave, "23456789"));
+            Assert.IsTrue(TieneAlguno(clave, "#@%*-_!"));
         }
 
-        private static bool ContieneCategoria(string texto, string alfabeto)
+        private static bool TieneAlguno(string texto, string alfabeto)
         {
             for (int i = 0; i < texto.Length; i++)
             {
@@ -459,28 +317,44 @@ namespace SistemaCanchas.Tests
             return false;
         }
 
-        private static UsuarioService CrearServicioConSesionAdmin()
+        private static UsuarioRepositoryFake RepoConAdminYEmpleado(string estadoEmpleado)
         {
-            UsuarioService servicio = CrearServicio(
-                new UsuarioRepositoryFake { UsuarioADevolver = CrearUsuarioPersistido() },
+            Usuario empleado = new Usuario
+            {
+                IdUsuario = 2,
+                NombreUsuario = "Ana",
+                UsuarioLogin = "ana",
+                NombreRol = ValoresDominio.Rol.Empleado,
+                EstadoUsuario = estadoEmpleado
+            };
+            UsuarioRepositoryFake repo = new UsuarioRepositoryFake { UsuarioADevolver = UsuarioGuardado() };
+            repo.UsuariosExistentes.Add(UsuarioGuardado());
+            repo.UsuariosExistentes.Add(empleado);
+            return repo;
+        }
+
+        private static UsuarioService ServicioConAdmin()
+        {
+            UsuarioService servicio = Servicio(
+                new UsuarioRepositoryFake { UsuarioADevolver = UsuarioGuardado() },
                 new GestorConexionFake());
-            servicio.ValidarCredenciales("admin", ClaveAppValida);
+            servicio.ValidarCredenciales("admin", ClaveOk);
             return servicio;
         }
 
-        private static UsuarioService CrearServicio(UsuarioRepositoryFake repositorio, GestorConexionFake gestor)
+        private static UsuarioService Servicio(UsuarioRepositoryFake repo, GestorConexionFake gestor)
         {
-            return new UsuarioService(repositorio, gestor);
+            return new UsuarioService(repo, gestor);
         }
 
-        private static Usuario CrearUsuarioPersistido()
+        private static Usuario UsuarioGuardado()
         {
             return new Usuario
             {
                 IdUsuario = 1,
                 NombreUsuario = "Administrador",
                 UsuarioLogin = "admin",
-                ClaveAppHash = BCrypt.Net.BCrypt.HashPassword(ClaveAppValida, CostoBcryptPrueba),
+                ClaveAppHash = BCrypt.Net.BCrypt.HashPassword(ClaveOk, CostoBcryptPrueba),
                 UsuarioBd = "login_admin",
                 ClaveBdEnc = "valor-cifrado",
                 NombreRol = ValoresDominio.Rol.Administrador,

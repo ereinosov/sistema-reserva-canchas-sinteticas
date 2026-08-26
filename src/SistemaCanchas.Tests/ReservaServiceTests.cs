@@ -15,182 +15,116 @@ namespace SistemaCanchas.Tests
     public class ReservaServiceTests
     {
         [TestMethod]
-        public void CrearReserva_SinSesion_LanzaSesionNoIniciada()
+        public void Crear_SinSesion_Falla()
         {
             ReservaService servicio = new ReservaService(
                 new ReservaRepositoryFake(),
                 new HorarioRepositoryFake(),
                 new UsuarioServiceFake());
 
-            try
-            {
-                servicio.CrearReserva(1, new int[] { 2 });
-                Assert.Fail("Debió lanzar SesionNoIniciadaException.");
-            }
-            catch (SesionNoIniciadaException)
-            {
-            }
+            Assert.ThrowsException<SesionNoIniciadaException>(
+                () => servicio.CrearReserva(1, new int[] { 2 }));
         }
 
         [TestMethod]
-        public void CrearReserva_Empleado_PersisteClienteHorarioYUsuario()
+        public void Crear_DatosValidos_GuardaClienteHorarioYUsuario()
         {
-            ReservaRepositoryFake repositorio = new ReservaRepositoryFake();
-            ReservaService servicio = CrearServicioEmpleado(repositorio, new HorarioRepositoryFake());
+            ReservaRepositoryFake repo = new ReservaRepositoryFake();
 
-            int id = servicio.CrearReserva(4, new int[] { 12 });
+            int id = Servicio(repo).CrearReserva(4, new int[] { 12 });
 
             Assert.AreEqual(1, id);
-            Assert.AreEqual(4, repositorio.UltimaInsertada.IdCliente);
-            Assert.AreEqual(12, repositorio.UltimaInsertada.IdHorario);
-            Assert.AreEqual(2, repositorio.UltimaInsertada.IdUsuario);
-            Assert.AreEqual(ValoresDominio.EstadoReserva.Activa, repositorio.UltimaInsertada.EstadoReserva);
+            Assert.AreEqual(4, repo.UltimaInsertada.IdCliente);
+            Assert.AreEqual(12, repo.UltimaInsertada.IdHorario);
+            Assert.AreEqual(2, repo.UltimaInsertada.IdUsuario);
+            Assert.AreEqual(ValoresDominio.EstadoReserva.Activa, repo.UltimaInsertada.EstadoReserva);
         }
 
         [TestMethod]
-        public void CrearReserva_SinCliente_LanzaValidacion()
+        public void Crear_SinCliente_Falla()
         {
-            ReservaService servicio = CrearServicioEmpleado(new ReservaRepositoryFake(), new HorarioRepositoryFake());
-
-            try
-            {
-                servicio.CrearReserva(0, new int[] { 12 });
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => Servicio().CrearReserva(0, new int[] { 12 }));
         }
 
         [TestMethod]
-        public void CrearReserva_SinFranjas_LanzaValidacion()
+        public void Crear_SinFranjas_Falla()
         {
-            ReservaService servicio = CrearServicioEmpleado(new ReservaRepositoryFake(), new HorarioRepositoryFake());
-
-            try
-            {
-                servicio.CrearReserva(1, new int[0]);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => Servicio().CrearReserva(1, new int[0]));
         }
 
         [TestMethod]
-        public void CrearReserva_FranjaOcupada_LanzaValidacion()
+        public void Crear_FranjaOcupada_Falla()
         {
-            ReservaRepositoryFake repositorio = new ReservaRepositoryFake
-            {
-                ExcepcionALanzar = new ErrorAccesoDatosException("ocupada", CodigosSql.FranjaOcupada)
-            };
-            ReservaService servicio = CrearServicioEmpleado(repositorio, new HorarioRepositoryFake());
+            ReservaRepositoryFake repo = RepoConError(CodigosSql.FranjaOcupada);
 
-            try
-            {
-                servicio.CrearReserva(1, new int[] { 8 });
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => Servicio(repo).CrearReserva(1, new int[] { 8 }));
         }
 
         [TestMethod]
-        public void CrearReserva_FechaAnterior_LanzaValidacion()
+        public void Crear_FechaAnterior_Falla()
         {
-            ReservaRepositoryFake repositorio = new ReservaRepositoryFake
-            {
-                ExcepcionALanzar = new ErrorAccesoDatosException("fecha", CodigosSql.FechaReservaAnterior)
-            };
-            ReservaService servicio = CrearServicioEmpleado(repositorio, new HorarioRepositoryFake());
+            ReservaRepositoryFake repo = RepoConError(CodigosSql.FechaReservaAnterior);
 
-            try
-            {
-                servicio.CrearReserva(1, new int[] { 8 });
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => Servicio(repo).CrearReserva(1, new int[] { 8 }));
         }
 
         [TestMethod]
-        public void ConsultarReservas_NormalizaFiltrosVacios()
+        public void Consultar_FiltrosVacios_PasaNulo()
         {
-            ReservaRepositoryFake repositorio = new ReservaRepositoryFake();
-            ReservaService servicio = CrearServicioEmpleado(repositorio, new HorarioRepositoryFake());
+            ReservaRepositoryFake repo = new ReservaRepositoryFake();
 
-            servicio.ConsultarReservas(null, 0, 0, "   ");
+            Servicio(repo).ConsultarReservas(null, 0, 0, "   ");
 
-            Assert.IsNull(repositorio.UltimoClienteFiltro);
-            Assert.IsNull(repositorio.UltimaCanchaFiltro);
-            Assert.IsNull(repositorio.UltimoEstadoFiltro);
+            Assert.IsNull(repo.UltimoClienteFiltro);
+            Assert.IsNull(repo.UltimaCanchaFiltro);
+            Assert.IsNull(repo.UltimoEstadoFiltro);
         }
 
         [TestMethod]
-        public void ModificarHorario_ReservaCancelada_LanzaValidacion()
+        public void ModificarHorario_ReservaCancelada_Falla()
         {
-            ReservaRepositoryFake repositorio = new ReservaRepositoryFake
-            {
-                ExcepcionALanzar = new ErrorAccesoDatosException("cancelada", CodigosSql.ReservaNoActivaParaModificar)
-            };
-            ReservaService servicio = CrearServicioEmpleado(repositorio, new HorarioRepositoryFake());
+            ReservaRepositoryFake repo = RepoConError(CodigosSql.ReservaNoActivaParaModificar);
 
-            try
-            {
-                servicio.ModificarHorario(3, 9);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => Servicio(repo).ModificarHorario(3, 9));
         }
 
         [TestMethod]
-        public void ModificarHorario_Activa_ActualizaFranja()
+        public void ModificarHorario_Activa_CambiaLaFranja()
         {
-            ReservaRepositoryFake repositorio = new ReservaRepositoryFake();
-            ReservaService servicio = CrearServicioEmpleado(repositorio, new HorarioRepositoryFake());
+            ReservaRepositoryFake repo = new ReservaRepositoryFake();
 
-            servicio.ModificarHorario(3, 15);
+            Servicio(repo).ModificarHorario(3, 15);
 
-            Assert.AreEqual(3, repositorio.IdReservaActualizada);
-            Assert.AreEqual(15, repositorio.IdHorarioActualizado);
+            Assert.AreEqual(3, repo.IdReservaActualizada);
+            Assert.AreEqual(15, repo.IdHorarioActualizado);
         }
 
         [TestMethod]
-        public void CancelarReserva_YaCancelada_LanzaValidacion()
+        public void Cancelar_YaCancelada_Falla()
         {
-            ReservaRepositoryFake repositorio = new ReservaRepositoryFake
-            {
-                ExcepcionALanzar = new ErrorAccesoDatosException("ya cancelada", CodigosSql.ReservaYaCancelada)
-            };
-            ReservaService servicio = CrearServicioEmpleado(repositorio, new HorarioRepositoryFake());
+            ReservaRepositoryFake repo = RepoConError(CodigosSql.ReservaYaCancelada);
 
-            try
-            {
-                servicio.CancelarReserva(5);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => Servicio(repo).CancelarReserva(5));
         }
 
         [TestMethod]
-        public void CancelarReserva_Activa_Cancela()
+        public void Cancelar_Activa_Cancela()
         {
-            ReservaRepositoryFake repositorio = new ReservaRepositoryFake();
-            ReservaService servicio = CrearServicioEmpleado(repositorio, new HorarioRepositoryFake());
+            ReservaRepositoryFake repo = new ReservaRepositoryFake();
 
-            servicio.CancelarReserva(5);
+            Servicio(repo).CancelarReserva(5);
 
-            Assert.AreEqual(5, repositorio.IdCancelada);
+            Assert.AreEqual(5, repo.IdCancelada);
         }
 
         [TestMethod]
-        public void ConsultarDisponibilidad_DevuelveFranjas()
+        public void Disponibilidad_DevuelveFranjas()
         {
             HorarioRepositoryFake horarios = new HorarioRepositoryFake();
             horarios.Franjas.Add(new Horario
@@ -200,9 +134,9 @@ namespace SistemaCanchas.Tests
                 FechaHorario = new DateTime(2026, 8, 24),
                 EstadoFranja = ValoresDominio.EstadoFranja.Libre
             });
-            ReservaService servicio = CrearServicioEmpleado(new ReservaRepositoryFake(), horarios);
 
-            IList<Horario> resultado = servicio.ConsultarDisponibilidad(2, new DateTime(2026, 8, 24, 15, 0, 0));
+            IList<Horario> resultado = Servicio(new ReservaRepositoryFake(), horarios)
+                .ConsultarDisponibilidad(2, new DateTime(2026, 8, 24, 15, 0, 0));
 
             Assert.AreEqual(1, resultado.Count);
             Assert.AreEqual(2, horarios.UltimoIdCancha);
@@ -210,41 +144,38 @@ namespace SistemaCanchas.Tests
         }
 
         [TestMethod]
-        public void ConsultarDisponibilidad_CanchaInexistente_LanzaValidacion()
+        public void Disponibilidad_CanchaInexistente_Falla()
         {
             HorarioRepositoryFake horarios = new HorarioRepositoryFake
             {
                 ExcepcionALanzar = new ErrorAccesoDatosException("cancha", CodigosSql.CanchaNoExiste)
             };
-            ReservaService servicio = CrearServicioEmpleado(new ReservaRepositoryFake(), horarios);
 
-            try
-            {
-                servicio.ConsultarDisponibilidad(99, DateTime.Today);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => Servicio(new ReservaRepositoryFake(), horarios).ConsultarDisponibilidad(99, DateTime.Today));
         }
 
-        private static ReservaService CrearServicioEmpleado(
-            ReservaRepositoryFake reservas,
-            HorarioRepositoryFake horarios)
+        private static ReservaRepositoryFake RepoConError(int codigo)
         {
-            return new ReservaService(reservas, horarios, new UsuarioServiceFake { Sesion = CrearSesionEmpleado() });
-        }
-
-        private static Usuario CrearSesionEmpleado()
-        {
-            return new Usuario
+            return new ReservaRepositoryFake
             {
-                IdUsuario = 2,
-                NombreUsuario = "Ana",
-                UsuarioLogin = "ana",
-                NombreRol = ValoresDominio.Rol.Empleado,
-                EstadoUsuario = ValoresDominio.EstadoUsuario.Activo
+                ExcepcionALanzar = new ErrorAccesoDatosException("error", codigo)
             };
+        }
+
+        private static ReservaService Servicio()
+        {
+            return Servicio(new ReservaRepositoryFake());
+        }
+
+        private static ReservaService Servicio(ReservaRepositoryFake reservas)
+        {
+            return Servicio(reservas, new HorarioRepositoryFake());
+        }
+
+        private static ReservaService Servicio(ReservaRepositoryFake reservas, HorarioRepositoryFake horarios)
+        {
+            return new ReservaService(reservas, horarios, new UsuarioServiceFake { Sesion = SesionPrueba.Empleado() });
         }
     }
 }

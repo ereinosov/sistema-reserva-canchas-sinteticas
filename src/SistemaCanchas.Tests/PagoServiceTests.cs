@@ -15,135 +15,97 @@ namespace SistemaCanchas.Tests
     public class PagoServiceTests
     {
         [TestMethod]
-        public void RegistrarPago_SinSesion_LanzaSesionNoIniciada()
+        public void Registrar_SinSesion_Falla()
         {
             PagoService servicio = new PagoService(new PagoRepositoryFake(), new UsuarioServiceFake());
 
-            try
-            {
-                servicio.RegistrarPago(1, 20m, DateTime.Today, ValoresDominio.EstadoPago.Pagado);
-                Assert.Fail("Debió lanzar SesionNoIniciadaException.");
-            }
-            catch (SesionNoIniciadaException)
-            {
-            }
+            Assert.ThrowsException<SesionNoIniciadaException>(
+                () => servicio.RegistrarPago(1, 20m, DateTime.Today, ValoresDominio.EstadoPago.Pagado));
         }
 
         [TestMethod]
-        public void RegistrarPago_MontoCero_LanzaValidacion()
+        public void Registrar_MontoCero_Falla()
         {
-            PagoService servicio = CrearServicioEmpleado(new PagoRepositoryFake());
-
-            try
-            {
-                servicio.RegistrarPago(1, 0m, DateTime.Today, ValoresDominio.EstadoPago.Pagado);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => Servicio().RegistrarPago(1, 0m, DateTime.Today, ValoresDominio.EstadoPago.Pagado));
         }
 
         [TestMethod]
-        public void RegistrarPago_DatosValidos_PersisteRedondeado()
+        public void Registrar_DatosValidos_RedondeaMontoYFecha()
         {
-            PagoRepositoryFake repositorio = new PagoRepositoryFake();
-            PagoService servicio = CrearServicioEmpleado(repositorio);
+            PagoRepositoryFake repo = new PagoRepositoryFake();
             DateTime fecha = new DateTime(2026, 8, 24, 15, 30, 0);
 
-            int id = servicio.RegistrarPago(7, 25.456m, fecha, ValoresDominio.EstadoPago.Pagado);
+            int id = Servicio(repo).RegistrarPago(7, 25.456m, fecha, ValoresDominio.EstadoPago.Pagado);
 
             Assert.AreEqual(1, id);
-            Assert.AreEqual(7, repositorio.UltimoInsertado.IdReserva);
-            Assert.AreEqual(25.46m, repositorio.UltimoInsertado.MontoPago);
-            Assert.AreEqual(new DateTime(2026, 8, 24), repositorio.UltimoInsertado.FechaPago);
-            Assert.AreEqual(ValoresDominio.EstadoPago.Pagado, repositorio.UltimoInsertado.EstadoPago);
+            Assert.AreEqual(7, repo.UltimoInsertado.IdReserva);
+            Assert.AreEqual(25.46m, repo.UltimoInsertado.MontoPago);
+            Assert.AreEqual(new DateTime(2026, 8, 24), repo.UltimoInsertado.FechaPago);
+            Assert.AreEqual(ValoresDominio.EstadoPago.Pagado, repo.UltimoInsertado.EstadoPago);
         }
 
         [TestMethod]
-        public void RegistrarPago_ReservaInactiva_LanzaValidacion()
+        public void Registrar_ReservaInactiva_Falla()
         {
-            PagoRepositoryFake repositorio = new PagoRepositoryFake
-            {
-                ExcepcionALanzar = new ErrorAccesoDatosException("inactiva", CodigosSql.ReservaNoActivaParaPago)
-            };
-            PagoService servicio = CrearServicioEmpleado(repositorio);
+            PagoRepositoryFake repo = RepoConError(CodigosSql.ReservaNoActivaParaPago);
 
-            try
-            {
-                servicio.RegistrarPago(3, 10m, DateTime.Today, ValoresDominio.EstadoPago.Pagado);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => Servicio(repo).RegistrarPago(3, 10m, DateTime.Today, ValoresDominio.EstadoPago.Pagado));
         }
 
         [TestMethod]
-        public void RegistrarPago_YaRegistrado_LanzaValidacion()
+        public void Registrar_YaTienePago_Falla()
         {
-            PagoRepositoryFake repositorio = new PagoRepositoryFake
-            {
-                ExcepcionALanzar = new ErrorAccesoDatosException("duplicado", CodigosSql.PagoYaRegistrado)
-            };
-            PagoService servicio = CrearServicioEmpleado(repositorio);
+            PagoRepositoryFake repo = RepoConError(CodigosSql.PagoYaRegistrado);
 
-            try
-            {
-                servicio.RegistrarPago(3, 10m, DateTime.Today, ValoresDominio.EstadoPago.Pagado);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => Servicio(repo).RegistrarPago(3, 10m, DateTime.Today, ValoresDominio.EstadoPago.Pagado));
         }
 
         [TestMethod]
-        public void ConsultarEstadoPago_SinFiltro_PasaNulo()
+        public void Consultar_SinFiltro_PasaNulo()
         {
-            PagoRepositoryFake repositorio = new PagoRepositoryFake();
-            repositorio.Pagos.Add(new Pago { IdReserva = 1, EstadoPago = ValoresDominio.EstadoPago.Pendiente });
-            PagoService servicio = CrearServicioEmpleado(repositorio);
+            PagoRepositoryFake repo = new PagoRepositoryFake();
+            repo.Pagos.Add(new Pago { IdReserva = 1, EstadoPago = ValoresDominio.EstadoPago.Pendiente });
 
-            IList<Pago> resultado = servicio.ConsultarEstadoPago(null, 0, 0, "   ");
+            IList<Pago> resultado = Servicio(repo).ConsultarEstadoPago(null, 0, 0, "   ");
 
             Assert.AreEqual(1, resultado.Count);
-            Assert.IsNull(repositorio.UltimaFechaFiltro);
-            Assert.IsNull(repositorio.UltimoClienteFiltro);
-            Assert.IsNull(repositorio.UltimaCanchaFiltro);
-            Assert.IsNull(repositorio.UltimoEstadoFiltro);
+            Assert.IsNull(repo.UltimaFechaFiltro);
+            Assert.IsNull(repo.UltimoClienteFiltro);
         }
 
         [TestMethod]
-        public void ConsultarEstadoPago_ConFiltros_PasaValores()
+        public void Consultar_ConFiltros_LosPasaAlRepositorio()
         {
-            PagoRepositoryFake repositorio = new PagoRepositoryFake();
-            PagoService servicio = CrearServicioEmpleado(repositorio);
+            PagoRepositoryFake repo = new PagoRepositoryFake();
             DateTime fecha = new DateTime(2026, 8, 24);
 
-            servicio.ConsultarEstadoPago(fecha, 4, 2, ValoresDominio.EstadoReserva.Activa);
+            Servicio(repo).ConsultarEstadoPago(fecha, 4, 2, ValoresDominio.EstadoReserva.Activa);
 
-            Assert.AreEqual(fecha, repositorio.UltimaFechaFiltro);
-            Assert.AreEqual(4, repositorio.UltimoClienteFiltro);
-            Assert.AreEqual(2, repositorio.UltimaCanchaFiltro);
-            Assert.AreEqual(ValoresDominio.EstadoReserva.Activa, repositorio.UltimoEstadoFiltro);
+            Assert.AreEqual(fecha, repo.UltimaFechaFiltro);
+            Assert.AreEqual(4, repo.UltimoClienteFiltro);
+            Assert.AreEqual(2, repo.UltimaCanchaFiltro);
+            Assert.AreEqual(ValoresDominio.EstadoReserva.Activa, repo.UltimoEstadoFiltro);
         }
 
-        private static PagoService CrearServicioEmpleado(PagoRepositoryFake repositorio)
+        private static PagoRepositoryFake RepoConError(int codigo)
         {
-            return new PagoService(repositorio, new UsuarioServiceFake { Sesion = CrearSesionEmpleado() });
-        }
-
-        private static Usuario CrearSesionEmpleado()
-        {
-            return new Usuario
+            return new PagoRepositoryFake
             {
-                IdUsuario = 2,
-                NombreUsuario = "Ana",
-                UsuarioLogin = "ana",
-                NombreRol = ValoresDominio.Rol.Empleado,
-                EstadoUsuario = ValoresDominio.EstadoUsuario.Activo
+                ExcepcionALanzar = new ErrorAccesoDatosException("error", codigo)
             };
+        }
+
+        private static PagoService Servicio()
+        {
+            return Servicio(new PagoRepositoryFake());
+        }
+
+        private static PagoService Servicio(PagoRepositoryFake repo)
+        {
+            return new PagoService(repo, new UsuarioServiceFake { Sesion = SesionPrueba.Empleado() });
         }
     }
 }

@@ -112,6 +112,8 @@ namespace SistemaCanchas.Presentacion
 
             dgvPagos.AllowUserToAddRows = false;
             dgvPagos.AllowUserToDeleteRows = false;
+            dgvPagos.AllowUserToResizeColumns = false;
+            dgvPagos.AllowUserToResizeRows = false;
             dgvPagos.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             dgvPagos.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvPagos.BackgroundColor = Color.White;
@@ -125,9 +127,11 @@ namespace SistemaCanchas.Presentacion
             dgvPagos.Name = "dgvPagos";
             dgvPagos.ReadOnly = true;
             dgvPagos.RowHeadersVisible = false;
+            dgvPagos.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
             dgvPagos.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgvPagos.Size = new Size(952, 240);
             dgvPagos.SelectionChanged += dgvPagos_SelectionChanged;
+            dgvPagos.CellClick += dgvPagos_CellClick;
 
             grpFiltros.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             grpFiltros.Controls.Add(lblFiltroFecha);
@@ -201,9 +205,10 @@ namespace SistemaCanchas.Presentacion
             grpDatos.Controls.Add(lblEstadoPago);
             grpDatos.Controls.Add(cboEstadoPago);
             grpDatos.Controls.Add(btnRegistrar);
+            grpDatos.Enabled = false;
             grpDatos.Location = new Point(16, 344);
             grpDatos.Size = new Size(952, 148);
-            grpDatos.Text = "Registrar pago";
+            grpDatos.Text = "Registrar pago de la reserva seleccionada";
 
             lblReservaSeleccionada.AutoSize = true;
             lblReservaSeleccionada.Location = new Point(16, 28);

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -15,91 +14,56 @@ namespace SistemaCanchas.Tests
     public class ClienteServiceTests
     {
         private const string CedulaValida = "0912345675";
+
         [TestMethod]
-        public void RegistrarCliente_SinSesion_LanzaSesionNoIniciada()
+        public void Registrar_SinSesion_Falla()
         {
             ClienteService servicio = new ClienteService(new ClienteRepositoryFake(), new UsuarioServiceFake());
 
-            try
-            {
-                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, CedulaValida, "0987654321", "ana@uteq.edu.ec");
-                Assert.Fail("Debió lanzar SesionNoIniciadaException.");
-            }
-            catch (SesionNoIniciadaException)
-            {
-            }
+            Assert.ThrowsException<SesionNoIniciadaException>(
+                () => servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, CedulaValida, "0987654321", "ana@uteq.edu.ec"));
         }
 
         [TestMethod]
-        public void RegistrarCliente_CedulaInvalida_LanzaValidacion()
+        public void Registrar_CedulaCorta_Falla()
         {
-            ClienteService servicio = CrearServicioEmpleado(new ClienteRepositoryFake());
-
-            try
-            {
-                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "123", "0987654321", "ana@uteq.edu.ec");
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioEmpleado().RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "123", "0987654321", "ana@uteq.edu.ec"));
         }
 
         [TestMethod]
-        public void RegistrarCliente_CedulaProvinciaInvalida_LanzaValidacion()
+        public void Registrar_CedulaProvinciaInvalida_Falla()
         {
-            ClienteService servicio = CrearServicioEmpleado(new ClienteRepositoryFake());
+            ValidacionNegocioException error = Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioEmpleado().RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "2501234567", "0987654321", "ana@uteq.edu.ec"));
 
-            try
-            {
-                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "2501234567", "0987654321", "ana@uteq.edu.ec");
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException ex)
-            {
-                StringAssert.Contains(ex.Message, "provincia");
-            }
+            StringAssert.Contains(error.Message, "provincia");
         }
 
         [TestMethod]
-        public void RegistrarCliente_CedulaTercerDigitoInvalido_LanzaValidacion()
+        public void Registrar_CedulaTercerDigitoInvalido_Falla()
         {
-            ClienteService servicio = CrearServicioEmpleado(new ClienteRepositoryFake());
+            ValidacionNegocioException error = Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioEmpleado().RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "0960000000", "0987654321", "ana@uteq.edu.ec"));
 
-            try
-            {
-                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "0960000000", "0987654321", "ana@uteq.edu.ec");
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException ex)
-            {
-                StringAssert.Contains(ex.Message, "tercer dígito");
-            }
+            StringAssert.Contains(error.Message, "tercer dígito");
         }
 
         [TestMethod]
-        public void RegistrarCliente_CedulaVerificadorInvalido_LanzaValidacion()
+        public void Registrar_CedulaVerificadorInvalido_Falla()
         {
-            ClienteService servicio = CrearServicioEmpleado(new ClienteRepositoryFake());
+            ValidacionNegocioException error = Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioEmpleado().RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "0912345670", "0987654321", "ana@uteq.edu.ec"));
 
-            try
-            {
-                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, "0912345670", "0987654321", "ana@uteq.edu.ec");
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException ex)
-            {
-                StringAssert.Contains(ex.Message, "verificador");
-            }
+            StringAssert.Contains(error.Message, "verificador");
         }
 
         [TestMethod]
-        public void RegistrarCliente_DatosValidos_PersisteRecortado()
+        public void Registrar_DatosValidos_GuardaSinEspaciosDeMas()
         {
-            ClienteRepositoryFake repositorio = new ClienteRepositoryFake();
-            ClienteService servicio = CrearServicioEmpleado(repositorio);
+            ClienteRepositoryFake repo = new ClienteRepositoryFake();
 
-            int id = servicio.RegistrarCliente(
+            int id = ServicioEmpleado(repo).RegistrarCliente(
                 "  Ana Pérez  ",
                 ValoresDominio.TipoDocumento.Cedula,
                 " " + CedulaValida + " ",
@@ -107,89 +71,76 @@ namespace SistemaCanchas.Tests
                 "  ana@uteq.edu.ec ");
 
             Assert.AreEqual(1, id);
-            Assert.AreEqual("Ana Pérez", repositorio.UltimoInsertado.NombreCliente);
-            Assert.AreEqual(CedulaValida, repositorio.UltimoInsertado.NumeroDocumentoCliente);
-            Assert.AreEqual("ana@uteq.edu.ec", repositorio.UltimoInsertado.CorreoCliente);
+            Assert.AreEqual("Ana Pérez", repo.UltimoInsertado.NombreCliente);
+            Assert.AreEqual(CedulaValida, repo.UltimoInsertado.NumeroDocumentoCliente);
+            Assert.AreEqual("ana@uteq.edu.ec", repo.UltimoInsertado.CorreoCliente);
         }
 
         [TestMethod]
-        public void RegistrarCliente_DocumentoDuplicado_LanzaValidacion()
+        public void Registrar_DocumentoDuplicado_Falla()
         {
-            ClienteRepositoryFake repositorio = new ClienteRepositoryFake
-            {
-                ExcepcionALanzar = new ErrorAccesoDatosException("duplicado", CodigosSql.ClienteDuplicado)
-            };
-            ClienteService servicio = CrearServicioEmpleado(repositorio);
+            ClienteRepositoryFake repo = RepoConError(CodigosSql.ClienteDuplicado);
 
-            try
-            {
-                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, CedulaValida, "0987654321", "ana@uteq.edu.ec");
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioEmpleado(repo).RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, CedulaValida, "0987654321", "ana@uteq.edu.ec"));
         }
 
         [TestMethod]
-        public void RegistrarCliente_TelefonoDuplicado_LanzaValidacion()
+        public void Registrar_TelefonoDuplicado_Falla()
         {
-            ClienteRepositoryFake repositorio = new ClienteRepositoryFake
-            {
-                ExcepcionALanzar = new ErrorAccesoDatosException("duplicado", CodigosSql.ClienteTelefonoDuplicado)
-            };
-            ClienteService servicio = CrearServicioEmpleado(repositorio);
+            ClienteRepositoryFake repo = RepoConError(CodigosSql.ClienteTelefonoDuplicado);
 
-            try
-            {
-                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, CedulaValida, "0987654321", "ana@uteq.edu.ec");
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException ex)
-            {
-                StringAssert.Contains(ex.Message, "teléfono");
-            }
+            ValidacionNegocioException error = Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioEmpleado(repo).RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, CedulaValida, "0987654321", "ana@uteq.edu.ec"));
+
+            StringAssert.Contains(error.Message, "teléfono");
         }
 
         [TestMethod]
-        public void RegistrarCliente_CorreoDuplicado_LanzaValidacion()
+        public void Registrar_CorreoDuplicado_Falla()
         {
-            ClienteRepositoryFake repositorio = new ClienteRepositoryFake
-            {
-                ExcepcionALanzar = new ErrorAccesoDatosException("duplicado", CodigosSql.ClienteCorreoDuplicado)
-            };
-            ClienteService servicio = CrearServicioEmpleado(repositorio);
+            ClienteRepositoryFake repo = RepoConError(CodigosSql.ClienteCorreoDuplicado);
 
-            try
-            {
-                servicio.RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, CedulaValida, "0987654321", "ana@uteq.edu.ec");
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException ex)
-            {
-                StringAssert.Contains(ex.Message, "correo");
-            }
+            ValidacionNegocioException error = Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioEmpleado(repo).RegistrarCliente("Ana Pérez", ValoresDominio.TipoDocumento.Cedula, CedulaValida, "0987654321", "ana@uteq.edu.ec"));
+
+            StringAssert.Contains(error.Message, "correo");
         }
 
         [TestMethod]
-        public void ConsultarClientes_EscapaComodinesLike()
+        public void Consultar_EscapaComodinesDelFiltro()
         {
-            ClienteRepositoryFake repositorio = new ClienteRepositoryFake();
-            ClienteService servicio = CrearServicioEmpleado(repositorio);
+            ClienteRepositoryFake repo = new ClienteRepositoryFake();
 
-            servicio.ConsultarClientes(" 0102030405 ", "Ana_Pérez%");
+            ServicioEmpleado(repo).ConsultarClientes(" 0102030405 ", "Ana_Pérez%");
 
-            Assert.AreEqual("0102030405", repositorio.UltimoDocumentoFiltro);
-            Assert.AreEqual("Ana[_]Pérez[%]", repositorio.UltimoNombreFiltro);
+            Assert.AreEqual("0102030405", repo.UltimoDocumentoFiltro);
+            Assert.AreEqual("Ana[_]Pérez[%]", repo.UltimoNombreFiltro);
         }
 
         [TestMethod]
-        public void ModificarCliente_ActualizaDatos()
+        public void Consultar_DevuelveLaLista()
         {
-            ClienteRepositoryFake repositorio = new ClienteRepositoryFake();
-            ClienteService servicio = CrearServicioEmpleado(repositorio);
+            ClienteRepositoryFake repo = new ClienteRepositoryFake();
+            repo.Clientes.Add(new Cliente
+            {
+                IdCliente = 1,
+                NombreCliente = "Ana Pérez",
+                TipoDocumentoCliente = ValoresDominio.TipoDocumento.Cedula,
+                NumeroDocumentoCliente = "0102030405"
+            });
 
-            servicio.ModificarCliente(
+            IList<Cliente> resultado = ServicioEmpleado(repo).ConsultarClientes(null, null);
+
+            Assert.AreEqual(1, resultado.Count);
+        }
+
+        [TestMethod]
+        public void Modificar_ActualizaLosDatos()
+        {
+            ClienteRepositoryFake repo = new ClienteRepositoryFake();
+
+            ServicioEmpleado(repo).ModificarCliente(
                 4,
                 "  Carlos Mora  ",
                 ValoresDominio.TipoDocumento.Pasaporte,
@@ -197,132 +148,66 @@ namespace SistemaCanchas.Tests
                 "+593987654321",
                 "carlos@uteq.edu.ec");
 
-            Assert.AreEqual(4, repositorio.UltimoActualizado.IdCliente);
-            Assert.AreEqual("Carlos Mora", repositorio.UltimoActualizado.NombreCliente);
-            Assert.AreEqual(ValoresDominio.TipoDocumento.Pasaporte, repositorio.UltimoActualizado.TipoDocumentoCliente);
+            Assert.AreEqual(4, repo.UltimoActualizado.IdCliente);
+            Assert.AreEqual("Carlos Mora", repo.UltimoActualizado.NombreCliente);
         }
 
         [TestMethod]
-        public void EliminarCliente_Empleado_LanzaOperacionNoPermitida()
+        public void Eliminar_Empleado_NoPuede()
         {
-            ClienteService servicio = CrearServicioEmpleado(new ClienteRepositoryFake());
-
-            try
-            {
-                servicio.EliminarCliente(1);
-                Assert.Fail("Debió lanzar OperacionNoPermitidaException.");
-            }
-            catch (OperacionNoPermitidaException)
-            {
-            }
+            Assert.ThrowsException<OperacionNoPermitidaException>(
+                () => ServicioEmpleado().EliminarCliente(1));
         }
 
         [TestMethod]
-        public void EliminarCliente_ConReservasActivas_LanzaValidacion()
+        public void Eliminar_ConReservasActivas_Falla()
         {
-            ClienteRepositoryFake repositorio = new ClienteRepositoryFake
-            {
-                ExcepcionALanzar = new ErrorAccesoDatosException("reservas", CodigosSql.ClienteConReservasActivas)
-            };
-            ClienteService servicio = CrearServicioAdmin(repositorio);
+            ClienteRepositoryFake repo = RepoConError(CodigosSql.ClienteConReservasActivas);
 
-            try
-            {
-                servicio.EliminarCliente(8);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioAdmin(repo).EliminarCliente(8));
         }
 
         [TestMethod]
-        public void EliminarCliente_ConPagosPendientes_LanzaValidacion()
+        public void Eliminar_ConPagosPendientes_Falla()
         {
-            ClienteRepositoryFake repositorio = new ClienteRepositoryFake
-            {
-                ExcepcionALanzar = new ErrorAccesoDatosException("pagos", CodigosSql.ClienteConPagosPendientes)
-            };
-            ClienteService servicio = CrearServicioAdmin(repositorio);
+            ClienteRepositoryFake repo = RepoConError(CodigosSql.ClienteConPagosPendientes);
 
-            try
-            {
-                servicio.EliminarCliente(8);
-                Assert.Fail("Debió lanzar ValidacionNegocioException.");
-            }
-            catch (ValidacionNegocioException)
-            {
-            }
+            Assert.ThrowsException<ValidacionNegocioException>(
+                () => ServicioAdmin(repo).EliminarCliente(8));
         }
 
         [TestMethod]
-        public void EliminarCliente_Administrador_Elimina()
+        public void Eliminar_Administrador_Elimina()
         {
-            ClienteRepositoryFake repositorio = new ClienteRepositoryFake();
-            ClienteService servicio = CrearServicioAdmin(repositorio);
+            ClienteRepositoryFake repo = new ClienteRepositoryFake();
 
-            servicio.EliminarCliente(8);
+            ServicioAdmin(repo).EliminarCliente(8);
 
-            Assert.AreEqual(8, repositorio.IdEliminado);
+            Assert.AreEqual(8, repo.IdEliminado);
         }
 
-        [TestMethod]
-        public void ConsultarClientes_DevuelveLista()
+        private static ClienteRepositoryFake RepoConError(int codigo)
         {
-            ClienteRepositoryFake repositorio = new ClienteRepositoryFake();
-            repositorio.Clientes.Add(new Cliente
+            return new ClienteRepositoryFake
             {
-                IdCliente = 1,
-                NombreCliente = "Ana Pérez",
-                TipoDocumentoCliente = ValoresDominio.TipoDocumento.Cedula,
-                NumeroDocumentoCliente = "0102030405"
-            });
-            ClienteService servicio = CrearServicioEmpleado(repositorio);
-
-            IList<Cliente> resultado = servicio.ConsultarClientes(null, null);
-
-            Assert.AreEqual(1, resultado.Count);
-            Assert.IsNull(repositorio.UltimoDocumentoFiltro);
-            Assert.IsNull(repositorio.UltimoNombreFiltro);
-        }
-
-        private static ClienteService CrearServicioAdmin(ClienteRepositoryFake repositorio)
-        {
-            return CrearServicio(CrearSesionAdmin(), repositorio);
-        }
-
-        private static ClienteService CrearServicioEmpleado(ClienteRepositoryFake repositorio)
-        {
-            return CrearServicio(CrearSesionEmpleado(), repositorio);
-        }
-
-        private static ClienteService CrearServicio(Usuario sesion, ClienteRepositoryFake repositorio)
-        {
-            return new ClienteService(repositorio, new UsuarioServiceFake { Sesion = sesion });
-        }
-
-        private static Usuario CrearSesionAdmin()
-        {
-            return new Usuario
-            {
-                IdUsuario = 1,
-                NombreUsuario = "John",
-                UsuarioLogin = "admin",
-                NombreRol = ValoresDominio.Rol.Administrador,
-                EstadoUsuario = ValoresDominio.EstadoUsuario.Activo
+                ExcepcionALanzar = new ErrorAccesoDatosException("error", codigo)
             };
         }
 
-        private static Usuario CrearSesionEmpleado()
+        private static ClienteService ServicioEmpleado()
         {
-            return new Usuario
-            {
-                IdUsuario = 2,
-                NombreUsuario = "Ana",
-                UsuarioLogin = "ana",
-                NombreRol = ValoresDominio.Rol.Empleado,
-                EstadoUsuario = ValoresDominio.EstadoUsuario.Activo
-            };
+            return ServicioEmpleado(new ClienteRepositoryFake());
+        }
+
+        private static ClienteService ServicioEmpleado(ClienteRepositoryFake repo)
+        {
+            return new ClienteService(repo, new UsuarioServiceFake { Sesion = SesionPrueba.Empleado() });
+        }
+
+        private static ClienteService ServicioAdmin(ClienteRepositoryFake repo)
+        {
+            return new ClienteService(repo, new UsuarioServiceFake { Sesion = SesionPrueba.Admin() });
         }
     }
 }

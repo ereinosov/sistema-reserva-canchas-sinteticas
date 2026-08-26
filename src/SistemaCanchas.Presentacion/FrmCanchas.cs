@@ -22,41 +22,34 @@ namespace SistemaCanchas.Presentacion
 
             _canchaService = canchaService;
             InitializeComponent();
+            TextosUi.ConfigurarGrilla(dgvCanchas);
         }
 
         private void FrmCanchas_Load(object sender, EventArgs e)
         {
-            AsignarHorarioPorDefecto();
+            AsignarHorarioPorDefecto(dtpInicioNuevo, dtpFinNuevo);
+            AsignarHorarioPorDefecto(dtpInicioEdicion, dtpFinEdicion);
             CargarCanchas();
         }
 
         private void dgvCanchas_SelectionChanged(object sender, EventArgs e)
         {
-            if (dgvCanchas.CurrentRow == null || dgvCanchas.CurrentRow.Index < 0)
+            ActualizarPanelEdicion();
+        }
+
+        private void dgvCanchas_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0)
             {
                 return;
             }
 
-            _idSeleccionado = Convert.ToInt32(dgvCanchas.CurrentRow.Cells["colId"].Value);
-            txtNombreCancha.Text = Convert.ToString(dgvCanchas.CurrentRow.Cells["colNombre"].Value);
-            object inicio = dgvCanchas.CurrentRow.Cells["colInicio"].Value;
-            object fin = dgvCanchas.CurrentRow.Cells["colFin"].Value;
-            if (inicio is TimeSpan)
-            {
-                dtpHoraInicio.Value = DateTime.Today.Add((TimeSpan)inicio);
-            }
-
-            if (fin is TimeSpan)
-            {
-                dtpHoraFin.Value = DateTime.Today.Add((TimeSpan)fin);
-            }
-
-            ActualizarBotonesEstado();
+            MostrarSeleccion(dgvCanchas.Rows[e.RowIndex]);
         }
 
         private void btnRegistrar_Click(object sender, EventArgs e)
         {
-            if (!ValidarNombre())
+            if (!ValidarNombre(txtNombreNuevo))
             {
                 return;
             }
@@ -64,17 +57,16 @@ namespace SistemaCanchas.Presentacion
             try
             {
                 _canchaService.RegistrarCancha(
-                    txtNombreCancha.Text,
-                    dtpHoraInicio.Value.TimeOfDay,
-                    dtpHoraFin.Value.TimeOfDay);
+                    txtNombreNuevo.Text,
+                    dtpInicioNuevo.Value.TimeOfDay,
+                    dtpFinNuevo.Value.TimeOfDay);
                 MessageBox.Show(
                     "Cancha registrada.",
                     TextosUi.TituloAplicacion,
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
-                txtNombreCancha.Clear();
-                AsignarHorarioPorDefecto();
-                _idSeleccionado = 0;
+                txtNombreNuevo.Clear();
+                AsignarHorarioPorDefecto(dtpInicioNuevo, dtpFinNuevo);
                 CargarCanchas();
             }
             catch (Exception ex)
@@ -95,7 +87,7 @@ namespace SistemaCanchas.Presentacion
                 return;
             }
 
-            if (!ValidarNombre())
+            if (!ValidarNombre(txtNombreEdicion))
             {
                 return;
             }
@@ -104,9 +96,9 @@ namespace SistemaCanchas.Presentacion
             {
                 _canchaService.ModificarCancha(
                     _idSeleccionado,
-                    txtNombreCancha.Text,
-                    dtpHoraInicio.Value.TimeOfDay,
-                    dtpHoraFin.Value.TimeOfDay);
+                    txtNombreEdicion.Text,
+                    dtpInicioEdicion.Value.TimeOfDay,
+                    dtpFinEdicion.Value.TimeOfDay);
                 MessageBox.Show(
                     "Cancha actualizada.",
                     TextosUi.TituloAplicacion,
@@ -148,8 +140,6 @@ namespace SistemaCanchas.Presentacion
             try
             {
                 _canchaService.DesactivarCancha(_idSeleccionado);
-                txtNombreCancha.Clear();
-                _idSeleccionado = 0;
                 CargarCanchas();
             }
             catch (Exception ex)
@@ -191,22 +181,27 @@ namespace SistemaCanchas.Presentacion
             try
             {
                 IList<Cancha> canchas = _canchaService.ObtenerTodas();
-                dgvCanchas.Rows.Clear();
-                for (int i = 0; i < canchas.Count; i++)
+                dgvCanchas.SelectionChanged -= dgvCanchas_SelectionChanged;
+                try
                 {
-                    Cancha cancha = canchas[i];
-                    dgvCanchas.Rows.Add(
-                        cancha.IdCancha,
-                        cancha.NombreCancha,
-                        cancha.EstadoCancha,
-                        cancha.HoraInicioOperacion,
-                        cancha.HoraFinOperacion);
-                }
+                    dgvCanchas.Rows.Clear();
+                    for (int i = 0; i < canchas.Count; i++)
+                    {
+                        Cancha cancha = canchas[i];
+                        dgvCanchas.Rows.Add(
+                            cancha.IdCancha,
+                            cancha.NombreCancha,
+                            cancha.EstadoCancha,
+                            cancha.HoraInicioOperacion,
+                            cancha.HoraFinOperacion);
+                    }
 
-                if (dgvCanchas.Rows.Count == 0)
+                    TextosUi.QuitarSeleccionGrilla(dgvCanchas);
+                    MostrarSinSeleccion();
+                }
+                finally
                 {
-                    _idSeleccionado = 0;
-                    ActualizarBotonesEstado();
+                    dgvCanchas.SelectionChanged += dgvCanchas_SelectionChanged;
                 }
             }
             catch (Exception ex)
@@ -215,34 +210,67 @@ namespace SistemaCanchas.Presentacion
             }
         }
 
-        private void ActualizarBotonesEstado()
+        private void ActualizarPanelEdicion()
         {
-            bool inactiva = false;
-            if (_idSeleccionado > 0 && dgvCanchas.CurrentRow != null)
+            if (dgvCanchas.CurrentRow == null || dgvCanchas.CurrentRow.Index < 0 ||
+                dgvCanchas.SelectedRows.Count == 0)
             {
-                string estado = Convert.ToString(dgvCanchas.CurrentRow.Cells["colEstado"].Value);
-                inactiva = string.Equals(estado, ValoresDominio.EstadoCancha.Inactiva, StringComparison.Ordinal);
+                MostrarSinSeleccion();
+                return;
             }
 
-            btnActivar.Enabled = inactiva;
+            MostrarSeleccion(dgvCanchas.CurrentRow);
         }
 
-        private bool ValidarNombre()
+        private void MostrarSinSeleccion()
+        {
+            _idSeleccionado = 0;
+            grpSeleccionado.Enabled = false;
+            lblSeleccionado.Text = "Seleccione una cancha de la lista para editarla.";
+            txtNombreEdicion.Clear();
+            AsignarHorarioPorDefecto(dtpInicioEdicion, dtpFinEdicion);
+        }
+
+        private void MostrarSeleccion(DataGridViewRow fila)
+        {
+            _idSeleccionado = Convert.ToInt32(fila.Cells["colId"].Value);
+            string nombre = Convert.ToString(fila.Cells["colNombre"].Value);
+            string estado = Convert.ToString(fila.Cells["colEstado"].Value);
+            bool inactiva = string.Equals(estado, ValoresDominio.EstadoCancha.Inactiva, StringComparison.Ordinal);
+
+            grpSeleccionado.Enabled = true;
+            lblSeleccionado.Text = "Editando: " + nombre + " — " + estado + ".";
+            txtNombreEdicion.Text = nombre;
+            AsignarHora(dtpInicioEdicion, fila.Cells["colInicio"].Value);
+            AsignarHora(dtpFinEdicion, fila.Cells["colFin"].Value);
+            btnActivar.Enabled = inactiva;
+            btnDesactivar.Enabled = !inactiva;
+        }
+
+        private bool ValidarNombre(TextBox cuadro)
         {
             errValidacion.Clear();
-            if (string.IsNullOrWhiteSpace(txtNombreCancha.Text))
+            if (string.IsNullOrWhiteSpace(cuadro.Text))
             {
-                errValidacion.SetError(txtNombreCancha, "Ingrese el nombre de la cancha.");
+                errValidacion.SetError(cuadro, "Ingrese el nombre de la cancha.");
                 return false;
             }
 
             return true;
         }
 
-        private void AsignarHorarioPorDefecto()
+        private static void AsignarHorarioPorDefecto(DateTimePicker inicio, DateTimePicker fin)
         {
-            dtpHoraInicio.Value = DateTime.Today.AddHours(ValoresDominio.HoraInicioFranja);
-            dtpHoraFin.Value = DateTime.Today.AddHours(ValoresDominio.HoraFinOperacion);
+            inicio.Value = DateTime.Today.AddHours(ValoresDominio.HoraInicioFranja);
+            fin.Value = DateTime.Today.AddHours(ValoresDominio.HoraFinOperacion);
+        }
+
+        private static void AsignarHora(DateTimePicker selector, object valor)
+        {
+            if (valor is TimeSpan)
+            {
+                selector.Value = DateTime.Today.Add((TimeSpan)valor);
+            }
         }
 
         private static void MostrarError(Exception ex)

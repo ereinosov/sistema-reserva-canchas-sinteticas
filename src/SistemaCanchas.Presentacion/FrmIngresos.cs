@@ -21,6 +21,7 @@ namespace SistemaCanchas.Presentacion
 
             _ingresoService = ingresoService;
             InitializeComponent();
+            TextosUi.ConfigurarGrilla(dgvIngresos);
         }
 
         private void FrmIngresos_Load(object sender, EventArgs e)
@@ -58,6 +59,8 @@ namespace SistemaCanchas.Presentacion
                         ingreso.MontoPago,
                         ingreso.FechaPago.HasValue ? (object)ingreso.FechaPago.Value.Date : null);
                 }
+
+                TextosUi.QuitarSeleccionGrilla(dgvIngresos);
 
                 lblTotalIngresos.Text = "Total ingresos: " +
                     consulta.TotalIngresos.ToString("N2", CultureInfo.CurrentCulture);

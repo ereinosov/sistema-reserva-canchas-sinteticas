@@ -12,6 +12,7 @@ namespace SistemaCanchas.Presentacion
     {
         private readonly IUsuarioService _usuarioService;
         private int _idSeleccionado;
+        private string _loginSeleccionado;
 
         public FrmUsuarios(IUsuarioService usuarioService)
         {
@@ -22,6 +23,7 @@ namespace SistemaCanchas.Presentacion
 
             _usuarioService = usuarioService;
             InitializeComponent();
+            TextosUi.ConfigurarGrilla(dgvUsuarios);
         }
 
         private void FrmUsuarios_Load(object sender, EventArgs e)
@@ -34,21 +36,22 @@ namespace SistemaCanchas.Presentacion
 
         private void dgvUsuarios_SelectionChanged(object sender, EventArgs e)
         {
-            if (dgvUsuarios.CurrentRow == null || dgvUsuarios.CurrentRow.Index < 0)
+            ActualizarPanelEdicion();
+        }
+
+        private void dgvUsuarios_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0)
             {
-                _idSeleccionado = 0;
-                ActualizarBotonActivar();
                 return;
             }
 
-            _idSeleccionado = Convert.ToInt32(dgvUsuarios.CurrentRow.Cells["colId"].Value);
-            txtNombreUsuario.Text = Convert.ToString(dgvUsuarios.CurrentRow.Cells["colNombre"].Value);
-            ActualizarBotonActivar();
+            MostrarSeleccion(dgvUsuarios.Rows[e.RowIndex]);
         }
 
         private void btnRegistrar_Click(object sender, EventArgs e)
         {
-            if (!ValidarFormato())
+            if (!ValidarAlta())
             {
                 return;
             }
@@ -63,7 +66,7 @@ namespace SistemaCanchas.Presentacion
             try
             {
                 _usuarioService.RegistrarUsuario(
-                    txtNombreUsuario.Text,
+                    txtNombreNuevo.Text,
                     txtUsuarioLogin.Text,
                     txtClaveApp.Text,
                     rol.Valor);
@@ -74,26 +77,18 @@ namespace SistemaCanchas.Presentacion
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
 
-                LimpiarFormulario();
+                LimpiarAlta();
                 CargarUsuarios();
             }
-            catch (ValidacionNegocioException ex)
+            catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (OperacionNoPermitidaException ex)
-            {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (ErrorInfraestructuraException ex)
-            {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MostrarError(ex);
             }
         }
 
         private void btnDesactivar_Click(object sender, EventArgs e)
         {
-            if (dgvUsuarios.CurrentRow == null)
+            if (_idSeleccionado <= 0)
             {
                 MessageBox.Show(
                     "Seleccione un usuario de la lista.",
@@ -103,9 +98,7 @@ namespace SistemaCanchas.Presentacion
                 return;
             }
 
-            int idUsuario = Convert.ToInt32(dgvUsuarios.CurrentRow.Cells["colId"].Value);
-            string login = Convert.ToString(dgvUsuarios.CurrentRow.Cells["colLogin"].Value);
-
+            string login = _loginSeleccionado;
             DialogResult confirmacion = MessageBox.Show(
                 "¿Desactivar al usuario \"" + login + "\"? No podrá iniciar sesión y el historial se conserva.",
                 TextosUi.TituloAplicacion,
@@ -120,20 +113,12 @@ namespace SistemaCanchas.Presentacion
 
             try
             {
-                _usuarioService.DesactivarUsuario(idUsuario);
+                _usuarioService.DesactivarUsuario(_idSeleccionado);
                 CargarUsuarios();
             }
-            catch (ValidacionNegocioException ex)
+            catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (OperacionNoPermitidaException ex)
-            {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (ErrorInfraestructuraException ex)
-            {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MostrarError(ex);
             }
         }
 
@@ -154,17 +139,9 @@ namespace SistemaCanchas.Presentacion
                 _usuarioService.ActivarUsuario(_idSeleccionado);
                 CargarUsuarios();
             }
-            catch (ValidacionNegocioException ex)
+            catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (OperacionNoPermitidaException ex)
-            {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (ErrorInfraestructuraException ex)
-            {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MostrarError(ex);
             }
         }
 
@@ -181,15 +158,15 @@ namespace SistemaCanchas.Presentacion
             }
 
             errValidacion.Clear();
-            if (string.IsNullOrWhiteSpace(txtNombreUsuario.Text))
+            if (string.IsNullOrWhiteSpace(txtNombreEdicion.Text))
             {
-                errValidacion.SetError(txtNombreUsuario, "Ingrese el nombre.");
+                errValidacion.SetError(txtNombreEdicion, "Ingrese el nombre.");
                 return;
             }
 
             try
             {
-                _usuarioService.ActualizarNombreUsuario(_idSeleccionado, txtNombreUsuario.Text);
+                _usuarioService.ActualizarNombreUsuario(_idSeleccionado, txtNombreEdicion.Text);
                 MessageBox.Show(
                     "Nombre actualizado.",
                     TextosUi.TituloAplicacion,
@@ -197,17 +174,9 @@ namespace SistemaCanchas.Presentacion
                     MessageBoxIcon.Information);
                 CargarUsuarios();
             }
-            catch (ValidacionNegocioException ex)
+            catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (OperacionNoPermitidaException ex)
-            {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (ErrorInfraestructuraException ex)
-            {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MostrarError(ex);
             }
         }
 
@@ -247,17 +216,9 @@ namespace SistemaCanchas.Presentacion
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Information);
             }
-            catch (ValidacionNegocioException ex)
+            catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (OperacionNoPermitidaException ex)
-            {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (ErrorInfraestructuraException ex)
-            {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MostrarError(ex);
             }
         }
 
@@ -271,54 +232,82 @@ namespace SistemaCanchas.Presentacion
             try
             {
                 IList<Usuario> usuarios = _usuarioService.ObtenerTodos();
-                dgvUsuarios.Rows.Clear();
-                for (int i = 0; i < usuarios.Count; i++)
+                dgvUsuarios.SelectionChanged -= dgvUsuarios_SelectionChanged;
+                try
                 {
-                    Usuario usuario = usuarios[i];
-                    dgvUsuarios.Rows.Add(
-                        usuario.IdUsuario,
-                        usuario.NombreUsuario,
-                        usuario.UsuarioLogin,
-                        usuario.NombreRol,
-                        usuario.EstadoUsuario);
-                }
+                    dgvUsuarios.Rows.Clear();
+                    for (int i = 0; i < usuarios.Count; i++)
+                    {
+                        Usuario usuario = usuarios[i];
+                        dgvUsuarios.Rows.Add(
+                            usuario.IdUsuario,
+                            usuario.NombreUsuario,
+                            usuario.UsuarioLogin,
+                            usuario.NombreRol,
+                            usuario.EstadoUsuario);
+                    }
 
-                if (dgvUsuarios.Rows.Count == 0)
+                    TextosUi.QuitarSeleccionGrilla(dgvUsuarios);
+                    MostrarSinSeleccion();
+                }
+                finally
                 {
-                    _idSeleccionado = 0;
-                    ActualizarBotonActivar();
+                    dgvUsuarios.SelectionChanged += dgvUsuarios_SelectionChanged;
                 }
             }
-            catch (ErrorInfraestructuraException ex)
+            catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            catch (OperacionNoPermitidaException ex)
-            {
-                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MostrarError(ex);
             }
         }
 
-        private void ActualizarBotonActivar()
+        private void ActualizarPanelEdicion()
         {
-            bool inactivo = false;
-            if (_idSeleccionado > 0 && dgvUsuarios.CurrentRow != null)
+            if (dgvUsuarios.CurrentRow == null || dgvUsuarios.CurrentRow.Index < 0 ||
+                dgvUsuarios.SelectedRows.Count == 0)
             {
-                string estado = Convert.ToString(dgvUsuarios.CurrentRow.Cells["colEstado"].Value);
-                inactivo = string.Equals(estado, ValoresDominio.EstadoUsuario.Inactivo, StringComparison.Ordinal);
+                MostrarSinSeleccion();
+                return;
             }
 
-            btnActivar.Enabled = inactivo;
+            MostrarSeleccion(dgvUsuarios.CurrentRow);
         }
 
-        private bool ValidarFormato()
+        private void MostrarSinSeleccion()
+        {
+            _idSeleccionado = 0;
+            _loginSeleccionado = null;
+            grpSeleccionado.Enabled = false;
+            lblSeleccionado.Text = "Seleccione un usuario de la lista para editarlo.";
+            txtNombreEdicion.Clear();
+            txtClaveNueva.Clear();
+            txtConfirmarClave.Clear();
+        }
+
+        private void MostrarSeleccion(DataGridViewRow fila)
+        {
+            _idSeleccionado = Convert.ToInt32(fila.Cells["colId"].Value);
+            string nombre = Convert.ToString(fila.Cells["colNombre"].Value);
+            _loginSeleccionado = Convert.ToString(fila.Cells["colLogin"].Value);
+            string rol = Convert.ToString(fila.Cells["colRol"].Value);
+            string estado = Convert.ToString(fila.Cells["colEstado"].Value);
+            bool inactivo = string.Equals(estado, ValoresDominio.EstadoUsuario.Inactivo, StringComparison.Ordinal);
+
+            grpSeleccionado.Enabled = true;
+            lblSeleccionado.Text = "Editando: " + nombre + " (" + _loginSeleccionado + ") — " + rol + ", " + estado + ".";
+            txtNombreEdicion.Text = nombre;
+            btnActivar.Enabled = inactivo;
+            btnDesactivar.Enabled = !inactivo;
+        }
+
+        private bool ValidarAlta()
         {
             errValidacion.Clear();
             bool valido = true;
 
-            if (string.IsNullOrWhiteSpace(txtNombreUsuario.Text))
+            if (string.IsNullOrWhiteSpace(txtNombreNuevo.Text))
             {
-                errValidacion.SetError(txtNombreUsuario, "Ingrese el nombre.");
+                errValidacion.SetError(txtNombreNuevo, "Ingrese el nombre.");
                 valido = false;
             }
 
@@ -337,15 +326,26 @@ namespace SistemaCanchas.Presentacion
             return valido;
         }
 
-        private void LimpiarFormulario()
+        private void LimpiarAlta()
         {
-            txtNombreUsuario.Clear();
+            txtNombreNuevo.Clear();
             txtUsuarioLogin.Clear();
             txtClaveApp.Clear();
-            txtClaveNueva.Clear();
-            txtConfirmarClave.Clear();
             cboRol.SelectedIndex = 0;
-            txtNombreUsuario.Focus();
+            txtNombreNuevo.Focus();
+        }
+
+        private static void MostrarError(Exception ex)
+        {
+            if (ex is ValidacionNegocioException ||
+                ex is OperacionNoPermitidaException ||
+                ex is ErrorInfraestructuraException)
+            {
+                MessageBox.Show(ex.Message, TextosUi.TituloAplicacion, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            throw ex;
         }
 
         private sealed class ItemRol
